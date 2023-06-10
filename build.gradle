@@ -10,11 +10,14 @@ buildscript {
         readium_version = '2.3.0'
         firebase_bom = '32.1.0'
         google_services = '4.3.15'
+        crashlytics = '2.9.5'
+        navigation_compose = '2.6.0'
 
     }
     dependencies {
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
         classpath "com.google.gms:google-services:$google_services"
+        classpath "com.google.firebase:firebase-crashlytics-gradle:$crashlytics"
     }
 }
 
