@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.shamela.library.presentaion.theme.alMajeedPlain
+import com.shamela.library.presentaion.theme.AppFonts
 
 @Composable
 fun DownloadScreen(
@@ -17,6 +17,6 @@ fun DownloadScreen(
 ){
 val downloadState = viewModel.downloadState.collectAsState().value
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "التحميل", style = alMajeedPlain)
+        Text(text = "التحميل", style = AppFonts.textNormal)
     }
 }

@@ -11,16 +11,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.shamela.library.presentaion.common.DefaultTopBar
 import com.shamela.library.presentaion.navigation.HomeHostDestination
 import com.shamela.library.presentaion.navigation.NavigationGraphs
 import com.shamela.library.presentaion.navigation.homeGraph
-import com.shamela.library.presentaion.theme.alMajeedSmall
+import com.shamela.library.presentaion.theme.AppFonts
 import com.shamela.library.presentaion.utils.Utils
 
 private val destination = listOf(
@@ -37,6 +40,9 @@ fun HomeHostScreen() {
     val bottomBarVisibility = remember { mutableStateOf(false) }
     bottomBarVisibility.value =
         (Utils.parentGraphRoute(navController) == NavigationGraphs.HOME_GRAPH_ROUTE)
+    var selectedScreenTitle by remember {
+        mutableStateOf(destination[0].label)
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -47,6 +53,7 @@ fun HomeHostScreen() {
                     destination.forEach { screen ->
                         val isSelected =
                             currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                        if (isSelected){ selectedScreenTitle = screen.label}
 
                         NavigationBarItem(
                             selected = isSelected,
@@ -69,16 +76,17 @@ fun HomeHostScreen() {
                             label = {
                                 Text(
                                     text = screen.label,
-                                    style = alMajeedSmall,
+                                    style = AppFonts.textSmallBold.copy(fontSize = 14.sp),
                                 )
                             },
                             alwaysShowLabel = false
                         )
-
-
                     }
                 }
             }
+        },
+        topBar = {
+            DefaultTopBar(selectedScreenTitle)
         }
     ) {
         NavHost(

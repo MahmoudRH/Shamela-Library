@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.shamela.library.presentaion.theme.alMajeedPlain
+import com.shamela.library.presentaion.theme.AppFonts
 
 @Composable
 fun FavoriteScreen(
@@ -17,6 +17,6 @@ fun FavoriteScreen(
 ){
 val favoriteState = viewModel.favoriteState.collectAsState().value
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "المفضلة", style = alMajeedPlain)
+        Text(text = "المفضلة", style = AppFonts.textNormal)
     }
 }

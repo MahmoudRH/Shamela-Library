@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.shamela.library.presentaion.theme.alMajeedPlain
+import com.shamela.library.presentaion.theme.AppFonts
 
 @Composable
 fun SearchScreen(
@@ -17,6 +17,6 @@ fun SearchScreen(
 ){
 val searchState = viewModel.searchState.collectAsState().value
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "البحث", style = alMajeedPlain)
+        Text(text = "البحث", style = AppFonts.textNormal)
     }
 }
