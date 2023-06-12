@@ -26,7 +26,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -59,6 +59,11 @@ dependencies {
     implementation platform("org.jetbrains.kotlin:kotlin-bom:$kotlin_bom")
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx"
     implementation "androidx.activity:activity-compose:$compose_activity"
+
+    //-> Gson library
+    implementation "com.google.code.gson:gson:$gson_version"
+    //-> Joda-time
+    implementation 'joda-time:joda-time:2.12.1'
 
     //-> Compose dependencies
     implementation platform("androidx.compose:compose-bom:$compose_bom")

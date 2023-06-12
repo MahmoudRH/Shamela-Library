@@ -2,9 +2,9 @@ package com.shamela.library
 
 import android.app.Application
 import com.shamela.library.data.local.sharedPrefs.SharedPreferencesData
-import com.shamela.library.presentaion.theme.colors.AppColors
-import com.shamela.library.presentaion.theme.AppFonts
-import com.shamela.library.presentaion.theme.AppTheme
+import com.shamela.library.presentation.theme.colors.AppColors
+import com.shamela.library.presentation.theme.AppFonts
+import com.shamela.library.presentation.theme.AppTheme
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp

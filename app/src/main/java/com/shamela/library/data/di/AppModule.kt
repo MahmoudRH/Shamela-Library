@@ -19,13 +19,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 object AppModule {
-
     @Singleton
     @Provides
     fun provideUserPreferencesDatasource(app: Application): UserPrefsDataSource {
         return SharedPreferencesData(app)
     }
-
     @Singleton
     @Provides
     fun provideUserPrefsUseCases(datasource:UserPrefsDataSource): UserPreferencesUseCases{
@@ -38,6 +36,4 @@ object AppModule {
             getAvailableFontSizes = GetAvailableFontSizes(datasource)
         )
     }
-
-
 }

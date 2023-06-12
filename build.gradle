@@ -12,7 +12,7 @@ buildscript {
         google_services = '4.3.15'
         crashlytics = '2.9.5'
         navigation_compose = '2.6.0'
-
+        gson_version = "2.10.1"
     }
     dependencies {
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"

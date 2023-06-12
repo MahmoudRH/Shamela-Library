@@ -1,0 +1,61 @@
+package com.shamela.library.presentation.screens.download
+
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.shamela.library.presentation.common.BookItem
+import com.shamela.library.presentation.common.LoadingScreen
+import com.shamela.library.presentation.common.SectionItem
+import com.shamela.library.presentation.screens.library.ViewType
+import com.shamela.library.presentation.screens.library.ViewTypeSection
+
+@Composable
+fun DownloadScreen(
+    viewModel: DownloadViewModel = hiltViewModel(),
+){
+val downloadState = viewModel.downloadState.collectAsState().value
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            ViewTypeSection(
+                modifier = Modifier,
+                selectedViewType = downloadState.viewType
+            ) { viewModel.onEvent(DownloadEvent.OnChangeViewType(it)) }
+        }
+
+
+        when (downloadState.viewType) {
+            ViewType.Sections -> {
+                items(downloadState.sections,key = {it.id}) {
+                    SectionItem(modifier = Modifier
+                        .clickable { }
+                        .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
+                    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                }
+            }
+
+            ViewType.Books -> {
+                items(downloadState.books,key = {it.id}) {
+                    BookItem(modifier = Modifier
+                        .clickable { }
+                        .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
+                    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                }
+            }
+        }
+    }
+    LoadingScreen(visibility = downloadState.isLoading)
+}
