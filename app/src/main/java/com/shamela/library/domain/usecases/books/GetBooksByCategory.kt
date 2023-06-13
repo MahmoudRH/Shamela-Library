@@ -5,7 +5,7 @@ import com.shamela.library.domain.repo.BooksRepository
 import javax.inject.Inject
 
 class GetBooksByCategory @Inject constructor(private val repo: BooksRepository) {
-    suspend operator fun invoke(categoryId: String): List<Book> {
-        return repo.getBooksByCategory(categoryId)
+    suspend operator fun invoke(categoryName: String): List<Book> {
+        return repo.getBooksByCategory(categoryName)
     }
 }

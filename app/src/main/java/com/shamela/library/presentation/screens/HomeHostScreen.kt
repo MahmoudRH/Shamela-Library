@@ -24,7 +24,7 @@ import com.shamela.library.presentation.navigation.HomeHostDestination
 import com.shamela.library.presentation.navigation.NavigationGraphs
 import com.shamela.library.presentation.navigation.homeGraph
 import com.shamela.library.presentation.theme.AppFonts
-import com.shamela.library.presentation.utils.Utils
+import com.shamela.library.presentation.utils.NavigationUtils
 
 private val destination = listOf(
     HomeHostDestination.Library,
@@ -38,8 +38,12 @@ private val destination = listOf(
 fun HomeHostScreen() {
     val navController = rememberNavController()
     val bottomBarVisibility = remember { mutableStateOf(false) }
-    bottomBarVisibility.value =
-        (Utils.parentGraphRoute(navController) == NavigationGraphs.HOME_GRAPH_ROUTE)
+    bottomBarVisibility.value  =
+        if (NavigationUtils.parentGraphRoute(navController) == NavigationGraphs.HOME_GRAPH_ROUTE)
+            NavigationUtils.currentRoute(navController) != HomeHostDestination.SectionBooks.route
+        else
+            false
+
     var selectedScreenTitle by remember {
         mutableStateOf(destination[0].label)
     }
@@ -86,7 +90,9 @@ fun HomeHostScreen() {
             }
         },
         topBar = {
-            DefaultTopBar(selectedScreenTitle)
+//            if (bottomBarVisibility.value) {
+                DefaultTopBar(selectedScreenTitle)
+//            }
         }
     ) {
         NavHost(

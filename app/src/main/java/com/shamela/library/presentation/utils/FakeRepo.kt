@@ -12,25 +12,29 @@ object FakeRepo {
                 id = "",
                 title = "هداية الحيارى في أجوبة اليهود والنصارى",
                 author = "ابن القيم",
-                pageCount = 720
+                pageCount = 720,
+            "",
             ),
             Book(
                 id = "",
                 title = "نقد مراتب الإجماع",
                 author = "ابن تيمية",
-                pageCount = 430
+                pageCount = 430,
+                "",
             ),
             Book(
                 id = "",
                 title = "مختصر الصواعق المرسلة على الجهمية والمعطلة",
                 author = "ابن القيم",
-                pageCount = 353
+                pageCount = 353,
+                "",
             ),
             Book(
                 id = "",
                 title = "قاعدة مختصرة في وجوب طاعة الله ورسوله وولاة الأمور",
                 author = "ابن تيمية",
-                pageCount = 1265
+                pageCount = 1265,
+                "",
             ),
         )
     }

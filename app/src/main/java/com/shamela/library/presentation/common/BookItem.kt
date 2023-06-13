@@ -19,7 +19,13 @@ import com.shamela.library.domain.model.Book
 import com.shamela.library.presentation.theme.AppFonts
 
 @Composable
-fun BookItem(modifier: Modifier, item: Book) {
+fun BookItem(
+    modifier: Modifier,
+    icon: @Composable () -> Unit = {
+        Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)
+    },
+    item: Book,
+) {
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -27,13 +33,18 @@ fun BookItem(modifier: Modifier, item: Book) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(Modifier.fillMaxWidth(0.9f)) {
-            Text(text = item.title, maxLines = 1, style = AppFonts.textNormalBold, overflow = TextOverflow.Ellipsis)
+            Text(
+                text = item.title,
+                maxLines = 1,
+                style = AppFonts.textNormalBold,
+                overflow = TextOverflow.Ellipsis
+            )
             Spacer(modifier = Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(text = item.author, style = AppFonts.textNormal)
                 Text(text = " عدد الصفحات: ${item.pageCount}", style = AppFonts.textNormal)
             }
         }
-        Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)
+        icon()
     }
 }

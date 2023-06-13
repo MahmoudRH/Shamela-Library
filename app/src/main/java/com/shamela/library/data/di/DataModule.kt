@@ -8,6 +8,7 @@ import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.domain.usecases.books.GetAllBooks
 import com.shamela.library.domain.usecases.books.GetAllCategories
 import com.shamela.library.domain.usecases.books.GetBooksByCategory
+import com.shamela.library.domain.usecases.books.GetDownloadUri
 import com.shamela.library.domain.usecases.books.SearchForABook
 import dagger.Module
 import dagger.Provides
@@ -31,7 +32,8 @@ object DataModule {
             getAllCategories = GetAllCategories(repo),
             getAllBooks = GetAllBooks(repo),
             getBooksByCategory = GetBooksByCategory(repo),
-            searchForABook = SearchForABook(repo)
+            searchForABook = SearchForABook(repo),
+            getDownloadUri = GetDownloadUri(repo)
         )
     }
 }

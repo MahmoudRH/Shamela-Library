@@ -6,7 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.Composable
@@ -23,8 +27,9 @@ import com.shamela.library.presentation.screens.library.ViewTypeSection
 @Composable
 fun DownloadScreen(
     viewModel: DownloadViewModel = hiltViewModel(),
-){
-val downloadState = viewModel.downloadState.collectAsState().value
+    navigateToSectionBooksScreen: (categoryName: String, type: String) -> Unit,
+) {
+    val downloadState = viewModel.downloadState.collectAsState().value
     LazyColumn(
         Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -39,19 +44,32 @@ val downloadState = viewModel.downloadState.collectAsState().value
 
         when (downloadState.viewType) {
             ViewType.Sections -> {
-                items(downloadState.sections,key = {it.id}) {
+                items(downloadState.sections, key = { it.id }) {
                     SectionItem(modifier = Modifier
-                        .clickable { }
+                        .clickable {
+                            navigateToSectionBooksScreen(it.name, "remote")
+                        }
                         .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
                     Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }
 
             ViewType.Books -> {
-                items(downloadState.books,key = {it.id}) {
-                    BookItem(modifier = Modifier
-                        .clickable { }
-                        .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
+                items(downloadState.books, key = { it.id }) { currentBook ->
+                    BookItem(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        icon = {
+                            IconButton(onClick = {
+                                viewModel.onEvent(DownloadEvent.OnClickDownloadBook(currentBook))
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Download,
+                                    contentDescription = "download"
+                                )
+                            }
+                        },
+                        item = currentBook
+                    )
                     Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }

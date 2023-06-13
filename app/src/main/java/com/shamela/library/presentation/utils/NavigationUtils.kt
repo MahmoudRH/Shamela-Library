@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 
-object Utils {
+object NavigationUtils {
     @Composable
     fun parentGraphRoute(navController: NavHostController): String? {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -18,7 +18,4 @@ object Utils {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         return navBackStackEntry?.destination?.route
     }
-
-
-
 }

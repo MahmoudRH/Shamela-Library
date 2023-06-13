@@ -1,5 +1,6 @@
 package com.shamela.library.data.remote
 
+import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
@@ -27,7 +28,7 @@ class BooksRepoImpl :BooksRepository {
                 val authorName = "Unknown" // Set author name based on your logic
                 val pageCount = 0 // Set page count based on your logic
 
-                val book = Book("", bookName, authorName, pageCount)
+                val book = Book("", bookName, authorName, pageCount,"")
                 books.add(book)
             }
         } catch (e: Exception) {
@@ -43,5 +44,9 @@ class BooksRepoImpl :BooksRepository {
 
     override suspend fun getAllBooks(): List<Book> {
         return emptyList()
+    }
+
+    override suspend fun getDownloadLink(categoryName: String, bookName: String): Uri {
+        TODO("Not yet implemented")
     }
 }

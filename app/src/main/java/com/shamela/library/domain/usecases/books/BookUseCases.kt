@@ -4,5 +4,6 @@ data class BooksUseCases(
     val getAllCategories: GetAllCategories,
     val getAllBooks: GetAllBooks,
     val getBooksByCategory: GetBooksByCategory,
-    val searchForABook: SearchForABook
+    val searchForABook: SearchForABook,
+    val getDownloadUri: GetDownloadUri
 )
