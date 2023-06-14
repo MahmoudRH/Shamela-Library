@@ -15,7 +15,10 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStreamReader
+import javax.inject.Qualifier
 
+@Qualifier
+annotation class AssetsRepoImpl
 class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
     private val TAG = "AssetsBooksRepoImpl"
     private val gson = Gson()

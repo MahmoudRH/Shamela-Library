@@ -8,6 +8,7 @@ import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DownloadViewModel @Inject constructor(private val booksUseCases: BooksUseCases, private val application:Application) :
+class DownloadViewModel @Inject constructor(
+    @AssetsRepoImpl private val booksUseCases: BooksUseCases,
+    private val application:Application) :
     ViewModel() {
     private val _downloadState = MutableStateFlow<DownloadState>(DownloadState())
     val downloadState = _downloadState.asStateFlow()

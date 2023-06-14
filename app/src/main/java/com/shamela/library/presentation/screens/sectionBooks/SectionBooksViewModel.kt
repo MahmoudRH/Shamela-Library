@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.presentation.reciever.DownloadCompleteReceiver
 import com.shamela.library.presentation.screens.download.DownloadEvent
@@ -23,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SectionBooksViewModel @Inject constructor(
-    private val booksUseCases: BooksUseCases,
+    @AssetsRepoImpl private val booksUseCases: BooksUseCases,
     private val handle: SavedStateHandle,
     private val application: Application,
 ) : ViewModel() {
