@@ -1,6 +1,7 @@
 package com.shamela.library.presentation.screens.download
 
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,11 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shamela.library.presentation.common.BookItem
+import com.shamela.library.presentation.common.CharacterHeader
 import com.shamela.library.presentation.common.LoadingScreen
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.screens.library.ViewType
 import com.shamela.library.presentation.screens.library.ViewTypeSection
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DownloadScreen(
     viewModel: DownloadViewModel = hiltViewModel(),
@@ -55,25 +58,39 @@ fun DownloadScreen(
             }
 
             ViewType.Books -> {
-                items(downloadState.books, key = { it.id }) { currentBook ->
-                    BookItem(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        icon = {
-                            IconButton(onClick = {
-                                viewModel.onEvent(DownloadEvent.OnClickDownloadBook(currentBook))
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Download,
-                                    contentDescription = "download"
-                                )
-                            }
-                        },
-                        item = currentBook
-                    )
-                    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+
+
+                val booksList = downloadState.books.sortedBy { it.title }.groupBy { it.title.first() }
+                booksList.forEach { (initial, books) ->
+                    stickyHeader {
+                        CharacterHeader(
+                            modifier = Modifier,
+                            char = initial
+                        )
+                    }
+                    items(books, key = { it.id }) {
+                        BookItem(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            icon = {
+                                IconButton(onClick = {
+                                    viewModel.onEvent(DownloadEvent.OnClickDownloadBook(it))
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Download,
+                                        contentDescription = "download"
+                                    )
+                                }
+                            },
+                            item = it
+                        )
+                        if (it != books.last()) {
+                            Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                        }
+                    }
                 }
             }
         }
     }
     LoadingScreen(visibility = downloadState.isLoading)
 }
+

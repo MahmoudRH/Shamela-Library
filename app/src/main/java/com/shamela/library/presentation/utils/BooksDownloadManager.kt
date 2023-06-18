@@ -4,24 +4,35 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.shamela.library.domain.model.Book
-import kotlinx.coroutines.flow.StateFlow
 
 class BooksDownloadManager(private val context: Context) {
 
     companion object {
         private val _downloadIdMap = mutableStateMapOf<Long, Book>()
-        fun downloadIsDone(downloadId: Long) {
-            if (_downloadIdMap.contains(downloadId)) {
-                _downloadIdMap.remove(downloadId)
+        private val subscribers: MutableList<Subscriber> = mutableListOf()
+
+        fun subscribe(subscriber: Subscriber) {
+            if (!subscribers.contains(subscriber)) {
+                subscribers.add(subscriber)
             }
         }
 
-        val downloadIdMap by derivedStateOf { _downloadIdMap }
+        fun unsubscribe(subscriber: Subscriber) {
+            if (subscribers.contains(subscriber)) {
+                subscribers.remove(subscriber)
+            }
+        }
+
+        fun downloadIsDone(downloadId: Long) {
+            if (_downloadIdMap.contains(downloadId)) {
+                subscribers.forEach {
+                    it.onBookDownloaded(_downloadIdMap[downloadId]!!)
+                }
+                _downloadIdMap.remove(downloadId)
+            }
+        }
     }
 
     private val downManager =
@@ -50,5 +61,10 @@ class BooksDownloadManager(private val context: Context) {
         _downloadIdMap.remove(downloadId)
     }
 
+    interface Subscriber {
+        fun onBookDownloaded(book: Book)
+    }
 }
+
+
 

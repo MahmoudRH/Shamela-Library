@@ -2,14 +2,13 @@ package com.shamela.library.presentation.screens.sectionBooks
 
 
 import android.app.Application
-import android.app.DownloadManager
-import android.content.IntentFilter
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.assets.AssetsRepoImpl
+import com.shamela.library.data.local.files.FilesRepoImpl
+import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.usecases.books.BooksUseCases
-import com.shamela.library.presentation.reciever.DownloadCompleteReceiver
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,26 +19,24 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SectionBooksViewModel @Inject constructor(
-    @AssetsRepoImpl private val booksUseCases: BooksUseCases,
+    @AssetsRepoImpl private val remoteBooksUseCases: BooksUseCases,
+    @FilesRepoImpl private val localBooksUseCases: BooksUseCases,
     private val handle: SavedStateHandle,
     private val application: Application,
-) : ViewModel() {
+) : ViewModel(), BooksDownloadManager.Subscriber {
     private val _sectionBooksState = MutableStateFlow<SectionBooksState>(SectionBooksState())
     val sectionBooksState = _sectionBooksState.asStateFlow()
     private val booksDownloadManager = BooksDownloadManager(application.applicationContext)
-    private val downloadCompleteReceiver = DownloadCompleteReceiver()
-
-    init {
-        val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        application.applicationContext.registerReceiver(downloadCompleteReceiver, filter)
-    }
 
     fun onEvent(event: SectionBooksEvent) {
         when (event) {
             is SectionBooksEvent.OnClickDownloadBook -> {
                 viewModelScope.launch {
-                    booksUseCases.getDownloadUri(event.book.categoryName, event.book.title)
+                    remoteBooksUseCases.getDownloadUri(event.book.categoryName, event.book.title)
                         ?.let { uri ->
+                            _sectionBooksState.update {
+                                it.copy(isLoading = true)
+                            }
                             booksDownloadManager.downloadBook(
                                 downloadUri = uri,
                                 book = event.book,
@@ -53,37 +50,58 @@ class SectionBooksViewModel @Inject constructor(
                 viewModelScope.launch {
                     val categoryName = handle.get<String>("categoryName").toString()
                     val type = handle.get<String>("type").toString()
+                    _sectionBooksState.update { it.copy(type = type) }
                     when (type) {
                         "local" -> {
                             loadLocalBooksOfSection(categoryName)
                         }
 
                         "remote" -> {
-                            launch{
+                            launch {
                                 loadRemoteBooksOfSection(categoryName)
                             }
                         }
                     }
                 }
             }
-
-
         }
     }
 
     private suspend fun loadRemoteBooksOfSection(categoryName: String) {
-        booksUseCases.getBooksByCategory(categoryName = categoryName).collect { book ->
-            _sectionBooksState.update { it.copy(books = it.books + book, isLoading = false) }
+        remoteBooksUseCases.getBooksByCategory(categoryName = categoryName).collect { book ->
+            _sectionBooksState.update {
+                it.copy(
+                    books = it.books + mapOf(book.id to book),
+                    isLoading = false
+                )
+            }
         }
     }
 
-    private suspend fun loadLocalBooksOfSection(sectionId: String) {
-        //TODO: When the time comes
+    private suspend fun loadLocalBooksOfSection(categoryName: String) {
+        localBooksUseCases.getBooksByCategory(categoryName = categoryName).collect { book ->
+            _sectionBooksState.update {
+                it.copy(
+                    books = it.books + mapOf(book.id to book),
+                    isLoading = false
+                )
+            }
+        }
+    }
+
+    init {
+        BooksDownloadManager.subscribe(this)
     }
 
     override fun onCleared() {
         super.onCleared()
-        application.applicationContext.unregisterReceiver(downloadCompleteReceiver)
+        BooksDownloadManager.unsubscribe(this)
+    }
+
+    override fun onBookDownloaded(book: Book) {
+        _sectionBooksState.update {
+            it.copy(isLoading = false)
+        }
     }
 
 }

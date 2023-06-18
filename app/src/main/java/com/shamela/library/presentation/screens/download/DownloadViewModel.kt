@@ -18,8 +18,7 @@ import javax.inject.Inject
 class DownloadViewModel @Inject constructor(
     @AssetsRepoImpl private val booksUseCases: BooksUseCases,
     private val application: Application,
-) :
-    ViewModel() {
+) : ViewModel() {
     private val _downloadState = MutableStateFlow<DownloadState>(DownloadState())
     val downloadState = _downloadState.asStateFlow()
 
@@ -38,7 +37,12 @@ class DownloadViewModel @Inject constructor(
                 viewModelScope.launch {
                     launch {
                         booksUseCases.getAllBooks().collect { book ->
-                            _downloadState.update { it.copy(books = it.books + book, isLoading = false) }
+                            _downloadState.update {
+                                it.copy(
+                                    books = if (it.books.contains(book)) it.books else it.books + book,
+                                    isLoading = false
+                                )
+                            }
                         }
                     }
                     launch {

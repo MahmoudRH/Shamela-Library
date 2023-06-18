@@ -84,7 +84,16 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
         startDestination = HomeHostDestination.Library.route,
         route = NavigationGraphs.HOME_GRAPH_ROUTE
     ) {
-        composable(HomeHostDestination.Library.route) { LibraryScreen() }
+        composable(HomeHostDestination.Library.route) { LibraryScreen(
+            navigateToSectionBooksScreen = { categoryName: String, type: String ->
+                navController.navigate(
+                    HomeHostDestination.SectionBooks.createRoute(
+                        categoryName,
+                        type
+                    )
+                )
+            }
+        ) }
         composable(
             HomeHostDestination.Download.route,
         ) {
@@ -111,7 +120,6 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
         ) {
             it.arguments?.getString("categoryName")?.let { categoryName ->
                 SectionBooksScreen(categoryName = categoryName) { navController.popBackStack() }
-
             }
         }
     }

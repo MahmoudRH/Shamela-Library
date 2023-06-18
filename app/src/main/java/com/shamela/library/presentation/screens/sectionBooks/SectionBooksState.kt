@@ -4,6 +4,7 @@ import com.shamela.library.domain.model.Book
 
 
 data class SectionBooksState(
-    val books: List<Book> = emptyList(),
+    val books: Map<String, Book> = emptyMap(),
+    val type: String = "",
     val isLoading: Boolean = true,
 )

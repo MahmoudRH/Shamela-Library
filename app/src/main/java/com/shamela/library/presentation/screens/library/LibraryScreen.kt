@@ -1,17 +1,13 @@
 package com.shamela.library.presentation.screens.library
 
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,6 +39,7 @@ import com.shamela.library.presentation.theme.AppFonts
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel(),
+    navigateToSectionBooksScreen: (categoryName: String, type: String) -> Unit,
 ) {
     val libraryState = viewModel.libraryState.collectAsState().value
     LazyColumn(
@@ -55,39 +52,32 @@ fun LibraryScreen(
                 selectedViewType = libraryState.viewType
             ) { viewModel.onEvent(LibraryEvent.OnChangeViewType(it)) }
         }
-        item{
+        item {
             LoadingScreen(visibility = libraryState.isLoading)
         }
         when (libraryState.viewType) {
             ViewType.Sections -> {
-                items(libraryState.sections.values.toList(), key = {it.id} ){
+                items(libraryState.sections.values.toList(), key = { it.id }) {
                     SectionItem(modifier = Modifier
-                        .clickable { }
+                        .clickable {
+                            navigateToSectionBooksScreen(it.name, "local")
+                        }
                         .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
                     Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }
 
             ViewType.Books -> {
-                items(libraryState.books.values.toList(), key = {it.id}) {
-                    BookItem(modifier = Modifier
-                        .animateItemPlacement(
-                            animationSpec = tween(
-                                durationMillis = 1500,
-                                easing = LinearOutSlowInEasing,
-                            )
-                        )
-                        .clickable { }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        , item = it)
-                    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
-                }
+                        items( libraryState.books.values.toList(), key = { it.id }) {
+                            BookItem(modifier = Modifier
+                                .clickable { }
+                                .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
+                            Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                        }
             }
         }
     }
-
 }
-
 
 @Composable
 fun ViewTypeSection(modifier: Modifier, selectedViewType: ViewType, onClick: (ViewType) -> Unit) {
@@ -100,7 +90,6 @@ fun ViewTypeSection(modifier: Modifier, selectedViewType: ViewType, onClick: (Vi
             .height(IntrinsicSize.Min)
     ) {
         ViewType.values().forEach {
-
             Text(
                 modifier = Modifier
                     .weight(1f)
@@ -123,7 +112,6 @@ fun ViewTypeSection(modifier: Modifier, selectedViewType: ViewType, onClick: (Vi
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                 )
             }
-
         }
     }
 }
