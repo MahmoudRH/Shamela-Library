@@ -3,6 +3,7 @@ package com.shamela.library.data.local.files
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import com.folioreader.FolioReader
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
 import com.shamela.library.domain.repo.BooksRepository
@@ -10,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.withContext
-import org.readium.r2.streamer.parser.epub.EpubParser
+import org.readium.r2.streamer.parser.EpubParser
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
@@ -28,6 +29,13 @@ object FilesBooksRepoImpl : BooksRepository {
     private val downloadsFolder =
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
     private val shamelaBooks = File(downloadsFolder, BASE_DOWNLOAD_DIRECTORY)
+
+    fun openEpub(bookTitle:String){
+        val bookPath = File(shamelaBooks, "${bookTitle}.epub").path
+        FolioReader.get().apply {
+            openBook(bookPath)
+        }
+    }
 
     override fun getCategories(): Flow<Category> = channelFlow {
         Log.e(TAG, "Loading ALl Categories")
@@ -139,7 +147,7 @@ object FilesBooksRepoImpl : BooksRepository {
                     Book(
                         id = UUID.nameUUIDFromBytes(bookTitle.toByteArray()).toString(),
                         title = bookTitle,
-                        author = metadata.authors.first().name,
+                        author = metadata.authors.first().name?:"-",
                         pageCount = readingOrder.size,
                         categoryName = categoryName
                     )

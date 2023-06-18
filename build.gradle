@@ -7,7 +7,6 @@ buildscript {
         core_ktx = '1.10.1'
         kotlin_bom = '1.8.0'
         lifecycle_runtime_ktx = '2.6.1'
-        readium_version = '2.3.0'
         firebase_bom = '32.1.0'
         google_services = '4.3.15'
         crashlytics = '2.9.5'

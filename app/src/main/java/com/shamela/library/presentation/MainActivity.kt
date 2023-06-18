@@ -1,12 +1,17 @@
 package com.shamela.library.presentation
 
+import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.Context
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
@@ -21,10 +26,11 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val downloadCompleteReceiver = DownloadCompleteReceiver()
+    val userPreferences = SharedPreferencesData(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        ReadUserPreferences(SharedPreferencesData(this)).invoke().apply {
+        ReadUserPreferences(userPreferences).invoke().apply {
             AppFonts.changeFontFamily(AppFonts.fontFamilyOf(fontFamily))
             AppFonts.changeFontSize(fontSize)
             AppTheme.changeColorScheme(
@@ -33,9 +39,12 @@ class MainActivity : ComponentActivity() {
                     colorScheme,
                     isNightMode(this@MainActivity),
                     this@MainActivity
-                ), theme
+                ),
+                theme
             )
-
+            if (libraryUri == null) {
+                showPermissionDialog()
+            }
         }
         setContent {
             AppTheme.ShamelaLibraryTheme {
@@ -46,10 +55,36 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+            if (uri != null) {
+                userPreferences.saveLibraryFolderUri(uri)
+            } else {
+                // Permission is denied, handle the case where the user denied the permission
+                Toast.makeText(this, "الرجاء منح إذن الوصول للذاكرة", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private fun requestSAFPermission() {
+        val downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val initialUri = Uri.parse(downloadsFolder.absolutePath)
+        requestPermissionLauncher.launch(initialUri)
+    }
+    private fun showPermissionDialog() {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("اذن الوصول للملفات")
+            .setMessage("التطبيق بحاجة لإذن الوصول للملفات حتى يعمل بشكل صحيح")
+            .setPositiveButton("منح الإذن") { _, _ ->
+                requestSAFPermission()
+            }
+            .create()
+        dialog.show()
+    }
+
     override fun onStart() {
         super.onStart()
         val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        registerReceiver(downloadCompleteReceiver,filter)
+        registerReceiver(downloadCompleteReceiver, filter)
     }
 
     override fun onStop() {

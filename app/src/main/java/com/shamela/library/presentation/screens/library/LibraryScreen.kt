@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.LoadingScreen
 import com.shamela.library.presentation.common.SectionItem
@@ -70,7 +71,9 @@ fun LibraryScreen(
             ViewType.Books -> {
                         items( libraryState.books.values.toList(), key = { it.id }) {
                             BookItem(modifier = Modifier
-                                .clickable { }
+                                .clickable {
+                                    FilesBooksRepoImpl.openEpub(it.title)
+                                }
                                 .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
                             Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                         }
