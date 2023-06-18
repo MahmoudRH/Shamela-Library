@@ -2,10 +2,10 @@ package com.shamela.library.domain.usecases.books
 
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.repo.BooksRepository
-import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 class SearchForABook(private val repo: BooksRepository) {
-    suspend operator fun invoke(query: String): List<Book> {
+     operator fun invoke(query: String): Flow<Book> {
         return repo.searchBooksByName(query)
     }
 }

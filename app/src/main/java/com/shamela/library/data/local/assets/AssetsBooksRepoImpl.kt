@@ -7,10 +7,16 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageException
 import com.google.gson.Gson
 import com.shamela.library.data.dto.BookDto
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -24,13 +30,13 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
     private val gson = Gson()
     private val categoryBookCounts: MutableMap<String, Int> = mutableMapOf()
     private val storage: FirebaseStorage = FirebaseStorage.getInstance()
-    override suspend fun getCategories(): List<Category> {
+     suspend fun _getCategories(): List<Category> {
         return withContext(Dispatchers.IO) {
             try {
                 val categoryNames = context.assets.list("categories")
                 categoryNames?.mapIndexed { index, categoryName ->
                     val bookCount = categoryBookCounts.getOrPut(categoryName) {
-                        getBooksByCategory(categoryName).size
+                        _getBooksByCategory(categoryName).size
                     }
                     Category(index.toString(), categoryName.removeSuffix(".json"), bookCount)
                 } ?: emptyList()
@@ -40,8 +46,7 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
             }
         }
     }
-
-    override suspend fun getBooksByCategory(categoryName: String): List<Book> {
+    private suspend fun _getBooksByCategory(categoryName: String): List<Book> {
         return withContext(Dispatchers.IO) {
             try {
                 val categoryNameNoSuffix = categoryName.removeSuffix(".json")
@@ -58,28 +63,34 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
             }
         }
     }
-
-    override suspend fun searchBooksByName(query: String): List<Book> {
-        return getAllBooks().filter { it.title.contains(query) }
-    }
-
-    override suspend fun getAllBooks(): List<Book> {
+    private suspend fun _getsAllBooks(): List<Book> {
         return withContext(Dispatchers.IO) {
             try {
                 val categoryNames = context.assets.list("categories") ?: emptyArray()
                 val allBooks = mutableListOf<Book>()
-
                 for (categoryName in categoryNames) {
-                    val books = getBooksByCategory(categoryName)
+                    val books = _getBooksByCategory(categoryName)
                     allBooks.addAll(books)
                 }
-
-                allBooks.distinctBy { it.id }
+                allBooks
             } catch (e: IOException) {
                 Log.e(TAG, "Error: getAllBooks. ${e.message}")
                 emptyList()
             }
         }
+    }
+
+    override fun getCategories(): Flow<Category> = flow {
+            emitAll(_getCategories().asFlow())
+    }
+    override fun getBooksByCategory(categoryName: String): Flow<Book> = flow {
+        emitAll(_getBooksByCategory(categoryName).asFlow())
+    }
+    override fun searchBooksByName(query: String): Flow<Book> {
+        return getAllBooks().filter { it.title.contains(query) }
+    }
+    override fun getAllBooks(): Flow<Book> = flow {
+        emitAll(_getsAllBooks().asFlow())
     }
 
     override suspend fun getDownloadLink(categoryName: String, bookName: String): Uri? {

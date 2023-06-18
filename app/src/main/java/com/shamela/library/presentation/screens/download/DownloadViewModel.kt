@@ -2,10 +2,6 @@ package com.shamela.library.presentation.screens.download
 
 
 import android.app.Application
-import android.app.DownloadManager
-import android.content.Context
-import android.os.Environment
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.assets.AssetsRepoImpl
@@ -21,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class DownloadViewModel @Inject constructor(
     @AssetsRepoImpl private val booksUseCases: BooksUseCases,
-    private val application:Application) :
+    private val application: Application,
+) :
     ViewModel() {
     private val _downloadState = MutableStateFlow<DownloadState>(DownloadState())
     val downloadState = _downloadState.asStateFlow()
@@ -39,15 +36,17 @@ class DownloadViewModel @Inject constructor(
 
             DownloadEvent.LoadUserBooksAndSections -> {
                 viewModelScope.launch {
-                    _downloadState.update { it.copy(isLoading = true) }
-                    val availableBooks = booksUseCases.getAllBooks()
-                    val userSections = booksUseCases.getAllCategories()
-                    _downloadState.update {
-                        it.copy(
-                            books = availableBooks,
-                            sections = userSections.sortedBy {section-> section.name },
-                            isLoading = false
-                        )
+                    launch {
+                        booksUseCases.getAllBooks().collect { book ->
+                            _downloadState.update { it.copy(books = it.books + book, isLoading = false) }
+                        }
+                    }
+                    launch {
+                        booksUseCases.getAllCategories().collect { category ->
+                            _downloadState.update {
+                                it.copy(sections = it.sections + category, isLoading = false)
+                            }
+                        }
                     }
                 }
             }

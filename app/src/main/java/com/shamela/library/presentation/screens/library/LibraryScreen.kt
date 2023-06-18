@@ -1,12 +1,17 @@
 package com.shamela.library.presentation.screens.library
 
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +39,7 @@ import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.theme.AppFonts
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel(),
@@ -49,11 +55,12 @@ fun LibraryScreen(
                 selectedViewType = libraryState.viewType
             ) { viewModel.onEvent(LibraryEvent.OnChangeViewType(it)) }
         }
-
-
+        item{
+            LoadingScreen(visibility = libraryState.isLoading)
+        }
         when (libraryState.viewType) {
             ViewType.Sections -> {
-                items(libraryState.sections) {
+                items(libraryState.sections.values.toList(), key = {it.id} ){
                     SectionItem(modifier = Modifier
                         .clickable { }
                         .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
@@ -62,16 +69,23 @@ fun LibraryScreen(
             }
 
             ViewType.Books -> {
-                items(libraryState.books) {
+                items(libraryState.books.values.toList(), key = {it.id}) {
                     BookItem(modifier = Modifier
+                        .animateItemPlacement(
+                            animationSpec = tween(
+                                durationMillis = 1500,
+                                easing = LinearOutSlowInEasing,
+                            )
+                        )
                         .clickable { }
-                        .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        , item = it)
                     Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }
         }
     }
-    LoadingScreen(visibility = libraryState.isLoading)
+
 }
 
 
