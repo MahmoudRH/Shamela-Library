@@ -72,7 +72,7 @@ fun LibraryScreen(
                         items( libraryState.books.values.toList(), key = { it.id }) {
                             BookItem(modifier = Modifier
                                 .clickable {
-                                    FilesBooksRepoImpl.openEpub(it.title)
+                                    FilesBooksRepoImpl.openEpub(it)
                                 }
                                 .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
                             Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))

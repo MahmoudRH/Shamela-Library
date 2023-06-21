@@ -1,7 +1,6 @@
 package com.shamela.library.data.local.sharedPrefs
 
 import android.content.Context
-import android.net.Uri
 import com.shamela.library.domain.model.UserPrefs
 import com.shamela.library.domain.repo.UserPrefsDataSource
 
@@ -20,9 +19,6 @@ class SharedPreferencesData(private val context: Context) : UserPrefsDataSource 
         }
         sharedPrefs.getString(preferredColorScheme, null)?.let {
             userPrefs = userPrefs.copy(colorScheme = it)
-        }
-        sharedPrefs.getString(libraryFolderUri, null)?.let {
-            userPrefs = userPrefs.copy(libraryUri = Uri.parse(it))
         }
         return userPrefs
     }
@@ -92,18 +88,6 @@ class SharedPreferencesData(private val context: Context) : UserPrefsDataSource 
             ?.sortedWith(String.CASE_INSENSITIVE_ORDER) ?: emptyList()
     }
 
-    override fun saveLibraryFolderUri(uri: Uri) {
-        val sharedPrefs = context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
-        val editor = sharedPrefs.edit()
-        editor.putString(libraryFolderUri, uri.toString())
-        editor.apply()
-    }
-
-    override fun getLibraryFolderUri(): Uri? {
-        val sharedPrefs = context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
-        val uriString = sharedPrefs.getString(libraryFolderUri, null)
-        return uriString?.let { Uri.parse(it) }
-    }
 
 
     private companion object {
@@ -116,7 +100,6 @@ class SharedPreferencesData(private val context: Context) : UserPrefsDataSource 
         const val preferredFontFamily = "preferredFontFamily"
         const val preferredFontSize = "preferredFontSize"
         const val preferredColorScheme = "preferredColorScheme"
-        const val libraryFolderUri = "libraryFolderUri"
 
     }
 }

@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <application
         android:name=".ShamelaApp"
         android:allowBackup="true"
@@ -12,6 +9,7 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ShamelaLibrary"
@@ -27,7 +25,29 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".presentation.reciever.DownloadCompleteReceiver"/>
+        <receiver android:name=".presentation.reciever.DownloadCompleteReceiver" />
+
+        <activity
+            android:name="com.folioreader.ui.activity.FolioActivity"
+            android:exported="false"
+            android:theme="@style/FolioActivityDayTheme" />
+        <activity
+            android:name="com.folioreader.ui.activity.ContentHighlightActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.folioreader.ui.activity.SearchActivity"
+            android:exported="false"
+            android:theme="@style/FolioActivityDayTheme"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
     </application>
 
 </manifest>

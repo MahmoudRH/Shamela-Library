@@ -1,4 +1,5 @@
 buildscript {
+    apply from: 'versions.gradle'
     ext {
         hilt_version = '2.46.1'
         compose_bom = '2023.06.00'

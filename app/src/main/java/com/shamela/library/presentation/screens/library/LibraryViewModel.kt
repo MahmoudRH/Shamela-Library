@@ -38,6 +38,7 @@ class LibraryViewModel @Inject constructor(
                     Log.e("Mah ", "LibraryViewModel: loading Books")
                     launch {
                         booksUseCases.getAllBooks().collect { book ->
+                            Log.e("Mah ", "onEvent: collected Book: $book", )
                             _libraryState.update {
                                 it.copy(
                                     books = it.books + mapOf(book.id to book),

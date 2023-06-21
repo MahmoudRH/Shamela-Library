@@ -1,6 +1,5 @@
 package com.shamela.library.domain.repo
 
-import android.net.Uri
 import com.shamela.library.domain.model.UserPrefs
 
 interface UserPrefsDataSource {
@@ -18,7 +17,4 @@ interface UserPrefsDataSource {
 
     fun saveAvailableColorSchemes(colorSchemes: Set<String>)
     fun getAvailableColorSchemes(): List<String>
-
-    fun saveLibraryFolderUri(uri: Uri)
-    fun getLibraryFolderUri(): Uri?
 }

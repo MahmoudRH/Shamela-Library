@@ -77,7 +77,10 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:$navigation_compose"
 
     //-> FolioReader dependencies (for dealing with epub)
-    implementation "com.folioreader:folioreader:0.5.4"
+//    implementation "com.folioreader:folioreader:0.5.4"
+//    implementation files('libs/folioreader-debug.aar')
+    implementation project(':folioreader')
+
 
     //-> SAF : Storage Access Framework dependency
     implementation 'androidx.documentfile:documentfile:1.0.1'
