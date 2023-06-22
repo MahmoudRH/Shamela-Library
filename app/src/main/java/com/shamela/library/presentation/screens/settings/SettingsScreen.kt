@@ -36,8 +36,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.shamela.library.presentation.theme.AppFonts
-import com.shamela.library.presentation.theme.AppTheme
+import com.shamela.apptheme.theme.AppFonts
+import com.shamela.apptheme.theme.AppTheme
 import kotlin.math.ceil
 
 @Composable

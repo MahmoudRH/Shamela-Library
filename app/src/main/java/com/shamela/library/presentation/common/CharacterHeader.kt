@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
-import com.shamela.library.presentation.theme.AppFonts
+import com.shamela.apptheme.theme.AppFonts
 
 @Composable
 fun CharacterHeader(modifier: Modifier, char: Char) {

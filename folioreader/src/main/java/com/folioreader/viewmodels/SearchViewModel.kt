@@ -21,7 +21,7 @@ class SearchViewModel : ViewModel() {
     }
 
     var liveAdapterDataBundle: MutableLiveData<Bundle> = MutableLiveData()
-    private var r2StreamerApi: R2StreamerApi? = FolioReader.get()?.r2StreamerApi
+    private var r2StreamerApi: R2StreamerApi? = FolioReader.get().r2StreamerApi
     private var searchCallCount: Int = 0
     private var successSearchCallCount: Int = 0
     private var errorSearchCallCount: Int = 0

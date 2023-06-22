@@ -29,4 +29,9 @@
     <color name="highlight_blue">#ADD8FF</color>
     <color name="highlight_pink">#FFB0CA</color>
 
+    <color name="highlight_yellow_dark">#D4BB36</color>
+    <color name="highlight_green_dark">#85A03A</color>
+    <color name="highlight_blue_dark">#5C84B0</color>
+    <color name="highlight_pink_dark">#D96D8A</color>
+
 </resources>

@@ -41,7 +41,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion "$compose_compiler"
+        kotlinCompilerExtensionVersion "$versions.compose_compiler"
     }
     packagingOptions {
         resources {
@@ -55,18 +55,18 @@ kapt {
 dependencies {
 
 
-    implementation "androidx.core:core-ktx:$core_ktx"
-    implementation platform("org.jetbrains.kotlin:kotlin-bom:$kotlin_bom")
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx"
-    implementation "androidx.activity:activity-compose:$compose_activity"
+    implementation "androidx.core:core-ktx:$versions.core_ktx"
+    implementation platform("org.jetbrains.kotlin:kotlin-bom:$versions.kotlin_bom")
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions.lifecycle_runtime_ktx"
+    implementation "androidx.activity:activity-compose:$versions.compose_activity"
 
     //-> Gson library
-    implementation "com.google.code.gson:gson:$gson_version"
+    implementation "com.google.code.gson:gson:$versions.gson"
     //-> Joda-time
     implementation 'joda-time:joda-time:2.12.1'
 
     //-> Compose dependencies
-    implementation platform("androidx.compose:compose-bom:$compose_bom")
+    implementation platform("androidx.compose:compose-bom:$versions.compose_bom")
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
@@ -74,12 +74,12 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended"
 
     //-> Compose Navigation
-    implementation "androidx.navigation:navigation-compose:$navigation_compose"
+    implementation "androidx.navigation:navigation-compose:$versions.navigation_compose"
 
-    //-> FolioReader dependencies (for dealing with epub)
-//    implementation "com.folioreader:folioreader:0.5.4"
-//    implementation files('libs/folioreader-debug.aar')
+    //-> FolioReader
     implementation project(':folioreader')
+    //-> AppTheme
+    implementation project(':apptheme')
 
 
     //-> SAF : Storage Access Framework dependency
@@ -87,8 +87,8 @@ dependencies {
 
 
     //-> Hilt DI
-    implementation "com.google.dagger:hilt-android:$hilt_version"
-    kapt "com.google.dagger:hilt-compiler:$hilt_version"
+    implementation "com.google.dagger:hilt-android:$versions.hilt_version"
+    kapt "com.google.dagger:hilt-compiler:$versions.hilt_version"
     kapt "androidx.hilt:hilt-compiler:1.0.0"
     implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
 

@@ -107,24 +107,21 @@ object UiUtil {
         }
     }
 
-    fun setBackColorToTextView(textView: UnderlinedTextView, type: String?) {
+    fun setBackColorToTextView(textView: UnderlinedTextView, type: String?, isDark:Boolean) {
         val context = textView.context
-        if (type == "highlight_yellow") {
-            setUnderLineColor(textView, context, R.color.highlight_yellow, R.color.highlight_yellow)
-        } else if (type == "highlight_green") {
-            setUnderLineColor(textView, context, R.color.highlight_green, R.color.highlight_green)
-        } else if (type == "highlight_blue") {
-            setUnderLineColor(textView, context, R.color.highlight_blue, R.color.highlight_blue)
-        } else if (type == "highlight_pink") {
-            setUnderLineColor(textView, context, R.color.highlight_pink, R.color.highlight_pink)
-        } else if (type == "highlight_underline") {
-            setUnderLineColor(
-                textView,
-                context,
-                android.R.color.transparent,
-                android.R.color.holo_red_dark
-            )
-            textView.underlineWidth = 2.0f
+        when (type) {
+            "highlight_yellow" -> {
+                setUnderLineColor(textView, context, if(isDark) R.color.highlight_yellow_dark else R.color.highlight_yellow)
+            }
+            "highlight_green" -> {
+                setUnderLineColor(textView, context, if(isDark) R.color.highlight_green_dark else R.color.highlight_green)
+            }
+            "highlight_blue" -> {
+                setUnderLineColor(textView, context, if(isDark) R.color.highlight_blue_dark else R.color.highlight_blue)
+            }
+            "highlight_pink" -> {
+                setUnderLineColor(textView, context, if(isDark) R.color.highlight_pink_dark else R.color.highlight_pink)
+            }
         }
     }
 
@@ -132,18 +129,9 @@ object UiUtil {
         underlinedTextView: UnderlinedTextView,
         context: Context,
         background: Int,
-        underlinecolor: Int,
     ) {
-        underlinedTextView.setBackgroundColor(
-            ContextCompat.getColor(
-                context,
-                background
-            )
-        )
-        underlinedTextView.underLineColor = ContextCompat.getColor(
-            context,
-            underlinecolor
-        )
+        underlinedTextView.setBackgroundColor(ContextCompat.getColor(context, background))
+//        underlinedTextView.underLineColor = ContextCompat.getColor(context, underlinecolor)
     }
 
     fun convertDpToPixel(dp: Float, context: Context): Float {

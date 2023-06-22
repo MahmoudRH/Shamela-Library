@@ -22,8 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
 import com.shamela.library.presentation.common.BookItem
-import com.shamela.library.presentation.common.DefaultTopBar
-import com.shamela.library.presentation.common.LoadingScreen
+import com.shamela.apptheme.common.DefaultTopBar
+import com.shamela.apptheme.common.LoadingScreen
 
 @Composable
 fun SectionBooksScreen(

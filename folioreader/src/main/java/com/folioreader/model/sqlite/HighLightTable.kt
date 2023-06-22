@@ -8,6 +8,8 @@ import android.util.Log
 import com.folioreader.Constants
 import com.folioreader.model.HighLight
 import com.folioreader.model.HighlightImpl
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -54,26 +56,28 @@ object HighLightTable {
     }
 
     @SuppressLint("Range")
-    fun getAllHighlights(bookId: String?): ArrayList<HighlightImpl> {
-        val highlights = ArrayList<HighlightImpl>()
-        val highlightCursor: Cursor = DbAdapter.Companion.getHighLightsForBookId(bookId)
-        while (highlightCursor.moveToNext()) {
-            highlights.add(
-                HighlightImpl(
-                    highlightCursor.getInt(highlightCursor.getColumnIndex(ID)),
-                    highlightCursor.getString(highlightCursor.getColumnIndex(COL_BOOK_ID)),
-                    highlightCursor.getString(highlightCursor.getColumnIndex(COL_CONTENT)),
-                    getDateTime(highlightCursor.getString(highlightCursor.getColumnIndex(COL_DATE))),
-                    highlightCursor.getString(highlightCursor.getColumnIndex(COL_TYPE)),
-                    highlightCursor.getInt(highlightCursor.getColumnIndex(COL_PAGE_NUMBER)),
-                    highlightCursor.getString(highlightCursor.getColumnIndex(COL_PAGE_ID)),
-                    highlightCursor.getString(highlightCursor.getColumnIndex(COL_RANGY)),
-                    highlightCursor.getString(highlightCursor.getColumnIndex(COL_NOTE)),
-                    highlightCursor.getString(highlightCursor.getColumnIndex(COL_UUID))
+    suspend fun getAllHighlights(bookId: String?): ArrayList<HighlightImpl> {
+        return withContext(Dispatchers.IO){
+            val highlights = ArrayList<HighlightImpl>()
+            val highlightCursor: Cursor = DbAdapter.Companion.getHighLightsForBookId(bookId)
+            while (highlightCursor.moveToNext()) {
+                highlights.add(
+                    HighlightImpl(
+                        highlightCursor.getInt(highlightCursor.getColumnIndex(ID)),
+                        highlightCursor.getString(highlightCursor.getColumnIndex(COL_BOOK_ID)),
+                        highlightCursor.getString(highlightCursor.getColumnIndex(COL_CONTENT)),
+                        getDateTime(highlightCursor.getString(highlightCursor.getColumnIndex(COL_DATE))),
+                        highlightCursor.getString(highlightCursor.getColumnIndex(COL_TYPE)),
+                        highlightCursor.getInt(highlightCursor.getColumnIndex(COL_PAGE_NUMBER)),
+                        highlightCursor.getString(highlightCursor.getColumnIndex(COL_PAGE_ID)),
+                        highlightCursor.getString(highlightCursor.getColumnIndex(COL_RANGY)),
+                        highlightCursor.getString(highlightCursor.getColumnIndex(COL_NOTE)),
+                        highlightCursor.getString(highlightCursor.getColumnIndex(COL_UUID))
+                    )
                 )
-            )
+            }
+            highlights
         }
-        return highlights
     }
 
     @SuppressLint("Range")

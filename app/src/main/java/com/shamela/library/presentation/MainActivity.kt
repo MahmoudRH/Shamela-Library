@@ -28,8 +28,8 @@ import com.shamela.library.data.local.sharedPrefs.SharedPreferencesData
 import com.shamela.library.domain.usecases.userPreferences.ReadUserPreferences
 import com.shamela.library.presentation.reciever.DownloadCompleteReceiver
 import com.shamela.library.presentation.screens.HomeHostScreen
-import com.shamela.library.presentation.theme.AppFonts
-import com.shamela.library.presentation.theme.AppTheme
+import com.shamela.apptheme.theme.AppFonts
+import com.shamela.apptheme.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                 AppTheme.themeOf(
                     theme,
                     colorScheme,
-                    isNightMode(this@MainActivity),
+                    AppTheme.isDarkTheme(this@MainActivity),
                     this@MainActivity
                 ),
                 theme
@@ -158,11 +158,5 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         unregisterReceiver(downloadCompleteReceiver)
-    }
-
-    private fun isNightMode(context: Context): Boolean {
-        val nightModeFlags =
-            context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES
     }
 }

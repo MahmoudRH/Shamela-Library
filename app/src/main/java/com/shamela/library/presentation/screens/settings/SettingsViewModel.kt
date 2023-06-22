@@ -3,8 +3,8 @@ package com.shamela.library.presentation.screens.settings
 
 import androidx.lifecycle.ViewModel
 import com.shamela.library.domain.usecases.userPreferences.UserPreferencesUseCases
-import com.shamela.library.presentation.theme.AppFonts
-import com.shamela.library.presentation.theme.AppTheme
+import com.shamela.apptheme.theme.AppFonts
+import com.shamela.apptheme.theme.AppTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

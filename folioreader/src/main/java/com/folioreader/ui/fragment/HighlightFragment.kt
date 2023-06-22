@@ -49,7 +49,7 @@ class HighlightFragment : Fragment(), HighLightAdapterCallback {
         super.onViewCreated(view, savedInstanceState)
         val highlightsView = mRootView!!.findViewById<View>(R.id.rv_highlights) as RecyclerView
         val config = getSavedConfig(activity)
-        mBookId = requireArguments().getString(FolioReader.Companion.EXTRA_BOOK_ID)
+        mBookId = requireArguments().getString(FolioReader.EXTRA_BOOK_ID)
         if (config!!.isNightMode) {
             mRootView!!.findViewById<View>(R.id.rv_highlights).setBackgroundColor(
                 ContextCompat.getColor(
@@ -65,8 +65,8 @@ class HighlightFragment : Fragment(), HighLightAdapterCallback {
                 DividerItemDecoration.VERTICAL
             )
         )
-        adapter = HighlightAdapter(activity, HighLightTable.getAllHighlights(mBookId), this, config)
-        highlightsView.adapter = adapter
+//        adapter = HighlightAdapter(activity, HighLightTable.getAllHighlights(mBookId), this, config)
+//        highlightsView.adapter = adapter
     }
 
     override fun onItemClick(highlightImpl: HighlightImpl) {

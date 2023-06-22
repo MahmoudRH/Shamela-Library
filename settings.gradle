@@ -17,3 +17,5 @@ dependencyResolutionManagement {
 rootProject.name = "Shamela Library"
 include ':app'
 include ':folioreader'
+include ':AppTheme'
+include ':apptheme'

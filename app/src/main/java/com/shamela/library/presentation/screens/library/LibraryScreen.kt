@@ -31,9 +31,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
-import com.shamela.library.presentation.common.LoadingScreen
+import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.library.presentation.common.SectionItem
-import com.shamela.library.presentation.theme.AppFonts
+import com.shamela.apptheme.theme.AppFonts
 
 
 @OptIn(ExperimentalFoundationApi::class)

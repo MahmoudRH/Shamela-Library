@@ -47,10 +47,10 @@ class HighlightAdapter(
             }
         }, 10)
         holder.content.text = Html.fromHtml(getItem(position).content)
-        UiUtil.setBackColorToTextView(
-            holder.content,
-            getItem(position).type
-        )
+//        UiUtil.setBackColorToTextView(
+//            holder.content,
+//            getItem(position).type
+//        )
         holder.date.text = getItem(position).date?.let { formatDate(it) }
         holder.container.setOnClickListener { callback.onItemClick(getItem(position)) }
         holder.delete.setOnClickListener {

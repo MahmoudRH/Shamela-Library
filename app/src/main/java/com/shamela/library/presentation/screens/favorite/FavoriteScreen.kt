@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.shamela.library.presentation.theme.AppFonts
+import com.shamela.apptheme.theme.AppFonts
 
 @Composable
 fun FavoriteScreen(

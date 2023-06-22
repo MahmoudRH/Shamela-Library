@@ -19,11 +19,11 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.shamela.library.presentation.common.DefaultTopBar
+import com.shamela.apptheme.common.DefaultTopBar
 import com.shamela.library.presentation.navigation.HomeHostDestination
 import com.shamela.library.presentation.navigation.NavigationGraphs
 import com.shamela.library.presentation.navigation.homeGraph
-import com.shamela.library.presentation.theme.AppFonts
+import com.shamela.apptheme.theme.AppFonts
 import com.shamela.library.presentation.utils.NavigationUtils
 
 private val destination = listOf(

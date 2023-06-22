@@ -37,7 +37,6 @@ import java.lang.reflect.Field
 class SearchActivity : AppCompatActivity(), OnItemClickListener {
 
     companion object {
-        @JvmField
         val LOG_TAG: String = SearchActivity::class.java.simpleName
         const val BUNDLE_SPINE_SIZE = "BUNDLE_SPINE_SIZE"
         const val BUNDLE_SEARCH_URI = "BUNDLE_SEARCH_URI"

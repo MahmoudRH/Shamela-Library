@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
-import com.shamela.library.presentation.common.LoadingScreen
+import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.screens.library.ViewType
 import com.shamela.library.presentation.screens.library.ViewTypeSection
