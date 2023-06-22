@@ -1,6 +1,9 @@
 package com.folioreader.ui.screens.tableOfContent
 
+import org.readium.r2.shared.Link
+
 
 data class TableOfContentState(
-    val example:String = "",
+    val isLoading: Boolean = true,
+    val items: List<Link> = emptyList(),
 )

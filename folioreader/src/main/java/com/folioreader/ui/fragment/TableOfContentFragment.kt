@@ -75,7 +75,7 @@ class TableOfContentFragment : Fragment(), TOCCallback {
 
     private fun initAdapter() {
         if (publication != null) {
-            if (!publication!!.tableOfContents.isEmpty()) {
+            if (publication!!.tableOfContents.isNotEmpty()) {
                 val tocLinkWrappers = ArrayList<TOCLinkWrapper>()
                 for (tocLink in publication!!.tableOfContents) {
                     val tocLinkWrapper = createTocLinkWrapper(tocLink, 0)

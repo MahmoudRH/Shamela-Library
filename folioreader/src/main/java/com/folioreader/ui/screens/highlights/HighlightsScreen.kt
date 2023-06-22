@@ -50,11 +50,11 @@ fun HighlightsScreen(
     LaunchedEffect(key1 = Unit, block = {
         viewModel.onEvent(HighlightsEvent.GetHighlightsOf(bookId))
     })
-    LazyColumn(
+    Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        items(highlightsState.highlightsList, key = { it.id }) {
+        highlightsState.highlightsList.forEach {
             HighlightsItem(
                 item = it,
                 onItemClick = onItemClick,
@@ -82,15 +82,13 @@ private fun HighlightsItem(
         }
         .padding(horizontal = 16.dp, vertical = 8.dp)) {
         Column(Modifier.fillMaxWidth(0.9f)) {
-            HtmlText(html = item.content, item.type)
-            Spacer(modifier = Modifier.height(4.dp))
             Text(text = formatDate(item.date), style = AppFonts.textNormal)
+            Spacer(modifier = Modifier.height(4.dp))
+            HtmlText(html = item.content, item.type)
         }
 
         IconButton(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 16.dp),
+            modifier = Modifier.align(Alignment.CenterEnd),
             onClick = { onDeleteClicked(item.id) }) {
             Icon(imageVector = Icons.Outlined.Delete, contentDescription = "Delete")
         }

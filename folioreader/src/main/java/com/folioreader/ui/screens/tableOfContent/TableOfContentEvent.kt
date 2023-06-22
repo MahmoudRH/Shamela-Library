@@ -1,6 +1,8 @@
 package com.folioreader.ui.screens.tableOfContent
 
+import org.readium.r2.shared.Publication
+
 
 sealed class TableOfContentEvent{
-    class SampleEvent(val newText: String):TableOfContentEvent()
+    class LoadTableOfContentsOf(val publication: Publication):TableOfContentEvent()
 }
