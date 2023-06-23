@@ -1,35 +1,19 @@
 package com.shamela.library.presentation
 
-import android.Manifest
-import android.app.AlertDialog
 import android.app.DownloadManager
-import android.content.Context
-import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.content.res.Configuration
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import com.shamela.apptheme.theme.AppFonts
+import com.shamela.apptheme.theme.AppTheme
 import com.shamela.library.data.local.sharedPrefs.SharedPreferencesData
 import com.shamela.library.domain.usecases.userPreferences.ReadUserPreferences
 import com.shamela.library.presentation.reciever.DownloadCompleteReceiver
 import com.shamela.library.presentation.screens.HomeHostScreen
-import com.shamela.apptheme.theme.AppFonts
-import com.shamela.apptheme.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

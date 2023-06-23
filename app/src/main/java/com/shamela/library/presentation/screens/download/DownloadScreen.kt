@@ -13,15 +13,15 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
-import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.screens.library.ViewType
 import com.shamela.library.presentation.screens.library.ViewTypeSection

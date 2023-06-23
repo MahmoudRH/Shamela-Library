@@ -1,7 +1,6 @@
 package com.folioreader.ui.fragment
 
 import android.app.Dialog
-import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.util.Log

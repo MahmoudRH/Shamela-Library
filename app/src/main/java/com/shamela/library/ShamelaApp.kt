@@ -1,10 +1,10 @@
 package com.shamela.library
 
 import android.app.Application
-import com.shamela.library.data.local.sharedPrefs.SharedPreferencesData
-import com.shamela.apptheme.theme.colors.AppColors
 import com.shamela.apptheme.theme.AppFonts
 import com.shamela.apptheme.theme.AppTheme
+import com.shamela.apptheme.theme.colors.AppColors
+import com.shamela.library.data.local.sharedPrefs.SharedPreferencesData
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp

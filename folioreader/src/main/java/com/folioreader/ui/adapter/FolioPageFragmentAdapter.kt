@@ -8,7 +8,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.folioreader.ui.fragment.FolioPageFragment.Companion.newInstance
 import org.readium.r2.shared.Link
-import java.util.Arrays
 
 /**
  * @author mahavir on 4/2/16.

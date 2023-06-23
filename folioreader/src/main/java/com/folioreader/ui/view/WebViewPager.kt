@@ -4,7 +4,11 @@ import android.content.Context
 import android.os.Handler
 import android.util.AttributeSet
 import android.util.Log
-import android.view.*
+import android.view.GestureDetector
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import androidx.core.view.GestureDetectorCompat
 import androidx.viewpager.widget.PagerAdapter

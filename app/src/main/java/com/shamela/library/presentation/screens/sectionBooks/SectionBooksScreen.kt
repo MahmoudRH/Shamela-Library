@@ -13,7 +13,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,9 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
-import com.shamela.library.presentation.common.BookItem
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.shamela.apptheme.common.DefaultTopBar
 import com.shamela.apptheme.common.LoadingScreen
+import com.shamela.library.presentation.common.BookItem
 
 @Composable
 fun SectionBooksScreen(

@@ -3,7 +3,6 @@ package com.shamela.library.data.local.files
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
-import com.folioreader.Config
 import com.folioreader.FolioReader
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
