@@ -6,14 +6,12 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import android.graphics.PorterDuff
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.text.TextUtils
@@ -21,7 +19,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.util.StateSet
 import android.view.View
-import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
@@ -54,7 +51,7 @@ object UiUtil {
 
     fun setCustomFont(view: View, ctx: Context, asset: String?): Boolean {
         if (TextUtils.isEmpty(asset)) return false
-        var tf: Typeface? = null
+        val tf: Typeface?
         try {
             tf = getFont(ctx, asset)
             if (view is TextView) {
@@ -70,7 +67,7 @@ object UiUtil {
     }
 
     private val fontCache = Hashtable<String?, SoftReference<Typeface?>?>()
-    fun getFont(c: Context, name: String?): Typeface? {
+    private fun getFont(c: Context, name: String?): Typeface? {
         synchronized(fontCache) {
             if (fontCache[name] != null) {
                 val ref = fontCache[name]
@@ -132,10 +129,6 @@ object UiUtil {
     ) {
         underlinedTextView.setBackgroundColor(ContextCompat.getColor(context, background))
 //        underlinedTextView.underLineColor = ContextCompat.getColor(context, underlinecolor)
-    }
-
-    fun convertDpToPixel(dp: Float, context: Context): Float {
-        return dp * context.resources.displayMetrics.density
     }
 
     fun copyToClipboard(context: Context, text: String?) {
@@ -259,31 +252,6 @@ object UiUtil {
         )
         stateListDrawable.addState(StateSet.WILD_CARD, ColorDrawable(colorNormal))
         return stateListDrawable
-    }
-
-    fun getShapeDrawable(@ColorInt color: Int): GradientDrawable {
-        val gradientDrawable = GradientDrawable()
-        gradientDrawable.shape = GradientDrawable.RECTANGLE
-        gradientDrawable.setStroke(pxToDp(2), color)
-        gradientDrawable.setColor(color)
-        gradientDrawable.cornerRadius = pxToDp(3).toFloat()
-        return gradientDrawable
-    }
-
-    fun setShapeColor(view: View?, @ColorInt color: Int) {
-        (view!!.background as GradientDrawable).setColor(color)
-    }
-
-    fun pxToDp(px: Int): Int {
-        return (px / Resources.getSystem().displayMetrics.density).toInt()
-    }
-
-    fun setStatusBarColor(window: Window, @ColorInt color: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = color
-        }
     }
 
     fun rectToDOMRectJson(rect: Rect): String {

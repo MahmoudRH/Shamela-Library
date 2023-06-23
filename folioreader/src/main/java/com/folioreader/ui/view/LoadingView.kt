@@ -10,7 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.folioreader.Config
 import com.folioreader.R
-import com.folioreader.util.AppUtil.Companion.getSavedConfig
+import com.folioreader.util.AppUtil
 import com.folioreader.util.UiUtil
 
 class LoadingView : ConstraintLayout {
@@ -53,7 +53,7 @@ class LoadingView : ConstraintLayout {
     }
 
     fun updateTheme() {
-        var config = getSavedConfig(context)
+        var config = AppUtil.getSavedConfig(context)
         if (config == null) config = Config()
         UiUtil.setColorIntToDrawable(config.themeColor, progressBar!!.indeterminateDrawable)
         if (config.isNightMode) {

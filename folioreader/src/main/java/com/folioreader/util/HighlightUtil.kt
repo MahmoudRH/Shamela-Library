@@ -98,7 +98,7 @@ object HighlightUtil {
     fun generateRangyString(pageId: String): String {
         val rangyList = HighLightTable.getHighlightsForPageId(pageId)
         val builder = StringBuilder()
-        if (!rangyList!!.isEmpty()) {
+        if (rangyList.isNotEmpty()) {
             builder.append("type:textContent")
             for (rangy in rangyList) {
                 builder.append('|')
@@ -118,7 +118,7 @@ object HighlightUtil {
         )
     }
 
-    fun getHighlightBroadcastIntent(
+    private fun getHighlightBroadcastIntent(
         highlightImpl: HighlightImpl?,
         modify: HighLightAction?
     ): Intent {

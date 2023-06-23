@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Parcelable
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.folioreader.model.HighLight
 import com.folioreader.model.HighLight.HighLightAction
 import com.folioreader.model.HighlightImpl
 import com.folioreader.model.locators.ReadLocator
@@ -16,8 +15,6 @@ import com.folioreader.model.sqlite.DbAdapter
 import com.folioreader.network.QualifiedTypeConverterFactory
 import com.folioreader.network.R2StreamerApi
 import com.folioreader.ui.activity.FolioActivity
-import com.folioreader.ui.base.OnSaveHighlight
-import com.folioreader.ui.base.SaveReceivedHighlightTask
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
 import kotlinx.coroutines.Dispatchers
@@ -99,7 +96,7 @@ class FolioReader private constructor(private var context: Context) {
     }
 
     init {
-        DbAdapter.Companion.initialize(context)
+        DbAdapter.initialize(context)
         val localBroadcastManager = LocalBroadcastManager.getInstance(context)
         localBroadcastManager.registerReceiver(
             highlightReceiver,
@@ -134,26 +131,6 @@ class FolioReader private constructor(private var context: Context) {
         return singleton
     }
 
-    fun openBook(rawId: Int): FolioReader? {
-        val intent = getIntentFromUrl(null, rawId)
-        context.startActivity(intent)
-        return singleton
-    }
-
-    fun openBook(assetOrSdcardPath: String?, bookId: String?): FolioReader? {
-        val intent = getIntentFromUrl(assetOrSdcardPath, 0)
-        intent.putExtra(EXTRA_BOOK_ID, bookId)
-        context.startActivity(intent)
-        return singleton
-    }
-
-    fun openBook(rawId: Int, bookId: String?): FolioReader? {
-        val intent = getIntentFromUrl(null, rawId)
-        intent.putExtra(EXTRA_BOOK_ID, bookId)
-        context.startActivity(intent)
-        return singleton
-    }
-
     private fun getIntentFromUrl(assetOrSdcardPath: String?, rawId: Int): Intent {
         val intent = Intent(context, FolioActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -163,52 +140,6 @@ class FolioReader private constructor(private var context: Context) {
         intent.putExtra(FolioActivity.EXTRA_READ_LOCATOR, readLocator as Parcelable?)
         intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_PATH, assetOrSdcardPath)
         return intent
-    }
-
-    /**
-     * Pass your configuration and choose to override it every time or just for first execution.
-     *
-     * @param config         custom configuration.
-     * @param overrideConfig true will override the config, false will use either this
-     * config if it is null in application context or will fetch previously
-     * saved one while execution.
-     */
-    fun setConfig(config: Config?, overrideConfig: Boolean): FolioReader? {
-        this.config = config
-        this.overrideConfig = overrideConfig
-        return singleton
-    }
-
-    fun setPortNumber(portNumber: Int): FolioReader? {
-        this.portNumber = portNumber
-        return singleton
-    }
-
-    fun setOnHighlightListener(onHighlightListener: OnHighlightListener?): FolioReader {
-        this.onHighlightListener = onHighlightListener
-        return singleton!!
-    }
-
-    fun setReadLocatorListener(readLocatorListener: ReadLocatorListener?): FolioReader {
-        this.readLocatorListener = readLocatorListener
-        return singleton!!
-    }
-
-    fun setOnClosedListener(onClosedListener: OnClosedListener?): FolioReader {
-        this.onClosedListener = onClosedListener
-        return singleton!!
-    }
-
-    fun setReadLocator(readLocator: ReadLocator?): FolioReader {
-        this.readLocator = readLocator
-        return singleton!!
-    }
-
-    fun saveReceivedHighLights(
-        highlights: List<HighLight>,
-        onSaveHighlight: OnSaveHighlight,
-    ) {
-        SaveReceivedHighlightTask(onSaveHighlight, highlights).execute()
     }
 
     /**
@@ -299,7 +230,7 @@ class FolioReader private constructor(private var context: Context) {
         @Synchronized
         fun stop() {
             if (singleton != null) {
-                DbAdapter.Companion.terminate()
+                DbAdapter.terminate()
                 singleton!!.unregisterListeners()
                 singleton = null
             }

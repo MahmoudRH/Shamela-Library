@@ -2,7 +2,7 @@ package com.folioreader.ui.base
 
 import android.os.AsyncTask
 import android.util.Log
-import com.folioreader.util.AppUtil.Companion.charsetNameForURLConnection
+import com.folioreader.util.AppUtil
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -24,7 +24,7 @@ class HtmlTask(private val callback: HtmlTaskCallback) : AsyncTask<String?, Void
             val bufferedReader = BufferedReader(
                 InputStreamReader(
                     inputStream,
-                    charsetNameForURLConnection(urlConnection)
+                    AppUtil.charsetNameForURLConnection(urlConnection)
                 )
             )
             val stringBuilder = StringBuilder()

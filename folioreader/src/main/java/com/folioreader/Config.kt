@@ -1,12 +1,10 @@
 package com.folioreader
 
-import android.content.res.Resources.NotFoundException
 import android.os.Parcel
 import android.os.Parcelable
 import android.os.Parcelable.Creator
 import android.util.Log
 import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import org.json.JSONObject
 
@@ -56,7 +54,7 @@ class Config : Parcelable {
         dest.writeString(direction.toString())
     }
 
-    protected constructor(`in`: Parcel) {
+    private constructor(`in`: Parcel) {
         font = `in`.readInt()
         fontSize = `in`.readInt()
         isNightMode = `in`.readByte().toInt() != 0
@@ -66,7 +64,7 @@ class Config : Parcelable {
         direction = getDirectionFromString(LOG_TAG, `in`.readString())
     }
 
-    constructor() {}
+    constructor()
     constructor(jsonObject: JSONObject) {
         font = jsonObject.optInt(CONFIG_FONT)
         fontSize = jsonObject.optInt(CONFIG_FONT_SIZE)
@@ -79,22 +77,6 @@ class Config : Parcelable {
         )
         direction = getDirectionFromString(LOG_TAG, jsonObject.optString(CONFIG_DIRECTION))
     }
-
-    fun setFont(font: Int): Config {
-        this.font = font
-        return this
-    }
-
-    fun setFontSize(fontSize: Int): Config {
-        this.fontSize = fontSize
-        return this
-    }
-
-    fun setNightMode(nightMode: Boolean): Config {
-        isNightMode = nightMode
-        return this
-    }
-
     @ColorInt
     private fun getValidColorInt(@ColorInt colorInt: Int): Int {
         if (colorInt >= 0) {
@@ -105,115 +87,6 @@ class Config : Parcelable {
             return DEFAULT_THEME_COLOR_INT
         }
         return colorInt
-    }
-
-    fun setThemeColorRes(@ColorRes colorResId: Int): Config {
-        try {
-            themeColor = ContextCompat.getColor(AppContext.Companion.get()!!, colorResId)
-        } catch (e: NotFoundException) {
-            Log.w(LOG_TAG, "-> setThemeColorRes -> $e")
-            Log.w(
-                LOG_TAG, "-> setThemeColorRes -> Defaulting themeColor to " +
-                        DEFAULT_THEME_COLOR_INT
-            )
-            themeColor = DEFAULT_THEME_COLOR_INT
-        }
-        return this
-    }
-
-    fun setThemeColorInt(@ColorInt colorInt: Int): Config {
-        themeColor = getValidColorInt(colorInt)
-        return this
-    }
-
-    fun setShowTts(showTts: Boolean): Config {
-        isShowTts = showTts
-        return this
-    }
-
-    /**
-     * Set reading direction mode options for users. This method should be called before
-     * [.setDirection] as it has higher preference.
-     *
-     * @param allowedDirection reading direction mode options for users. Setting to
-     * [AllowedDirection.VERTICAL_AND_HORIZONTAL] users will have
-     * choice to select the reading direction at runtime.
-     */
-    fun setAllowedDirection(allowedDirection: AllowedDirection?): Config {
-        this.allowedDirection = allowedDirection
-        if (allowedDirection == null) {
-            this.allowedDirection = DEFAULT_ALLOWED_DIRECTION
-            direction = DEFAULT_DIRECTION
-            Log.w(
-                LOG_TAG, "-> allowedDirection cannot be null, defaulting " +
-                        "allowedDirection to " + DEFAULT_ALLOWED_DIRECTION + " and direction to " +
-                        DEFAULT_DIRECTION
-            )
-        } else if (allowedDirection == AllowedDirection.ONLY_VERTICAL &&
-            direction != Direction.VERTICAL
-        ) {
-            direction = Direction.VERTICAL
-            Log.w(
-                LOG_TAG, "-> allowedDirection is " + allowedDirection +
-                        ", defaulting direction to " + direction
-            )
-        } else if (allowedDirection == AllowedDirection.ONLY_HORIZONTAL &&
-            direction != Direction.HORIZONTAL
-        ) {
-            direction = Direction.HORIZONTAL
-            Log.w(
-                LOG_TAG, "-> allowedDirection is " + allowedDirection
-                        + ", defaulting direction to " + direction
-            )
-        }
-        return this
-    }
-
-    /**
-     * Set reading direction. This method should be called after
-     * [.setAllowedDirection] as it has lower preference.
-     *
-     * @param direction reading direction.
-     */
-    fun setDirection(direction: Direction): Config {
-        if (allowedDirection == AllowedDirection.VERTICAL_AND_HORIZONTAL) {
-            this.direction = DEFAULT_DIRECTION
-            Log.w(
-                LOG_TAG, "-> direction cannot be `null` when allowedDirection is " +
-                        allowedDirection + ", defaulting direction to " + this.direction
-            )
-        } else if (allowedDirection == AllowedDirection.ONLY_VERTICAL &&
-            direction != Direction.VERTICAL
-        ) {
-            this.direction = Direction.VERTICAL
-            Log.w(
-                LOG_TAG, "-> direction cannot be `" + direction + "` when allowedDirection is " +
-                        allowedDirection + ", defaulting direction to " + this.direction
-            )
-        } else if (allowedDirection == AllowedDirection.ONLY_HORIZONTAL &&
-            direction != Direction.HORIZONTAL
-        ) {
-            this.direction = Direction.HORIZONTAL
-            Log.w(
-                LOG_TAG, "-> direction cannot be `" + direction + "` when allowedDirection is " +
-                        allowedDirection + ", defaulting direction to " + this.direction
-            )
-        } else {
-            this.direction = direction
-        }
-        return this
-    }
-
-    override fun toString(): String {
-        return "Config{" +
-                "font=" + font +
-                ", fontSize=" + fontSize +
-                ", nightMode=" + isNightMode +
-                ", themeColor=" + themeColor +
-                ", showTts=" + isShowTts +
-                ", allowedDirection=" + allowedDirection +
-                ", direction=" + direction +
-                '}'
     }
 
     companion object {
@@ -230,7 +103,7 @@ class Config : Parcelable {
         private val DEFAULT_ALLOWED_DIRECTION = AllowedDirection.ONLY_VERTICAL
         private val DEFAULT_DIRECTION = Direction.VERTICAL
         private val DEFAULT_THEME_COLOR_INT =
-            ContextCompat.getColor(AppContext.Companion.get()!!, R.color.default_theme_accent_color)
+            ContextCompat.getColor(AppContext.get()!!, R.color.default_theme_accent_color)
         @JvmField
         val CREATOR: Creator<Config> = object : Creator<Config> {
             override fun createFromParcel(`in`: Parcel): Config {

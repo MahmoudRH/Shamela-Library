@@ -70,14 +70,14 @@ class SearchViewModel : ViewModel() {
         override fun onFailure(call: Call<List<Locator>>, t: Throwable) {
             Log.e(LOG_TAG, "-> search -> onFailure", t)
 
-            val bundle = processSingleSearchResponse(call, null, t)
+            val bundle = processSingleSearchResponse(null)
             mergeSearchResponse(bundle, call)
         }
 
         override fun onResponse(call: Call<List<Locator>>, response: Response<List<Locator>>) {
             Log.d(LOG_TAG, "-> search -> onResponse")
 
-            val bundle = processSingleSearchResponse(call, response, null)
+            val bundle = processSingleSearchResponse(response)
             mergeSearchResponse(bundle, call)
         }
     }
@@ -142,9 +142,7 @@ class SearchViewModel : ViewModel() {
     }
 
     private fun processSingleSearchResponse(
-        call: Call<List<Locator>>,
-        response: Response<List<Locator>>?,
-        t: Throwable?
+        response: Response<List<Locator>>?
     ): Bundle {
         Log.d(LOG_TAG, "-> processSingleSearchResponse")
 

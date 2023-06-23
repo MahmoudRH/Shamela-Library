@@ -6,7 +6,6 @@ import android.Manifest
  * Created by mobisys on 10/4/2016.
  */
 object Constants {
-    const val TABLE_OF_CONTENT_ITEMS = "toc_items"
     const val SELECTED_CHAPTER_POSITION = "selected_chapter_position"
     const val TYPE = "type"
     const val CHAPTER_SELECTED = "chapter_selected"
