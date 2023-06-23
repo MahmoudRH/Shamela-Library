@@ -443,8 +443,8 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     private fun startContentHighlightActivity() {
 
         val intent = Intent(this@FolioActivity, ContentHighlightActivity::class.java)
-
-        intent.putExtra(Constants.PUBLICATION, pubBox.publication)
+//        val tableOfContents = pubBox.publication.tableOfContents.ifEmpty { pubBox.publication.readingOrder }
+        intent.putExtra(Constants.EPUB_FILE_PATH, mEpubFilePath)
         try {
             intent.putExtra(CHAPTER_SELECTED, spine[currentChapterIndex].href)
         } catch (e: NullPointerException) {

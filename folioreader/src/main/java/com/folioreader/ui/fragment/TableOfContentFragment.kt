@@ -31,7 +31,7 @@ class TableOfContentFragment : Fragment(), TOCCallback {
     private var publication: Publication? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        publication = requireArguments().getSerializable(Constants.PUBLICATION) as Publication?
+        publication = requireArguments().getSerializable(Constants.TABLE_OF_CONTENT_ITEMS) as Publication?
     }
 
     override fun onCreateView(
@@ -129,7 +129,7 @@ class TableOfContentFragment : Fragment(), TOCCallback {
         ): TableOfContentFragment {
             val tableOfContentFragment = TableOfContentFragment()
             val args = Bundle()
-            args.putSerializable(Constants.PUBLICATION, publication)
+            args.putSerializable(Constants.TABLE_OF_CONTENT_ITEMS, publication)
             args.putString(Constants.SELECTED_CHAPTER_POSITION, selectedChapterHref)
             args.putString(Constants.BOOK_TITLE, bookTitle)
             tableOfContentFragment.arguments = args
