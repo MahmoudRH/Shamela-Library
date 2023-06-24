@@ -21,6 +21,7 @@ versions.kotlin_bom = '1.8.0'
 versions.lifecycle_runtime_ktx = '2.6.1'
 versions.navigation_compose = '2.6.0'
 versions.compose_compiler = '1.4.7'
+versions.accompanist = '0.31.4-beta'
 
 versions.hilt_version = '2.46.1'
 

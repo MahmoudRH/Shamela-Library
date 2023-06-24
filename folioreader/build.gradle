@@ -110,8 +110,12 @@ dependencies {
     //-> Compose Navigation
     implementation "androidx.navigation:navigation-compose:$versions.navigation_compose"
 
+    //-> Accompanist WebView Wrapper
+    implementation "com.google.accompanist:accompanist-webview:$versions.accompanist"
+
+
     //-> AppTheme
-    implementation project(':apptheme')
+    implementation project(path: ':apptheme')
 
     //-> Hilt DI
     implementation "com.google.dagger:hilt-android:$versions.hilt_version"

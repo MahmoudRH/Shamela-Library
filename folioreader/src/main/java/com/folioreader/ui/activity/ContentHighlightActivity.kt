@@ -57,7 +57,7 @@ import org.readium.r2.shared.Link
 import org.readium.r2.streamer.parser.EpubParser
 
 class ContentHighlightActivity : ComponentActivity() {
-    lateinit var highlightsItems: SnapshotStateList<HighlightImpl>
+    private lateinit var highlightsItems: SnapshotStateList<HighlightImpl>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val bookPath = intent.getStringExtra(Constants.EPUB_FILE_PATH)

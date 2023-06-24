@@ -16,7 +16,7 @@ object HtmlUtil {
      * @param htmlContent input html raw data
      * @return modified raw html string
      */
-    fun getHtmlContent(context: Context, htmlContent: String, config: Config): String {
+    fun getHtmlContent(context: Context, htmlContent: String/*, config: Config*/): String {
         var htmlContent = htmlContent
         val cssPath = String.format(
             context.getString(R.string.css_tag),
@@ -66,7 +66,7 @@ object HtmlUtil {
                 + "<meta name=\"viewport\" content=\"height=device-height, user-scalable=no\" />")
         val toInject = "\n$cssPath\n$jsPath\n</head>"
         htmlContent = htmlContent.replace("</head>", toInject)
-        var classes = ""
+        /*var classes = ""
         when (config.font) {
             Constants.FONT_ANDADA -> classes = "andada"
             Constants.FONT_LATO -> classes = "lato"
@@ -84,10 +84,13 @@ object HtmlUtil {
             3 -> classes += " textSizeFour"
             4 -> classes += " textSizeFive"
             else -> {}
-        }
+
         htmlContent = htmlContent.replace(
             "<html", "<html class=\"" + classes + "\"" +
                     " onclick=\"onClickHtml()\""
+        )}*/
+        htmlContent = htmlContent.replace(
+            "<html", "<html onclick=\"onClickHtml()\""
         )
         return htmlContent
     }

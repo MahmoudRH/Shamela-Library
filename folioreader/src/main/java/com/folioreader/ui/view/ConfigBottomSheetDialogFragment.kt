@@ -10,15 +10,12 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.SeekBar
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import com.folioreader.Config
 import com.folioreader.Constants
 import com.folioreader.R
 import com.folioreader.databinding.ViewConfigBinding
 import com.folioreader.model.event.ReloadDataEvent
-import com.folioreader.ui.activity.FolioActivity
 import com.folioreader.ui.activity.FolioActivityCallback
-import com.folioreader.ui.fragment.MediaControllerFragment
 import com.folioreader.util.AppUtil
 import com.folioreader.util.UiUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -49,8 +46,8 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (activity is FolioActivity)
-            activityCallback = activity as FolioActivity
+//        if (activity is FolioActivity)
+//            activityCallback = activity as FolioActivity
 
         view.viewTreeObserver.addOnGlobalLayoutListener {
             val dialog = dialog as BottomSheetDialog
@@ -110,7 +107,6 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             binding.viewConfigIbDayMode.isSelected = true
             binding.viewConfigIbNightMode.isSelected = false
             setToolBarColor()
-            setAudioPlayerBackground()
             UiUtil.setColorResToDrawable(R.color.app_gray, binding.viewConfigIbNightMode.drawable)
             UiUtil.setColorIntToDrawable(config.themeColor, binding.viewConfigIbDayMode.drawable)
         }
@@ -123,7 +119,6 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             UiUtil.setColorResToDrawable(R.color.app_gray, binding.viewConfigIbDayMode.drawable)
             UiUtil.setColorIntToDrawable(config.themeColor, binding.viewConfigIbNightMode.drawable)
             setToolBarColor()
-            setAudioPlayerBackground()
         }
 
         if (activityCallback.direction == Config.Direction.HORIZONTAL) {
@@ -276,15 +271,4 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setAudioPlayerBackground() {
-
-        var mediaControllerFragment: Fragment? = fragmentManager?.findFragmentByTag(MediaControllerFragment.LOG_TAG)
-            ?: return
-        mediaControllerFragment = mediaControllerFragment as MediaControllerFragment
-        if (isNightMode) {
-            mediaControllerFragment.setDayMode()
-        } else {
-            mediaControllerFragment.setNightMode()
-        }
-    }
 }

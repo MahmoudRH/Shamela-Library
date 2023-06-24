@@ -4,6 +4,7 @@ import android.graphics.Rect
 import com.folioreader.Config
 import com.folioreader.model.DisplayUnit
 import com.folioreader.model.locators.ReadLocator
+import com.folioreader.ui.activity.folioActivity.FolioActivity
 import java.lang.ref.WeakReference
 
 interface FolioActivityCallback {

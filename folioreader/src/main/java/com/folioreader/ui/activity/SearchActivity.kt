@@ -25,6 +25,7 @@ import com.folioreader.Config
 import com.folioreader.R
 import com.folioreader.databinding.ActivitySearchBinding
 import com.folioreader.model.locators.SearchLocator
+import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.folioreader.ui.adapter.ListViewType
 import com.folioreader.ui.adapter.OnItemClickListener
 import com.folioreader.ui.adapter.SearchAdapter

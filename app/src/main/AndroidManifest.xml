@@ -28,7 +28,7 @@
         <receiver android:name=".presentation.reciever.DownloadCompleteReceiver" />
 
         <activity
-            android:name="com.folioreader.ui.activity.FolioActivity"
+            android:name="com.folioreader.ui.activity.folioActivity.FolioActivity"
             android:exported="false"
             android:theme="@style/FolioActivityDayTheme" />
         <activity

@@ -159,7 +159,6 @@ class DirectionalViewpager : ViewGroup {
     private var mOnPageChangeListeners: MutableList<OnPageChangeListener>? = null
     private var mOnPageChangeListener: OnPageChangeListener? = null
     private var mInternalPageChangeListener: OnPageChangeListener? = null
-    private var mAdapterChangeListener: OnAdapterChangeListener? = null
     private var mPageTransformer: PageTransformer? = null
     private var mSetChildrenDrawingOrderEnabled: Method? = null
     private var mDrawingOrder = 0
@@ -393,55 +392,6 @@ class DirectionalViewpager : ViewGroup {
         dispatchOnScrollStateChanged(newState)
     }
 
-    /**
-     * Set a PagerAdapter that will supply views for this pager as needed.
-     *
-     * @param adapter Adapter to use
-     */
-    fun setAdapter(adapter: PagerAdapter?) {
-        adapter?.let {
-            if (this.mAdapter != null) {
-                adapter.unregisterDataSetObserver(mObserver!!)
-                adapter.startUpdate(this)
-                for (i in mItems.indices) {
-                    val ii = mItems[i]
-                    adapter.destroyItem(this, ii.position, ii.`object`!!)
-                }
-                adapter.finishUpdate(this)
-                mItems.clear()
-                removeNonDecorViews()
-                mCurItem = 0
-                scrollTo(0, 0)
-            }
-            val oldAdapter = this.mAdapter
-            this.mAdapter = adapter
-            mExpectedAdapterCount = 0
-            if (this.mAdapter != null) {
-                if (mObserver == null) {
-                    mObserver = PagerObserver()
-                }
-                adapter.registerDataSetObserver(mObserver!!)
-                mPopulatePending = false
-                val wasFirstLayout = mFirstLayout
-                mFirstLayout = true
-                mExpectedAdapterCount = adapter.count
-                if (mRestoredCurItem >= 0) {
-                    adapter.restoreState(mRestoredAdapterState, mRestoredClassLoader)
-                    setCurrentItemInternal(mRestoredCurItem, false, true)
-                    mRestoredCurItem = -1
-                    mRestoredAdapterState = null
-                    mRestoredClassLoader = null
-                } else if (!wasFirstLayout) {
-                    populate()
-                } else {
-                    requestLayout()
-                }
-            }
-            if (mAdapterChangeListener != null && oldAdapter !== adapter) {
-                mAdapterChangeListener!!.onAdapterChanged(oldAdapter, adapter)
-            }
-        }
-    }
 
     private fun removeNonDecorViews() {
         var i = 0
@@ -456,9 +406,6 @@ class DirectionalViewpager : ViewGroup {
         }
     }
 
-    fun setOnAdapterChangeListener(listener: OnAdapterChangeListener?) {
-        mAdapterChangeListener = listener
-    }
 
     private val clientWidth: Int
         private get() = measuredWidth - paddingLeft - paddingRight
@@ -3959,13 +3906,10 @@ class DirectionalViewpager : ViewGroup {
         private val LAYOUT_ATTRS = intArrayOf(
             android.R.attr.layout_gravity
         )
-        private val COMPARATOR: Comparator<ItemInfo> = object : Comparator<ItemInfo> {
-            override fun compare(lhs: ItemInfo, rhs: ItemInfo): Int {
-                return lhs.position - rhs.position
-            }
-        }
-        private val sInterpolator = Interpolator { t ->
-            var t = t
+        private val COMPARATOR: Comparator<ItemInfo> =
+            Comparator { lhs, rhs -> lhs.position - rhs.position }
+        private val sInterpolator = Interpolator { tx ->
+            var t = tx
             t -= 1.0f
             t * t * t * t * t + 1.0f
         }

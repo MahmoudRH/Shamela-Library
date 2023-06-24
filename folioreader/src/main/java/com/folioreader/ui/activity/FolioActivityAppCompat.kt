@@ -58,17 +58,14 @@ import com.folioreader.FolioReader
 import com.folioreader.R
 import com.folioreader.model.DisplayUnit
 import com.folioreader.model.HighlightImpl
-import com.folioreader.model.event.MediaOverlayPlayPauseEvent
 import com.folioreader.model.locators.ReadLocator
 import com.folioreader.model.locators.SearchLocator
 import com.folioreader.ui.adapter.FolioPageFragmentAdapter
 import com.folioreader.ui.adapter.SearchAdapter
 import com.folioreader.ui.fragment.FolioPageFragment
-import com.folioreader.ui.fragment.MediaControllerFragment
 import com.folioreader.ui.view.ConfigBottomSheetDialogFragment
 import com.folioreader.ui.view.DirectionalViewpager
 import com.folioreader.ui.view.FolioAppBarLayout
-import com.folioreader.ui.view.MediaControllerCallback
 import com.folioreader.util.AppUtil
 import com.folioreader.util.FileUtil
 import com.folioreader.util.UiUtil
@@ -81,8 +78,8 @@ import java.lang.ref.WeakReference
 import kotlin.math.ceil
 
 
-class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControllerCallback,
-    View.OnSystemUiVisibilityChangeListener {
+/*
+class FolioActivity : AppCompatActivity(), FolioActivityCallback {
 
     private var bookFileName: String = ""
 
@@ -106,7 +103,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
     private var mBookId: String = ""
     private var mEpubFilePath: String = ""
-    private var mediaControllerFragment: MediaControllerFragment? = null
     override var direction: Config.Direction = Config.Direction.VERTICAL
     private var portNumber: Int = Constants.DEFAULT_PORT_NUMBER
     private var streamerUri: Uri? = null
@@ -263,7 +259,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         mEpubFilePath = intent.extras?.getString(INTENT_EPUB_SOURCE_PATH) ?: ""
 
         initActionBar()
-        initMediaController()
 
         if (!isPermissionGranted()) {
             requestPermission()
@@ -381,12 +376,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.night_title_text_color))
     }
 
-    private fun initMediaController() {
-        Log.v(LOG_TAG, "-> initMediaController")
-
-        mediaControllerFragment = MediaControllerFragment.getInstance(supportFragmentManager, this)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
 
@@ -430,11 +419,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
                 return true
 
             }
-            R.id.itemTts -> {
-                Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
-                showMediaController()
-                return true
-            }
             else -> return super.onOptionsItemSelected(item)
         }
 
@@ -469,9 +453,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         )
     }
 
-    private fun showMediaController() {
-        mediaControllerFragment!!.show(supportFragmentManager)
-    }
 
     private fun setupBook() {
         Log.v(LOG_TAG, "-> setupBook")
@@ -576,7 +557,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     private fun initDistractionFreeMode(savedInstanceState: Bundle?) {
         Log.v(LOG_TAG, "-> initDistractionFreeMode")
 
-        window.decorView.setOnSystemUiVisibilityChangeListener(this)
+//        window.decorView.setOnSystemUiVisibilityChangeListener(this)
 
         // Deliberately Hidden and shown to make activity contents lay out behind SystemUI
         hideSystemUI()
@@ -595,9 +576,11 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
     }
 
-    /**
+    */
+/**
      * @return returns height of status bar + app bar as requested by param [DisplayUnit]
-     */
+     *//*
+
     override fun getTopDistraction(unit: DisplayUnit): Int {
 
         var topDistraction = 0
@@ -618,13 +601,15 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
     }
 
-    /**
+    */
+/**
      * Calculates the bottom distraction which can cause due to navigation bar.
      * In mobile landscape mode, navigation bar is either to left or right of the screen.
      * In tablet, navigation bar is always at bottom of the screen.
      *
      * @return returns height of navigation bar as requested by param [DisplayUnit]
-     */
+     *//*
+
     override fun getBottomDistraction(unit: DisplayUnit): Int {
 
         var bottomDistraction = 0
@@ -643,13 +628,15 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
     }
 
-    /**
+    */
+/**
      * Calculates the Rect for visible viewport of the webView in PX.
      * Visible viewport changes in following cases -
      * 1. In distraction free mode,
      * 2. In mobile landscape mode as navigation bar is placed either on left or right side,
      * 3. In tablets, navigation bar is always placed at bottom of the screen.
-     */
+     *//*
+
     private fun computeViewportRect(): Rect {
         //Log.v(LOG_TAG, "-> computeViewportRect");
 
@@ -696,16 +683,16 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     override val activity: WeakReference<FolioActivity>
         get() = WeakReference(this)
 
-    override fun onSystemUiVisibilityChange(visibility: Int) {
-        Log.v(LOG_TAG, "-> onSystemUiVisibilityChange -> visibility = $visibility")
-        distractionFreeMode = visibility != View.SYSTEM_UI_FLAG_VISIBLE
-        Log.v(LOG_TAG, "-> distractionFreeMode = $distractionFreeMode")
-        if (distractionFreeMode) {
-            actionBar.hide()
-        } else {
-            actionBar.show()
-        }
-    }
+//    override fun onSystemUiVisibilityChange(visibility: Int) {
+//        Log.v(LOG_TAG, "-> onSystemUiVisibilityChange -> visibility = $visibility")
+//        distractionFreeMode = visibility != View.SYSTEM_UI_FLAG_VISIBLE
+//        Log.v(LOG_TAG, "-> distractionFreeMode = $distractionFreeMode")
+//        if (distractionFreeMode) {
+//            actionBar.hide()
+//        } else {
+//            actionBar.show()
+//        }
+//    }
     override fun toggleSystemUI() {
         if (distractionFreeMode) {
             showSystemUI()
@@ -734,12 +721,14 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
                 or View.SYSTEM_UI_FLAG_FULLSCREEN)
     }
 
-    /**
+    */
+/**
      * Go to chapter specified by href
      *
      * @param href http link or relative link to the page or to the anchor
      * @return true if href is of EPUB or false if other link
-     */
+     *//*
+
     override fun goToChapter(href: String): Boolean {
 
         for (link in spine) {
@@ -842,15 +831,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
             override fun onPageSelected(position: Int) {
                 Log.v(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = $position")
-
-                EventBus.getDefault().post(
-                    spine[currentChapterIndex].href?.let {
-                        MediaOverlayPlayPauseEvent(
-                            it, isPlay = false, isStateChanged = true
-                        )
-                    }
-                )
-                mediaControllerFragment!!.setPlayButtonDrawable()
                 currentChapterIndex = position
             }
 
@@ -944,14 +924,16 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         return 0
     }
 
-    /**
+    */
+/**
      * If called, this method will occur after onStop() for applications targeting platforms
      * starting with Build.VERSION_CODES.P. For applications targeting earlier platform versions
      * this method will occur before onStop() and there are no guarantees about whether it will
      * occur before or after onPause()
      *
      * @see Activity.onSaveInstanceState
-     */
+     *//*
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         Log.v(LOG_TAG, "-> onSaveInstanceState")
@@ -991,26 +973,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
         AppUtil.saveConfig(this, config)
         direction = config.direction
-    }
-
-    override fun play() {
-        EventBus.getDefault().post(
-            spine[currentChapterIndex].href?.let {
-                MediaOverlayPlayPauseEvent(
-                    it, isPlay = true, isStateChanged = false
-                )
-            }
-        )
-    }
-
-    override fun pause() {
-        EventBus.getDefault().post(
-            spine[currentChapterIndex].href?.let {
-                MediaOverlayPlayPauseEvent(
-                    it, isPlay = false, isStateChanged = false
-                )
-            }
-        )
     }
 
     override fun onRequestPermissionsResult(
@@ -1056,4 +1018,4 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             }
         }
     }
-}
+}*/

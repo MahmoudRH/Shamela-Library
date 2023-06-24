@@ -16,7 +16,6 @@ object Constants {
     const val LOCALHOST = "http://127.0.0.1"
     const val DEFAULT_PORT_NUMBER = 8080
     const val STREAMER_URL_TEMPLATE = "%s:%d/%s/"
-    const val DEFAULT_STREAMER_URL = LOCALHOST + ":" + DEFAULT_PORT_NUMBER + "/"
     const val FONT_ANDADA = 1
     const val FONT_LATO = 2
     const val FONT_LORA = 3

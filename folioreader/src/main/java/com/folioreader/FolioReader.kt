@@ -14,7 +14,7 @@ import com.folioreader.model.locators.ReadLocator
 import com.folioreader.model.sqlite.DbAdapter
 import com.folioreader.network.QualifiedTypeConverterFactory
 import com.folioreader.network.R2StreamerApi
-import com.folioreader.ui.activity.FolioActivity
+import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
 import kotlinx.coroutines.Dispatchers
@@ -56,7 +56,7 @@ class FolioReader private constructor(private var context: Context) {
             if (Build.VERSION.SDK_INT >= 33) {
                 val highlightImpl =
                     intent.getParcelableExtra(
-                        HighlightImpl.Companion.INTENT,
+                        HighlightImpl.INTENT,
                         HighlightImpl::class.java
                     )
                 val action =
@@ -69,7 +69,7 @@ class FolioReader private constructor(private var context: Context) {
                 }
             } else {
                 val highlightImpl =
-                    intent.getParcelableExtra<HighlightImpl>(HighlightImpl.Companion.INTENT)
+                    intent.getParcelableExtra<HighlightImpl>(HighlightImpl.INTENT)
                 val action =
                     intent.getSerializableExtra(HighLightAction::class.java.name) as HighLightAction?
                 if (onHighlightListener != null && highlightImpl != null && action != null) {
@@ -100,7 +100,7 @@ class FolioReader private constructor(private var context: Context) {
         val localBroadcastManager = LocalBroadcastManager.getInstance(context)
         localBroadcastManager.registerReceiver(
             highlightReceiver,
-            IntentFilter(HighlightImpl.Companion.BROADCAST_EVENT)
+            IntentFilter(HighlightImpl.BROADCAST_EVENT)
         )
         localBroadcastManager.registerReceiver(
             readLocatorReceiver,
@@ -115,7 +115,6 @@ class FolioReader private constructor(private var context: Context) {
     /** @return : pair of author-name and pageCount */
     suspend fun parseEpub(file: File): Pair<String, Int>? {
         return withContext(Dispatchers.IO) {
-            val bookTitle = file.name.removeSuffix(".epub")
             EpubParser().parse(file.path)?.let {
                 val publication = it.publication
                 val authorName = publication.metadata.authors.first().name ?: "-"
@@ -126,12 +125,12 @@ class FolioReader private constructor(private var context: Context) {
     }
 
     fun openBook(assetOrSdcardPath: String?): FolioReader? {
-        val intent = getIntentFromUrl(assetOrSdcardPath, 0)
+        val intent = getIntentFromUrl(assetOrSdcardPath)
         context.startActivity(intent)
         return singleton
     }
 
-    private fun getIntentFromUrl(assetOrSdcardPath: String?, rawId: Int): Intent {
+    private fun getIntentFromUrl(assetOrSdcardPath: String?): Intent {
         val intent = Intent(context, FolioActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra(Config.INTENT_CONFIG, config)
@@ -184,7 +183,7 @@ class FolioReader private constructor(private var context: Context) {
             return singleton!!
         }
 
-        fun initRetrofit(streamerUrl: String?) {
+        fun initRetrofit(streamerUrl: String) {
             if (singleton == null || singleton!!.retrofit != null) return
             val client = OkHttpClient.Builder()
                 .connectTimeout(1, TimeUnit.MINUTES)
