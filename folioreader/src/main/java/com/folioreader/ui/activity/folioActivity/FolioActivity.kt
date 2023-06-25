@@ -1,12 +1,12 @@
 package com.folioreader.ui.activity.folioActivity
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +16,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
@@ -24,40 +25,28 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.folioreader.Config
 import com.folioreader.Constants
 import com.folioreader.FolioReader
-import com.folioreader.model.DisplayUnit
-import com.folioreader.model.locators.ReadLocator
-import com.folioreader.ui.activity.FolioActivityCallback
+import com.folioreader.model.locators.SearchLocator
+import com.folioreader.ui.activity.searchActivity.SearchActivity
 import com.folioreader.ui.base.HtmlUtil
 import com.folioreader.ui.fragment.FolioPageFragment
-import com.folioreader.ui.view.FolioWebView
-import com.folioreader.util.AppUtil
 import com.shamela.apptheme.common.DefaultTopBar
 import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.apptheme.theme.AppFonts
 import com.shamela.apptheme.theme.AppTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.withContext
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.lang.ref.WeakReference
-import java.net.HttpURLConnection
-import java.net.URL
 
 
 class FolioActivity() : ComponentActivity() {
@@ -104,7 +93,18 @@ class FolioActivity() : ComponentActivity() {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Scaffold(
                         topBar = {
-                            DefaultTopBar(title = state.bookTitle) { finish() }
+                            DefaultTopBar(
+                                title = state.bookTitle,
+                                actionIcon = Icons.Outlined.Search,
+                                onActionClick = {
+                                    val intent = Intent(this, SearchActivity::class.java)
+                                    intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, state.publication?.readingOrder?.size?:0)
+                                    searchLauncher.launch(intent)
+                                },
+                                onNavigateBack = {
+                                     finish()
+                                }
+                            )
                         }
                     ) { paddingValues ->
                         state.publication?.let {
@@ -135,7 +135,7 @@ class FolioActivity() : ComponentActivity() {
                                             fontFamilyCssClass = fontFamilyCss,
                                             isNightMode = isDarkTheme,
                                             fontSizeCssClass = fontSizeCss
-                                        ) ,
+                                        ),
                                         mimeType = state.mimeType,
                                     )
                                 }
@@ -147,8 +147,29 @@ class FolioActivity() : ComponentActivity() {
             }
         }
     }
+
+    private val searchLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            data?.let{
+                val searchLocator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    data.getParcelableExtra(EXTRA_SEARCH_ITEM, SearchLocator::class.java)
+                } else {
+                    data.getParcelableExtra(EXTRA_SEARCH_ITEM)
+                }
+                Log.e(LOG_TAG, "data of searchLauncher: ${searchLocator.toString()}", )
+
+            }
+
+        }
+    }
+
+
     private val mMebViewClient = object : WebViewClient() {
-        override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+        override fun shouldInterceptRequest(
+            view: WebView,
+            request: WebResourceRequest,
+        ): WebResourceResponse? {
             if (!request.isForMainFrame
                 && request.url.path != null
                 && request.url.path!!.endsWith("/favicon.ico")
@@ -172,7 +193,7 @@ class FolioActivity() : ComponentActivity() {
     ) {
         AndroidView(factory = { context ->
             WebView(context).apply {
-                settings.javaScriptEnabled  =true
+                settings.javaScriptEnabled = true
                 settings.defaultTextEncodingName = "UTF-8"
                 settings.allowFileAccess = true
                 webViewClient = mMebViewClient
@@ -182,7 +203,6 @@ class FolioActivity() : ComponentActivity() {
             it.loadDataWithBaseURL(url, data, mimeType, "UTF-8", null)
         })
     }
-
 
 
     override fun onNewIntent(intent: Intent) {

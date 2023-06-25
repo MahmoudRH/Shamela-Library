@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layoutDirection="rtl"
-    tools:context="com.folioreader.ui.activity.SearchActivity"
+    tools:context="com.folioreader.ui.activity.searchActivity.SearchActivity"
     tools:menu="@menu/menu_search">
 
     <androidx.recyclerview.widget.RecyclerView

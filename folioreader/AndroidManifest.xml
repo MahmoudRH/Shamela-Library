@@ -33,7 +33,7 @@
             android:exported="false"/>
 
         <activity
-            android:name="com.folioreader.ui.activity.SearchActivity"
+            android:name="com.folioreader.ui.activity.searchActivity.SearchActivity"
             android:launchMode="singleTop"
             android:exported="false">
             <intent-filter>

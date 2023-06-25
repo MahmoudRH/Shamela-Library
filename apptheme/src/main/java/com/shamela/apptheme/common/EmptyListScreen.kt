@@ -28,7 +28,7 @@ fun EmptyListScreen(visibility: Boolean, text:String, modifier: Modifier = Modif
                 .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = text, style = AppFonts.textLarge)
+            Text(text = text, style = AppFonts.textLarge.copy(color = MaterialTheme.colorScheme.onBackground))
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.folioreader.ui.activity
 
+/*import android.app.Activity
 import android.app.SearchManager
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -52,7 +53,6 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     private var spineSize: Int = 0
-    private lateinit var searchUri: Uri
     private lateinit var searchView: FolioSearchView
     private lateinit var actionBar: ActionBar
     private var collapseButtonView: ImageButton? = null
@@ -131,7 +131,6 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
         }
 
         spineSize = intent.getIntExtra(BUNDLE_SPINE_SIZE, 0)
-        searchUri = intent.getParcelableExtra(BUNDLE_SEARCH_URI)!!
 
         searchAdapter = SearchAdapter(this)
         searchAdapter.onItemClickListener = this
@@ -163,9 +162,7 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
         Log.v(LOG_TAG, "-> onNewIntent")
 
         if (intent.hasExtra(BUNDLE_SEARCH_URI)) {
-            searchUri = intent.getParcelableExtra(BUNDLE_SEARCH_URI)!!
         } else {
-            intent.putExtra(BUNDLE_SEARCH_URI, searchUri)
             intent.putExtra(BUNDLE_SPINE_SIZE, spineSize)
         }
 
@@ -323,9 +320,9 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
                 intent.putExtra(SearchAdapter.DATA_BUNDLE, searchAdapterDataBundle)
                 intent.putExtra(FolioActivity.EXTRA_SEARCH_ITEM, viewHolder.searchLocator as Parcelable)
                 intent.putExtra(BUNDLE_SAVE_SEARCH_QUERY, searchView.query)
-                setResult(ResultCode.ITEM_SELECTED.value, intent)
+                setResult(Activity.RESULT_OK, intent)
                 finish()
             }
         }
     }
-}
+}*/

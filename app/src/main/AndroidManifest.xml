@@ -36,7 +36,7 @@
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.folioreader.ui.activity.SearchActivity"
+            android:name="com.folioreader.ui.activity.searchActivity.SearchActivity"
             android:exported="false"
             android:theme="@style/FolioActivityDayTheme"
             android:launchMode="singleTop">

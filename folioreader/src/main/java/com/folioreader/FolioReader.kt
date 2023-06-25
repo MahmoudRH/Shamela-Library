@@ -17,6 +17,7 @@ import com.folioreader.network.R2StreamerApi
 import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -190,12 +191,13 @@ class FolioReader private constructor(private var context: Context) {
                 .readTimeout(1, TimeUnit.MINUTES)
                 .writeTimeout(1, TimeUnit.MINUTES)
                 .build()
+            val gson = GsonBuilder().create()
             singleton!!.retrofit = Retrofit.Builder()
                 .baseUrl(streamerUrl)
                 .addConverterFactory(
                     QualifiedTypeConverterFactory(
                         JacksonConverterFactory.create(),
-                        GsonConverterFactory.create()
+                        GsonConverterFactory.create(gson)
                     )
                 )
                 .client(client)

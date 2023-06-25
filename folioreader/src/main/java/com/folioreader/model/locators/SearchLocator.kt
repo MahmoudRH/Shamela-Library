@@ -26,6 +26,7 @@ class SearchLocator : Locator, Parcelable {
         this.searchItemType = searchItemType
     }
 
+
     constructor(parcel: Parcel) : this(
         Locator(
             parcel.readString()!!,
@@ -48,6 +49,10 @@ class SearchLocator : Locator, Parcelable {
 
     override fun describeContents(): Int {
         return 0
+    }
+
+    override fun toString(): String {
+        return "SearchLocator(primaryContents='$primaryContents', searchItemType=$searchItemType,  href = ${this.href}, title = ${this.title}, text =${this.text.toString()}"
     }
 
     companion object {

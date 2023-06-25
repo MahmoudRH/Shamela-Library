@@ -14,6 +14,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+/*
 class SearchViewModel : ViewModel() {
 
     companion object {
@@ -205,4 +206,4 @@ class SearchViewModel : ViewModel() {
         dataBundle.putParcelableArrayList("DATA", ArrayList(searchLocatorList))
         return dataBundle
     }
-}
+}*/

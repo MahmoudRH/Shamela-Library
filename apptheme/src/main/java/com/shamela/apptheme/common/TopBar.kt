@@ -41,6 +41,37 @@ fun DefaultTopBar(
         }
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DefaultTopBar(
+    title: String,
+    actionIcon: ImageVector? = null,
+    onActionClick: () -> Unit = {},
+    onNavigateBack: () -> Unit ,
+) {
+    CenterAlignedTopAppBar(
+        modifier = Modifier,
+        title = { Text(text = title, style = AppFonts.textLargeBold) },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(15.dp),
+        ),
+        actions = {
+            AnimatedVisibility(visible = actionIcon != null) {
+                IconButton(onClick = onActionClick) {
+                    Icon(actionIcon!!, contentDescription = null)
+                }
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onNavigateBack) {
+                Icon(Icons.Default.ArrowForwardIos, contentDescription = null)
+            }
+        }
+    )
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DefaultTopBar(
