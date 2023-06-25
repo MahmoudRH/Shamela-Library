@@ -51,20 +51,20 @@ object AppFonts {
     private val ReqaFamily = FontFamily(Font(R.font.reqa_regular, FontWeight.Normal))
 
     private val availableFonts = mapOf(
-        DEFAULT to Pair(FontFamily.Default,0),
-        NASKH to Pair(NaskhFamily,R.font.naskh_regular),
-        TAJAWAL to Pair(TajawalFamily,R.font.tajawal_regular),
-        AL_MAJEED to Pair(AlMajeedFamily,R.font.al_majeed_regular),
-        KUFI to Pair(KufiFamily,R.font.kufi_regular),
-        REQA to Pair(ReqaFamily,R.font.reqa_regular),
-        Messiri to Pair(MessiriFamily,R.font.messiri_regular),
+        DEFAULT to Pair(FontFamily.Default, 0),
+        NASKH to Pair(NaskhFamily, R.font.naskh_regular),
+        TAJAWAL to Pair(TajawalFamily, R.font.tajawal_regular),
+        AL_MAJEED to Pair(AlMajeedFamily, R.font.al_majeed_regular),
+        KUFI to Pair(KufiFamily, R.font.kufi_regular),
+        REQA to Pair(ReqaFamily, R.font.reqa_regular),
+        Messiri to Pair(MessiriFamily, R.font.messiri_regular),
     )
 
     fun getAvailableFontFamilies(): Set<String> {
         return availableFonts.keys
     }
 
-    fun getAvailableFontSizes() = setOf("4","2","0","-2","-4")
+    fun getAvailableFontSizes() = setOf("4", "2", "0", "-2", "-4")
 
     fun fontFamilyOf(font: String): FontFamily {
         return if (availableFonts.contains(font)) {
@@ -78,6 +78,7 @@ object AppFonts {
     fun changeFontFamily(newFontFamily: FontFamily) {
         selectedFontFamily.value = newFontFamily
     }
+
     fun changeFontSize(newFontSize: Int) {
         selectedFontSize.value = newFontSize
     }
@@ -86,14 +87,14 @@ object AppFonts {
         TextStyle(
             fontFamily = selectedFontFamily.value,
             fontWeight = FontWeight.Normal,
-            fontSize = (selectedFontSize.value+12).sp
+            fontSize = (selectedFontSize.value + 12).sp
         )
     }
     val textSmallBold by derivedStateOf {
         TextStyle(
             fontFamily = selectedFontFamily.value,
             fontWeight = FontWeight.Bold,
-            fontSize = (selectedFontSize.value+12).sp
+            fontSize = (selectedFontSize.value + 12).sp
         )
     }
 
@@ -101,7 +102,7 @@ object AppFonts {
         TextStyle(
             fontFamily = selectedFontFamily.value,
             fontWeight = FontWeight.Normal,
-            fontSize = (selectedFontSize.value+16).sp
+            fontSize = (selectedFontSize.value + 16).sp
         )
     }
 
@@ -109,7 +110,7 @@ object AppFonts {
         TextStyle(
             fontFamily = selectedFontFamily.value,
             fontWeight = FontWeight.Bold,
-            fontSize = (selectedFontSize.value+16).sp
+            fontSize = (selectedFontSize.value + 16).sp
         )
     }
 
@@ -117,7 +118,7 @@ object AppFonts {
         TextStyle(
             fontFamily = selectedFontFamily.value,
             fontWeight = FontWeight.Normal,
-            fontSize = (selectedFontSize.value+20).sp
+            fontSize = (selectedFontSize.value + 20).sp
         )
     }
 
@@ -125,13 +126,35 @@ object AppFonts {
         TextStyle(
             fontFamily = selectedFontFamily.value,
             fontWeight = FontWeight.Bold,
-            fontSize = (selectedFontSize.value+20).sp
+            fontSize = (selectedFontSize.value + 20).sp
         )
     }
 
+
     fun selectedFontTypeFace(context: Context): Typeface? {
-        val selectedFontRes = availableFonts.entries.find { it.value.first == selectedFontFamily.value }?.value?.second
-        return ResourcesCompat.getFont(context,selectedFontRes?: R.font.naskh_regular)
+        val selectedFontRes =
+            availableFonts.entries.find { it.value.first == selectedFontFamily.value }?.value?.second
+        return ResourcesCompat.getFont(context, selectedFontRes ?: R.font.naskh_regular)
+    }
+
+    fun selectedFontFamilyCssClass(): String {
+        return when (selectedFontFamily.value) {
+            TajawalFamily -> "tajawal"
+            NaskhFamily -> "naskh"
+            ReqaFamily -> "reqa"
+            AlMajeedFamily -> "majeed"
+            KufiFamily -> "kufi"
+            MessiriFamily -> "messiri"
+            else -> ""
+        }
+    }
+
+    fun selectedFontSizeCssClass(): String {
+        val fontSizeClasses =
+            listOf("textSizeOne", "textSizeTwo", "textSizeThree", "textSizeFour", "textSizeFive")
+        val availableFontSizes = getAvailableFontSizes().map { it.toInt() }.sorted()
+        val fontSizeClassMap = availableFontSizes.zip(fontSizeClasses).toMap()
+        return fontSizeClassMap[selectedFontSize.value] ?: "textSizeTwo"
     }
 }
 

@@ -32,7 +32,7 @@ class HtmlTask(private val callback: HtmlTaskCallback) : AsyncTask<String?, Void
             while (bufferedReader.readLine().also { line = it } != null) {
                 stringBuilder.append(line).append('\n')
             }
-            if (stringBuilder.length > 0) stringBuilder.deleteCharAt(stringBuilder.length - 1)
+            if (stringBuilder.isNotEmpty()) stringBuilder.deleteCharAt(stringBuilder.length - 1)
             return stringBuilder.toString()
         } catch (e: IOException) {
             Log.e(TAG, "HtmlTask failed", e)

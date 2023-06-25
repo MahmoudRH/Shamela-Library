@@ -8,6 +8,7 @@ data class FolioActivityState(
     val isTopActivity: Boolean = true,
     val taskImportance: Int = 0,
     val bookTitle: String = "",
+    val htmlData: List<String> = emptyList(),
     val mimeType: String = "",
     val bookPages: List<String> = emptyList(), //list of urls
     val streamUrl: String = "",

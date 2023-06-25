@@ -228,38 +228,53 @@ html.nightMode .highlight_underline {border-bottom: 2px solid rgba(240, 40, 20, 
  * Font classes
  *
  */
-
-@font-face {
-    font-family: 'andada';
-    src: url('file:///android_asset/fonts/andada/Andada-Regular.otf');
-}
-
-@font-face {
-    font-family: 'lato';
-    src: url('file:///android_asset/fonts/lato/Lato-Regular.ttf');
-}
-
-@font-face {
-    font-family: 'lora';
-    src: url('file:///android_asset/fonts/lora/Lora-Regular.ttf');
-}
-
-@font-face {
-    font-family: 'raleway';
-    src: url('file:///android_asset/fonts/raleway/Raleway-Regular.ttf');
-}
-
-.andada {
-     font-family: "andada", sans-serif;
+ @font-face {
+     font-family: 'majeed';
+     src: url('file:///android_asset/fonts/al_majeed_regular.ttf');
  }
-.lato {
-     font-family: "lato", serif;
+ @font-face {
+     font-family: 'kufi';
+     src: url('file:///android_asset/fonts/kufi_regular.ttf');
  }
-.lora {
-     font-family: "lora", serif;
+ @font-face {
+     font-family: 'messiri';
+     src: url('file:///android_asset/fonts/messiri_regular.ttf');
  }
-.raleway {
-     font-family: "raleway", sans-serif;
+ @font-face {
+     font-family: 'naskh';
+     src: url('file:///android_asset/fonts/naskh_regular.ttf');
+ }
+ @font-face {
+     font-family: 'reqa';
+     src: url('file:///android_asset/fonts/reqa_regular.ttf');
+ }
+ @font-face {
+     font-family: 'tajawal';
+     src: url('file:///android_asset/fonts/tajawal_regular.ttf');
+ }
+
+ .majeed {
+     font-family: 'majeed', sans-serif;
+ }
+
+ .kufi {
+     font-family: 'kufi', sans-serif;
+ }
+
+ .messiri {
+     font-family: 'messiri', sans-serif;
+ }
+
+ .naskh {
+     font-family: 'naskh', sans-serif;
+ }
+
+ .reqa {
+     font-family: 'reqa', sans-serif;
+ }
+
+ .tajawal {
+     font-family: 'tajawal', sans-serif;
  }
 
 html.textSizeOne { font-size: 13px !important; }

@@ -7,10 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Rect
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -23,11 +21,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,25 +33,31 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.Config
 import com.folioreader.Constants
 import com.folioreader.FolioReader
-import com.folioreader.R
 import com.folioreader.model.DisplayUnit
-import com.folioreader.model.HighlightImpl
 import com.folioreader.model.locators.ReadLocator
 import com.folioreader.ui.activity.FolioActivityCallback
-import com.folioreader.ui.base.HtmlTask
+import com.folioreader.ui.base.HtmlUtil
 import com.folioreader.ui.fragment.FolioPageFragment
 import com.folioreader.ui.view.FolioWebView
-import com.folioreader.util.HighlightUtil
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewState
+import com.folioreader.util.AppUtil
 import com.shamela.apptheme.common.DefaultTopBar
 import com.shamela.apptheme.common.LoadingScreen
+import com.shamela.apptheme.theme.AppFonts
 import com.shamela.apptheme.theme.AppTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.withContext
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 import java.lang.ref.WeakReference
+import java.net.HttpURLConnection
+import java.net.URL
 
 
 class FolioActivity() : ComponentActivity() {
@@ -70,18 +74,20 @@ class FolioActivity() : ComponentActivity() {
         private const val HIGHLIGHT_ITEM = "highlight_item"
     }
 
+
     @SuppressLint("SetJavaScriptEnabled")
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.e(LOG_TAG, "-> onCreate")
         val epubFilePath = intent.getStringExtra(INTENT_EPUB_SOURCE_PATH) ?: ""
-
+        val isDarkTheme = AppTheme.isDarkTheme(this)
+        val fontFamilyCss = AppFonts.selectedFontFamilyCssClass()
+        val fontSizeCss = AppFonts.selectedFontSizeCssClass()
         LocalBroadcastManager.getInstance(this).registerReceiver(
             closeBroadcastReceiver,
             IntentFilter(FolioReader.ACTION_CLOSE_FOLIOREADER)
         )
-
         setContent {
             LaunchedEffect(
                 key1 = Unit
@@ -106,7 +112,7 @@ class FolioActivity() : ComponentActivity() {
                                 initialPage = 0,
                                 initialPageOffsetFraction = 0f
                             ) {
-                                it.readingOrder.size
+                                state.bookPages.size
                             }
                             HorizontalPager(
                                 state = pagerState,
@@ -121,22 +127,63 @@ class FolioActivity() : ComponentActivity() {
                                             rememberScrollState()
                                         )
                                 ) {
-                                    WebView(
-                                        state = rememberWebViewState(
-                                            url = state.bookPages[currentPageIndex]
-                                        ),
-                                        onCreated = { it.settings.javaScriptEnabled = true },
+                                    CustomWebView(
+                                        url = state.bookPages[currentPageIndex],
+                                        data = HtmlUtil.getHtmlContent(
+                                            context = this@FolioActivity,
+                                            content = state.htmlData[currentPageIndex],
+                                            fontFamilyCssClass = fontFamilyCss,
+                                            isNightMode = isDarkTheme,
+                                            fontSizeCssClass = fontSizeCss
+                                        ) ,
+                                        mimeType = state.mimeType,
                                     )
                                 }
                             }
                         }
-
                     }
                     LoadingScreen(state.isLoading)
                 }
             }
         }
     }
+    private val mMebViewClient = object : WebViewClient() {
+        override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+            if (!request.isForMainFrame
+                && request.url.path != null
+                && request.url.path!!.endsWith("/favicon.ico")
+            ) {
+                try {
+                    return WebResourceResponse("image/png", null, null)
+                } catch (e: Exception) {
+                    Log.e(FolioPageFragment.LOG_TAG, "shouldInterceptRequest failed", e)
+                }
+
+            }
+            return null
+        }
+    }
+
+    @Composable
+    private fun CustomWebView(
+        url: String,
+        data: String,
+        mimeType: String = "application/xhtml+xml",
+    ) {
+        AndroidView(factory = { context ->
+            WebView(context).apply {
+                settings.javaScriptEnabled  =true
+                settings.defaultTextEncodingName = "UTF-8"
+                settings.allowFileAccess = true
+                webViewClient = mMebViewClient
+                loadDataWithBaseURL(url, data, mimeType, "UTF-8", null)
+            }
+        }, update = {
+            it.loadDataWithBaseURL(url, data, mimeType, "UTF-8", null)
+        })
+    }
+
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -216,4 +263,5 @@ class FolioActivity() : ComponentActivity() {
             FolioReader.get().r2StreamerApi = null
         }
     }
+
 }
