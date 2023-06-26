@@ -68,3 +68,7 @@ class SearchLocator : Locator, Parcelable {
         }
     }
 }
+
+fun Locator.toSearchLocator():SearchLocator{
+    return SearchLocator(this,"",SearchItemType.SEARCH_COUNT_ITEM)
+}

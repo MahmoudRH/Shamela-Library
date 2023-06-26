@@ -228,54 +228,103 @@ html.nightMode .highlight_underline {border-bottom: 2px solid rgba(240, 40, 20, 
  * Font classes
  *
  */
- @font-face {
-     font-family: 'majeed';
-     src: url('file:///android_asset/fonts/al_majeed_regular.ttf');
- }
- @font-face {
-     font-family: 'kufi';
-     src: url('file:///android_asset/fonts/kufi_regular.ttf');
- }
- @font-face {
-     font-family: 'messiri';
-     src: url('file:///android_asset/fonts/messiri_regular.ttf');
- }
- @font-face {
-     font-family: 'naskh';
-     src: url('file:///android_asset/fonts/naskh_regular.ttf');
- }
- @font-face {
-     font-family: 'reqa';
-     src: url('file:///android_asset/fonts/reqa_regular.ttf');
- }
- @font-face {
-     font-family: 'tajawal';
-     src: url('file:///android_asset/fonts/tajawal_regular.ttf');
- }
+@font-face {
+    font-family: 'amiri';
+    src: url('file:///android_asset/fonts/amiri_regular.ttf');
+}
+@font-face {
+    font-family: 'flat';
+    src: url('file:///android_asset/fonts/flat_regular.ttf');
+}
+@font-face {
+    font-family: 'gulzar';
+    src: url('file:///android_asset/fonts/gulzar_regular.ttf');
+}
+@font-face {
+    font-family: 'jozoor';
+    src: url('file:///android_asset/fonts/jozoor_regular.ttf');
+}
+@font-face {
+    font-family: 'kitab';
+    src: url('file:///android_asset/fonts/kitab_regular.ttf');
+}
 
- .majeed {
-     font-family: 'majeed', sans-serif;
- }
+@font-face {
+    font-family: 'kufi';
+    src: url('file:///android_asset/fonts/kufi_regular.ttf');
+}
+@font-face {
+    font-family: 'messiri';
+    src: url('file:///android_asset/fonts/messiri_regular.ttf');
+}
+@font-face {
+    font-family: 'naskh';
+    src: url('file:///android_asset/fonts/naskh_regular.ttf');
+}
+@font-face {
+    font-family: 'naskh_2';
+    src: url('file:///android_asset/fonts/naskh_2_regular.ttf');
+}
+@font-face {
+    font-family: 'naskh_3';
+    src: url('file:///android_asset/fonts/naskh_3_regular.ttf');
+}
+@font-face {
+    font-family: 'reqa';
+    src: url('file:///android_asset/fonts/reqa_regular.ttf');
+}
+@font-face {
+    font-family: 'tajawal';
+    src: url('file:///android_asset/fonts/tajawal_regular.ttf');
+}
 
- .kufi {
-     font-family: 'kufi', sans-serif;
- }
+.amiri {
+    font-family: 'amiri', sans-serif;
+}
 
- .messiri {
-     font-family: 'messiri', sans-serif;
- }
+.flat {
+    font-family: 'flat', sans-serif;
+}
 
- .naskh {
-     font-family: 'naskh', sans-serif;
- }
+.gulzar {
+    font-family: 'gulzar', sans-serif;
+}
 
- .reqa {
-     font-family: 'reqa', sans-serif;
- }
+.jozoor {
+    font-family: 'jozoor', sans-serif;
+}
 
- .tajawal {
-     font-family: 'tajawal', sans-serif;
- }
+.kitab {
+    font-family: 'kitab', sans-serif;
+}
+
+.kufi {
+    font-family: 'kufi', sans-serif;
+}
+
+.messiri {
+    font-family: 'messiri', sans-serif;
+}
+
+.naskh {
+    font-family: 'naskh', sans-serif;
+}
+
+.naskh_2 {
+    font-family: 'naskh_2', sans-serif;
+}
+
+.naskh_3 {
+    font-family: 'naskh_3', sans-serif;
+}
+
+.reqa {
+    font-family: 'reqa', sans-serif;
+}
+
+.tajawal {
+    font-family: 'tajawal', sans-serif;
+}
 
 html.textSizeOne { font-size: 13px !important; }
 html.textSizeTwo { font-size: 15px !important; }

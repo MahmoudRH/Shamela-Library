@@ -1,6 +1,9 @@
 package com.folioreader.ui.activity.searchActivity
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -40,6 +43,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.shamela.apptheme.common.EmptyListScreen
 import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.apptheme.theme.AppFonts
@@ -123,8 +127,13 @@ class SearchActivity : ComponentActivity() {
 
                                 }
                                 items(state.searchResults) {
-                                    it.text?.let { locator ->
-                                        SearchResult(locator)
+                                    it.text?.let { locatorText ->
+                                        SearchResult(locatorText){
+                                            val intent = Intent()
+                                            intent.putExtra(FolioActivity.EXTRA_SEARCH_ITEM, it as Parcelable)
+                                            setResult(Activity.RESULT_OK, intent)
+                                            finish()
+                                        }
                                     }
                                 }
                             }
@@ -134,8 +143,6 @@ class SearchActivity : ComponentActivity() {
                         visibility = state.isListEmpty,
                         text = "لم يتم العثور على أي نتائج..",
                     )
-//                    LoadingScreen(visibility = state.isLoading)
-
                 }
 
                 DisposableEffect(Unit) {
@@ -147,7 +154,7 @@ class SearchActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun SearchResult(locator: LocatorText) {
+    private fun SearchResult(locator: LocatorText, onItemClicked:()->Unit) {
         val text = buildAnnotatedString {
             val before = locator.before
             val highlightedText = locator.hightlight
@@ -169,7 +176,7 @@ class SearchActivity : ComponentActivity() {
 
         Column(
             modifier = Modifier
-                .clickable { /* Handle click event */ }
+                .clickable { onItemClicked() }
         ) {
             Text(
                 text = text,

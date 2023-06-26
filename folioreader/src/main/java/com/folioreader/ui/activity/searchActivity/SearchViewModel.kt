@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.folioreader.FolioReader
+import com.folioreader.model.locators.SearchLocator
+import com.folioreader.model.locators.toSearchLocator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -40,11 +42,7 @@ class SearchViewModel : ViewModel() {
                             searchJob = viewModelScope.launch {
                                 withContext(Dispatchers.IO) {
                                     (0 until spineSize).forEach { page ->
-                                        val resultsList = it.search(page, query)
-                                        Log.e(
-                                            "SearchViewModel",
-                                            "onEven(Search): resultsList: $resultsList ",
-                                        )
+                                        val resultsList = it.search(page, query).map { it.toSearchLocator() }
                                         _state.update {
                                             it.copy(
                                                 searchResults = it.searchResults + resultsList,

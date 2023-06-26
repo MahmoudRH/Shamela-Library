@@ -92,7 +92,7 @@ class FolioWebView : WebView {
     private lateinit var parentFragment: FolioPageFragment
 
     private var actionMode: ActionMode? = null
-    private var textSelectionCb: TextSelectionCb? = null
+    private var textSelectionCallback: TextSelectionCallback? = null
     private var textSelectionCb2: TextSelectionCb2? = null
     private var selectionRect = Rect()
     private val popupRect = Rect()
@@ -438,7 +438,7 @@ class FolioWebView : WebView {
         fun fadeInSeekBarIfInvisible()
     }
 
-    private inner class TextSelectionCb : ActionMode.Callback {
+    private inner class TextSelectionCallback : ActionMode.Callback {
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             Log.d(LOG_TAG, "-> onCreateActionMode")
@@ -508,8 +508,8 @@ class FolioWebView : WebView {
     override fun startActionMode(callback: Callback): ActionMode {
         Log.d(LOG_TAG, "-> startActionMode")
 
-        textSelectionCb = TextSelectionCb()
-        actionMode = super.startActionMode(textSelectionCb)
+        textSelectionCallback = TextSelectionCallback()
+        actionMode = super.startActionMode(textSelectionCallback)
         actionMode?.finish()
 
         /*try {

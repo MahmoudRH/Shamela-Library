@@ -22,6 +22,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -32,10 +33,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.Constants
 import com.folioreader.FolioReader
@@ -47,22 +50,22 @@ import com.shamela.apptheme.common.DefaultTopBar
 import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.apptheme.theme.AppFonts
 import com.shamela.apptheme.theme.AppTheme
+import kotlinx.coroutines.launch
 
 
-class FolioActivity() : ComponentActivity() {
+class FolioActivity : ComponentActivity() {
     private val viewModel: FolioActivityViewModel by viewModels()
+    private var searchResultToBeHighlighted = ""
+
+    @OptIn(ExperimentalFoundationApi::class)
+    lateinit var pagerState: PagerState
 
     companion object {
         const val LOG_TAG = "FolioActivityCompose"
         const val INTENT_EPUB_SOURCE_PATH = "com.folioreader.epub_asset_path"
         const val EXTRA_READ_LOCATOR = "com.folioreader.extra.READ_LOCATOR"
-        private const val BUNDLE_READ_LOCATOR_CONFIG_CHANGE = "BUNDLE_READ_LOCATOR_CONFIG_CHANGE"
-        private const val BUNDLE_DISTRACTION_FREE_MODE = "BUNDLE_DISTRACTION_FREE_MODE"
         const val EXTRA_SEARCH_ITEM = "EXTRA_SEARCH_ITEM"
-        const val ACTION_SEARCH_CLEAR = "ACTION_SEARCH_CLEAR"
-        private const val HIGHLIGHT_ITEM = "highlight_item"
     }
-
 
     @SuppressLint("SetJavaScriptEnabled")
     @OptIn(ExperimentalFoundationApi::class)
@@ -98,28 +101,35 @@ class FolioActivity() : ComponentActivity() {
                                 actionIcon = Icons.Outlined.Search,
                                 onActionClick = {
                                     val intent = Intent(this, SearchActivity::class.java)
-                                    intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, state.publication?.readingOrder?.size?:0)
+                                    intent.putExtra(
+                                        SearchActivity.BUNDLE_SPINE_SIZE,
+                                        state.publication?.readingOrder?.size ?: 0
+                                    )
                                     searchLauncher.launch(intent)
                                 },
                                 onNavigateBack = {
-                                     finish()
+                                    finish()
                                 }
                             )
                         }
                     ) { paddingValues ->
                         state.publication?.let {
-                            val pagerState = rememberPagerState(
+                            pagerState = rememberPagerState(
                                 initialPage = 0,
                                 initialPageOffsetFraction = 0f
                             ) {
                                 state.bookPages.size
                             }
+                            LaunchedEffect(key1 = Unit, block = {
+                                snapshotFlow { pagerState.currentPage }.collect {
+                                    viewModel.onEvent(FolioActivityEvent.OnChangeSelectedPage(it))
+                                }
+                            })
                             HorizontalPager(
                                 state = pagerState,
                                 contentPadding = paddingValues,
                                 modifier = Modifier.fillMaxSize(),
-
-                                ) { currentPageIndex ->
+                            ) { currentPageIndex ->
                                 Column(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -148,20 +158,38 @@ class FolioActivity() : ComponentActivity() {
         }
     }
 
-    private val searchLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-            data?.let{
-                val searchLocator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    data.getParcelableExtra(EXTRA_SEARCH_ITEM, SearchLocator::class.java)
-                } else {
-                    data.getParcelableExtra(EXTRA_SEARCH_ITEM)
+    @OptIn(ExperimentalFoundationApi::class)
+    private val searchLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                data?.let {
+                    val searchLocator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        data.getParcelableExtra(EXTRA_SEARCH_ITEM, SearchLocator::class.java)
+                    } else {
+                        data.getParcelableExtra(EXTRA_SEARCH_ITEM)
+                    }
+                    Log.e(LOG_TAG, "data of searchLauncher: ${searchLocator.toString()}")
+                    lifecycleScope.launch {
+                        searchLocator?.let {
+                            val page = viewModel.state.value.bookPages.indexOfFirst {
+                                it.contains(searchLocator.href)
+                            }
+                            pagerState.scrollToPage(page)
+                            searchResultToBeHighlighted = highlightSearchLocator(searchLocator)
+                            Log.e(
+                                LOG_TAG,
+                                "searchResultToBeHighlighted:${searchResultToBeHighlighted} ",
+                            )
+                        }
+                    }
                 }
-                Log.e(LOG_TAG, "data of searchLauncher: ${searchLocator.toString()}", )
 
             }
-
         }
+
+    private fun highlightSearchLocator(searchLocator: SearchLocator): String {
+        return "javascript:highlightSearchLocator('${searchLocator.locations.cfi}')"
     }
 
 
@@ -183,8 +211,24 @@ class FolioActivity() : ComponentActivity() {
             }
             return null
         }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            super.onPageFinished(view, url)
+            view?.let{
+                Log.e("MAH ", "onPageFinished:url($url) ")
+                searchResultToBeHighlighted.let {
+                    if (it.isNotBlank()) {
+                        Log.e(LOG_TAG, "onPageFinished:webView.loadUrl($it) ")
+                        view.loadUrl(it)
+                        searchResultToBeHighlighted = ""
+                    }
+                }
+            }
+
+        }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Composable
     private fun CustomWebView(
         url: String,
@@ -200,7 +244,7 @@ class FolioActivity() : ComponentActivity() {
                 loadDataWithBaseURL(url, data, mimeType, "UTF-8", null)
             }
         }, update = {
-            it.loadDataWithBaseURL(url, data, mimeType, "UTF-8", null)
+
         })
     }
 
