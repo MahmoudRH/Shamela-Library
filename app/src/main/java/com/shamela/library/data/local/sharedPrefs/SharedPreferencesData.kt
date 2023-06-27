@@ -8,13 +8,13 @@ class SharedPreferencesData(private val context: Context) : UserPrefsDataSource 
     override fun getUserPrefs(): UserPrefs {
         val sharedPrefs = context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
         var userPrefs = UserPrefs()
-        sharedPrefs.getString(preferredTheme, null)?.let {
+        sharedPrefs.getString(preferredTheme, "تلقائي")?.let {
             userPrefs = userPrefs.copy(theme = it)
         }
-        sharedPrefs.getString(preferredFontFamily, null)?.let {
+        sharedPrefs.getString(preferredFontFamily, "خط تَجَوَّل")?.let {
             userPrefs = userPrefs.copy(fontFamily = it)
         }
-        sharedPrefs.getInt(preferredFontSize, 0).let {
+        sharedPrefs.getInt(preferredFontSize, -2).let {
             userPrefs = userPrefs.copy(fontSize = it)
         }
         sharedPrefs.getString(preferredColorScheme, null)?.let {

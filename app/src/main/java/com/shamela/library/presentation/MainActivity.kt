@@ -1,13 +1,27 @@
 package com.shamela.library.presentation
 
+import android.Manifest
+import android.app.AlertDialog
 import android.app.DownloadManager
+import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.folioreader.Constants
 import com.shamela.apptheme.theme.AppFonts
 import com.shamela.apptheme.theme.AppTheme
 import com.shamela.library.data.local.sharedPrefs.SharedPreferencesData
@@ -20,11 +34,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val downloadCompleteReceiver = DownloadCompleteReceiver()
     val userPreferences = SharedPreferencesData(this)
-    private companion object{
-        //PERMISSION request constant, assign any value
-        private const val STORAGE_PERMISSION_CODE = 100
-        private const val TAG = "PERMISSION_TAG"
-    }
+    private val permissionState = mutableStateOf(false)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ReadUserPreferences(userPreferences).invoke().apply {
@@ -43,83 +53,73 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme.ShamelaLibraryTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    HomeHostScreen()
+                   if( isPermissionGranted() || permissionState.value) {
+                       HomeHostScreen()
+                   }else{
+                       showPermissionDialog()
+                   }
                 }
             }
         }
     }
-/*    private fun requestPermission(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+    private fun isPermissionGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            //Android is 11(R) or above
+            Environment.isExternalStorageManager()
+        } else {
+            ContextCompat.checkSelfPermission(
+                this@MainActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private fun requestPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             //Android is 11(R) or above
             try {
-                Log.d(TAG, "requestPermission: try")
                 val intent = Intent()
                 intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
                 val uri = Uri.fromParts("package", this.packageName, null)
                 intent.data = uri
                 storageActivityResultLauncher.launch(intent)
-            }
-            catch (e: Exception){
-                Log.e(TAG, "requestPermission: ", e)
+            } catch (e: Exception) {
                 val intent = Intent()
                 intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
                 storageActivityResultLauncher.launch(intent)
             }
-        }
-        else{
+        } else {
             //Android is below 11(R)
-            ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE),
-                STORAGE_PERMISSION_CODE
+            ActivityCompat.requestPermissions(
+                this@MainActivity,
+                Constants.writeExternalStoragePerms,
+                Constants.WRITE_EXTERNAL_STORAGE_REQUEST
             )
         }
     }
-    private val storageActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-        Log.d(TAG, "storageActivityResultLauncher: ")
-        //here we will handle the result of our intent
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-            //Android is 11(R) or above
-            if (Environment.isExternalStorageManager()){
-                //Manage External Storage Permission is granted
-                Log.d(TAG, "storageActivityResultLauncher: Manage External Storage Permission is granted")
-            }
-            else{
-                //Manage External Storage Permission is denied....
-                Log.d(TAG, "storageActivityResultLauncher: Manage External Storage Permission is denied....")
-                toast("Manage External Storage Permission is denied....")
-            }
-        }
-        else{
-            //Android is below 11(R)
-        }
-    }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == STORAGE_PERMISSION_CODE){
-            if (grantResults.isNotEmpty()){
-                //check each permission if granted or not
-                val write = grantResults[0] == PackageManager.PERMISSION_GRANTED
-                val read = grantResults[1] == PackageManager.PERMISSION_GRANTED
-                if (write && read){
-                    //External Storage Permission granted
-                    Log.d(TAG, "onRequestPermissionsResult: External Storage Permission granted")
-                }
-                else{
-                    //External Storage Permission denied...
-                    Log.d(TAG, "onRequestPermissionsResult: External Storage Permission denied...")
-                    toast("External Storage Permission denied...")
+    private val storageActivityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            //here we will handle the result of our intent
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    Toast.makeText(
+                        this,
+                        "تم منح إذن الوصول للملفات....",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    permissionState.value = true
+                    //Do Whatever you want
+                } else {
+                    //Manage External Storage Permission is denied....
+                    Toast.makeText(
+                        this,
+                        "تم رفض إذن الوصول للملفات....",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
-    }
-    private fun toast(message: String){
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
 
 
     private fun showPermissionDialog() {
@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
             .create()
         dialog.show()
     }
-*/
+
     override fun onStart() {
         super.onStart()
         val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
