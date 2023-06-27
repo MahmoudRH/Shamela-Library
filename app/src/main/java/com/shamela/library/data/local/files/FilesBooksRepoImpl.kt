@@ -77,14 +77,22 @@ object FilesBooksRepoImpl : BooksRepository {
         }
     }
 
-    override fun searchBooksByName(query: String): Flow<Book> = channelFlow {
+    override fun searchBooksByName(categoryName: String, query: String): Flow<Book> = channelFlow {
         Log.e(TAG, "search Books By Name")
         openShamelaFolder { categories ->
-            categories?.forEach { folder ->
-                val categoryName = folder.name
-                val bookFile = folder.listFiles()?.find { it.name.contains(query) }
-                bookFile?.let {
-                    parseBook(it, categoryName)?.let { book -> send(book) }
+            if (categoryName == "all"){
+                categories?.forEach {folder->
+                    val bookFile = folder.listFiles()?.find { it.name.contains(query) }
+                    bookFile?.let {
+                        parseBook(it, categoryName)?.let { book -> send(book) }
+                    }
+                }
+            }else{
+                categories?.find { it.name.contains(categoryName) }?.let{folder->
+                    val bookFile = folder.listFiles()?.find { it.name.contains(query) }
+                    bookFile?.let {
+                        parseBook(it, categoryName)?.let { book -> send(book) }
+                    }
                 }
             }
         }

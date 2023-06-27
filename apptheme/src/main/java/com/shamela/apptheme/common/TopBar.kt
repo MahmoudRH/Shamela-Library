@@ -34,8 +34,10 @@ fun DefaultTopBar(
         ),
         actions = {
             AnimatedVisibility(visible = actionIcon != null) {
-                IconButton(onClick = onActionClick) {
-                    Icon(actionIcon!!, contentDescription = null)
+                actionIcon?.let {
+                    IconButton(onClick = onActionClick) {
+                        Icon(it, contentDescription = null)
+                    }
                 }
             }
         }
@@ -48,7 +50,7 @@ fun DefaultTopBar(
     title: String,
     actionIcon: ImageVector? = null,
     onActionClick: () -> Unit = {},
-    onNavigateBack: () -> Unit ,
+    onNavigateBack: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         modifier = Modifier,
@@ -76,7 +78,7 @@ fun DefaultTopBar(
 @Composable
 fun DefaultTopBar(
     title: String,
-    onNavigateBack: () -> Unit ,
+    onNavigateBack: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         modifier = Modifier.shadow(elevation = 4.dp),

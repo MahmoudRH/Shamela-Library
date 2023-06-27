@@ -1,7 +1,7 @@
 package com.shamela.library.presentation.screens.library
 
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,6 +21,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,14 +35,27 @@ import com.shamela.apptheme.theme.AppFonts
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.SectionItem
+import com.shamela.library.presentation.navigation.HomeHostDestination
+import com.shamela.library.presentation.navigation.Library
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel(),
     navigateToSectionBooksScreen: (categoryName: String, type: String) -> Unit,
+    navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
 ) {
+    LaunchedEffect(key1 = Unit, block = {
+        Library.buttons.onEach {
+            if (it) {
+                Log.e("Mah ", "LibraryScreen: Search is clicked")
+                navigateToSearchResultsScreen("all","local")
+            }
+        }.launchIn(this)
+    })
     val libraryState = viewModel.libraryState.collectAsState().value
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -69,14 +83,14 @@ fun LibraryScreen(
             }
 
             ViewType.Books -> {
-                        items( libraryState.books.values.toList(), key = { it.id }) {
-                            BookItem(modifier = Modifier
-                                .clickable {
-                                    FilesBooksRepoImpl.openEpub(it)
-                                }
-                                .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
-                            Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                items(libraryState.books.values.toList(), key = { it.id }) {
+                    BookItem(modifier = Modifier
+                        .clickable {
+                            FilesBooksRepoImpl.openEpub(it)
                         }
+                        .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
+                    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                }
             }
         }
     }

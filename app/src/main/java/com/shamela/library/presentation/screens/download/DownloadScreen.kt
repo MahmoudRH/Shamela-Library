@@ -1,6 +1,7 @@
 package com.shamela.library.presentation.screens.download
 
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,15 +25,29 @@ import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
 import com.shamela.library.presentation.common.SectionItem
+import com.shamela.library.presentation.navigation.Download
+import com.shamela.library.presentation.navigation.Library
 import com.shamela.library.presentation.screens.library.ViewType
 import com.shamela.library.presentation.screens.library.ViewTypeSection
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DownloadScreen(
     viewModel: DownloadViewModel = hiltViewModel(),
     navigateToSectionBooksScreen: (categoryName: String, type: String) -> Unit,
-) {
+    navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
+
+    ) {
+    LaunchedEffect(key1 = Unit, block = {
+        Download.buttons.onEach {
+            if (it) {
+                Log.e("Mah ", "DownloadScreen: Search is clicked")
+                navigateToSearchResultsScreen("all", "remote")
+            }
+        }.launchIn(this)
+    })
     val downloadState = viewModel.downloadState.collectAsState().value
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -60,7 +76,8 @@ fun DownloadScreen(
             ViewType.Books -> {
 
 
-                val booksList = downloadState.books.sortedBy { it.title }.groupBy { it.title.first() }
+                val booksList =
+                    downloadState.books.sortedBy { it.title }.groupBy { it.title.first() }
                 booksList.forEach { (initial, books) ->
                     stickyHeader {
                         CharacterHeader(

@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,10 +31,17 @@ fun SectionBooksScreen(
     viewModel: SectionBooksViewModel = hiltViewModel(),
     categoryName: String,
     navigateBack: () -> Unit,
+    navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
 ) {
     val sectionBooksState = viewModel.sectionBooksState.collectAsState().value
     Column {
-        DefaultTopBar(title = categoryName, navigateBack)
+        DefaultTopBar(
+            title = categoryName,
+            onNavigateBack = navigateBack,
+            actionIcon = Icons.Outlined.Search,
+            onActionClick = {
+                navigateToSearchResultsScreen(categoryName,sectionBooksState.type)
+            })
         LazyColumn(
             Modifier
                 .fillMaxSize()
@@ -41,20 +49,25 @@ fun SectionBooksScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
-            items(sectionBooksState.books.values.toList(), key = {it.id}) { currentBook ->
-                when(sectionBooksState.type){
-                    "local"->{
+            items(sectionBooksState.books.values.toList(), key = { it.id }) { currentBook ->
+                when (sectionBooksState.type) {
+                    "local" -> {
                         BookItem(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             item = currentBook
                         )
                     }
-                    "remote"->{
+
+                    "remote" -> {
                         BookItem(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             icon = {
                                 IconButton(onClick = {
-                                    viewModel.onEvent(SectionBooksEvent.OnClickDownloadBook(currentBook))
+                                    viewModel.onEvent(
+                                        SectionBooksEvent.OnClickDownloadBook(
+                                            currentBook
+                                        )
+                                    )
                                 }) {
                                     Icon(
                                         imageVector = Icons.Outlined.Download,

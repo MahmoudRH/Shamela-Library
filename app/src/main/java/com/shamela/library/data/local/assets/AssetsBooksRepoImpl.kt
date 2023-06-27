@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -28,7 +29,7 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
     private val gson = Gson()
     private val categoryBookCounts: MutableMap<String, Int> = mutableMapOf()
     private val storage: FirebaseStorage = FirebaseStorage.getInstance()
-     suspend fun _getCategories(): List<Category> {
+    suspend fun _getCategories(): List<Category> {
         return withContext(Dispatchers.IO) {
             try {
                 val categoryNames = context.assets.list("categories")
@@ -44,6 +45,7 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
             }
         }
     }
+
     private suspend fun _getBooksByCategory(categoryName: String): List<Book> {
         return withContext(Dispatchers.IO) {
             try {
@@ -61,6 +63,7 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
             }
         }
     }
+
     private suspend fun _getsAllBooks(): List<Book> {
         return withContext(Dispatchers.IO) {
             try {
@@ -79,14 +82,21 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
     }
 
     override fun getCategories(): Flow<Category> = flow {
-            emitAll(_getCategories().asFlow())
+        emitAll(_getCategories().asFlow())
     }
+
     override fun getBooksByCategory(categoryName: String): Flow<Book> = flow {
         emitAll(_getBooksByCategory(categoryName).asFlow())
     }
-    override fun searchBooksByName(query: String): Flow<Book> {
-        return getAllBooks().filter { it.title.contains(query) }
+
+    override fun searchBooksByName(categoryName: String, query: String): Flow<Book> {
+        return if (categoryName == "all") getAllBooks()
+            .filter { it.title.contains(query) }
+        else {
+            getBooksByCategory(categoryName).filter { it.title.contains(query) }
+        }
     }
+
     override fun getAllBooks(): Flow<Book> = flow {
         emitAll(_getsAllBooks().asFlow())
     }

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.shamela.apptheme.common.EmptyListScreen
 import com.shamela.apptheme.common.LoadingScreen
+import com.shamela.apptheme.common.SearchTopBar
 import com.shamela.apptheme.theme.AppFonts
 import com.shamela.apptheme.theme.AppTheme
 import org.readium.r2.shared.LocatorText
@@ -166,7 +167,7 @@ class SearchActivity : ComponentActivity() {
                 style = SpanStyle(
                     fontSize = (AppFonts.textNormal.fontSize.value + 4f).sp,
                     background = Color(0xfff8ff00),
-                    color = Color.Blue
+                    color = Color.Black
                 )
             ) {
                 append("$highlightedText")
@@ -187,96 +188,6 @@ class SearchActivity : ComponentActivity() {
             )
             Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
         }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun SearchTopBar(
-        onNavigateBack: () -> Unit = {},
-        value: String,
-        onValueChanged: (String) -> Unit,
-        onClickSearch: (String) -> Unit = {},
-        onClickClear: () -> Unit = {},
-        hint: String,
-        focusRequester: FocusRequester,
-    ) {
-        TopAppBar(
-            title = {
-                SearchTextField(
-                    value,
-                    onValueChanged,
-                    hint = hint,
-                    focusRequester = focusRequester,
-                    onSearch = { onClickSearch(value) }
-                )
-            },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
-            ),
-            navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.Default.ArrowForwardIos, contentDescription = null)
-                }
-            },
-            actions = {
-                AnimatedVisibility(
-                    value.trim().isNotEmpty(),
-                    enter = fadeIn(), exit = fadeOut()
-                ) {
-                    IconButton(
-                        onClick = onClickClear
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Cancel,
-                            contentDescription = "مسح"
-                        )
-                    }
-                }
-            }
-        )
-    }
-
-    @OptIn(ExperimentalComposeUiApi::class)
-    @Composable
-    private fun SearchTextField(
-        value: String,
-        onValueChanged: (String) -> Unit,
-        hint: String,
-        focusRequester: FocusRequester,
-        onSearch: () -> Unit = {},
-    ) {
-        val keyboardController = LocalSoftwareKeyboardController.current
-        BasicTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester)
-                .onFocusChanged {
-                    if (it.isFocused)
-                        keyboardController?.show()
-                },
-            value = value,
-            onValueChange = onValueChanged,
-            singleLine = true,
-            decorationBox = { innerTextField ->
-                AnimatedVisibility(
-                    value.isEmpty(),
-                    enter = fadeIn(), exit = fadeOut()
-                ) {
-                    Text(text = hint, color = Color.Gray, fontSize = 18.sp)
-                }
-                innerTextField()
-            },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = {
-                keyboardController?.hide()
-                onSearch()
-            }),
-            textStyle = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 18.sp
-            ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
-        )
     }
 }
 

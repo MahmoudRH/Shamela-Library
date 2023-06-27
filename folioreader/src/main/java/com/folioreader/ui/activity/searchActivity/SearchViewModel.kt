@@ -34,7 +34,7 @@ class SearchViewModel : ViewModel() {
 
             is SearchEvent.Search -> {
                 streamerApi?.let {
-                    state.value.searchQuery.trim().let { query ->
+                    event.query.trim().let { query ->
                         if (query.isNotBlank()) {
                             _state.update { it.copy(isLoading = true, searchResults = emptyList()) }
                             searchJob?.cancel()
@@ -49,7 +49,6 @@ class SearchViewModel : ViewModel() {
                                                 searchProgress = ((page + 1f) / spineSize)
                                             )
                                         }
-
                                     }
                                     _state.update {
                                         it.copy(
