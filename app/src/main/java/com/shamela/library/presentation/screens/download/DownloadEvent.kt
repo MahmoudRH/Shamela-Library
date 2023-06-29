@@ -6,7 +6,8 @@ import com.shamela.library.presentation.screens.library.ViewType
 
 sealed class DownloadEvent{
     class OnChangeViewType(val newViewType: ViewType): DownloadEvent()
-    object LoadUserBooksAndSections: DownloadEvent()
+    object LoadUserBooks: DownloadEvent()
+    object LoadUserSections: DownloadEvent()
     class OnClickDownloadBook(val book: Book):DownloadEvent()
 
 }

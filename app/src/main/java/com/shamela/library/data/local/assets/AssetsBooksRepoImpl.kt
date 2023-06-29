@@ -20,6 +20,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStreamReader
+import java.util.UUID
 import javax.inject.Qualifier
 
 @Qualifier
@@ -56,7 +57,11 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
                     gson.fromJson(InputStreamReader(inputStream), Array<BookDto>::class.java)
                 inputStream.close()
                 books.toList()
-                    .map { Book(it.id, it.title, it.author, it.pageCount, categoryNameNoSuffix) }
+                    .map { book ->
+                        val uuidName = book.title + categoryNameNoSuffix
+                        val bookID = UUID.nameUUIDFromBytes(uuidName.toByteArray()).toString()
+                        Book(bookID, book.title, book.author, book.pageCount, categoryNameNoSuffix)
+                    }
             } catch (e: IOException) {
                 Log.e(TAG, "Error: getBooksByCategory($categoryName). ${e.message}")
                 emptyList()
@@ -64,22 +69,22 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
         }
     }
 
-    private suspend fun _getsAllBooks(): List<Book> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val categoryNames = context.assets.list("categories") ?: emptyArray()
-                val allBooks = mutableListOf<Book>()
-                for (categoryName in categoryNames) {
-                    val books = _getBooksByCategory(categoryName)
-                    allBooks.addAll(books)
-                }
-                allBooks
-            } catch (e: IOException) {
-                Log.e(TAG, "Error: getAllBooks. ${e.message}")
-                emptyList()
-            }
-        }
-    }
+//    private suspend fun _getsAllBooks(): List<Book> {
+//        return withContext(Dispatchers.IO) {
+//            try {
+//                val categoryNames = context.assets.list("categories") ?: emptyArray()
+//                val allBooks = mutableListOf<Book>()
+//                for (categoryName in categoryNames) {
+//                    val books = _getBooksByCategory(categoryName)
+//                    allBooks.addAll(books)
+//                }
+//                allBooks
+//            } catch (e: IOException) {
+//                Log.e(TAG, "Error: getAllBooks. ${e.message}")
+//                emptyList()
+//            }
+//        }
+//    }
 
     override fun getCategories(): Flow<Category> = flow {
         emitAll(_getCategories().asFlow())
@@ -98,7 +103,16 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
     }
 
     override fun getAllBooks(): Flow<Book> = flow {
-        emitAll(_getsAllBooks().asFlow())
+        try {
+            val categoryNames = context.assets.list("categories") ?: emptyArray()
+            categoryNames.forEach { category ->
+                val books = _getBooksByCategory(category).asFlow()
+                emitAll(books)
+            }
+
+        } catch (e: IOException) {
+            Log.e(TAG, "Error: getAllBooks. ${e.message}")
+        }
     }
 
     override suspend fun getDownloadLink(categoryName: String, bookName: String): Uri? {

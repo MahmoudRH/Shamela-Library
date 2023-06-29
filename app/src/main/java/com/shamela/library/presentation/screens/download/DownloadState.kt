@@ -7,7 +7,6 @@ import com.shamela.library.presentation.screens.library.ViewType
 
 data class DownloadState(
     val viewType: ViewType = ViewType.Sections,
-    val isLoading:Boolean = true,
     val books:List<Book> = emptyList(),
     val sections:List<Category> = emptyList(),
 )

@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,12 +47,6 @@ fun SearchResultsScreen(
             onClickClear = { viewModel.onEvent(SearchResultsEvent.ClearSearchQuery) },
             onClickSearch = { query -> viewModel.onEvent(SearchResultsEvent.Search(query)) },
         )
-        /*        AnimatedVisibility(visible = state.isLoading) {
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth(),
-                        progress = state.searchProgress,
-                    )
-                }*/
         Box(
             Modifier
                 .fillMaxSize()
@@ -61,38 +55,6 @@ fun SearchResultsScreen(
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                /*   item {
-                       this@Column.AnimatedVisibility(visible = state.searchResults.isNotEmpty() || state.isLoading) {
-                           Row(
-                               modifier = Modifier
-                                   .fillMaxWidth()
-                                   .background(
-                                       MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                           0.2.dp
-                                       )
-                                   )
-                                   .padding(horizontal = 16.dp, vertical = 12.dp),
-                               verticalAlignment = Alignment.CenterVertically,
-                               horizontalArrangement = Arrangement.SpaceBetween
-                           ) {
-                               Text(
-                                   text = "عدد النتائج: ${state.searchResults.size}",
-                                   style = AppFonts.textNormalBold,
-                                   color = MaterialTheme.colorScheme.onBackground
-                               )
-                               Row {
-                                   AnimatedVisibility(visible = state.isLoading) {
-                                       Text(
-                                           text = "جار البحث",
-                                           style = AppFonts.textNormalBold,
-                                           color = MaterialTheme.colorScheme.onBackground
-                                       )
-                                   }
-                               }
-                           }
-                       }
-
-                   }*/
                 items(state.resultsList) {currentBook->
                     when (state.type){
                         "local"->{
@@ -112,7 +74,7 @@ fun SearchResultsScreen(
                                         viewModel.onEvent(SearchResultsEvent.OnClickDownloadBook(currentBook))
                                     }) {
                                         Icon(
-                                            imageVector = Icons.Outlined.Download,
+                                            imageVector = Icons.Outlined.FileDownload,
                                             contentDescription = "download"
                                         )
                                     }
@@ -120,7 +82,6 @@ fun SearchResultsScreen(
                                 highlightText = state.lastQuery
                             )
                         }
-
                     }
 
                     Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))

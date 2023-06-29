@@ -80,15 +80,15 @@ object FilesBooksRepoImpl : BooksRepository {
     override fun searchBooksByName(categoryName: String, query: String): Flow<Book> = channelFlow {
         Log.e(TAG, "search Books By Name")
         openShamelaFolder { categories ->
-            if (categoryName == "all"){
-                categories?.forEach {folder->
+            if (categoryName == "all") {
+                categories?.forEach { folder ->
                     val bookFile = folder.listFiles()?.find { it.name.contains(query) }
                     bookFile?.let {
                         parseBook(it, categoryName)?.let { book -> send(book) }
                     }
                 }
-            }else{
-                categories?.find { it.name.contains(categoryName) }?.let{folder->
+            } else {
+                categories?.find { it.name.contains(categoryName) }?.let { folder ->
                     val bookFile = folder.listFiles()?.find { it.name.contains(query) }
                     bookFile?.let {
                         parseBook(it, categoryName)?.let { book -> send(book) }
@@ -104,8 +104,9 @@ object FilesBooksRepoImpl : BooksRepository {
             categories?.forEach { folder ->
                 folder.listFiles()?.forEach { bookFile ->
                     val bookTitle = bookFile.name.removeSuffix(".epub")
+                    val uuidName = bookTitle + folder.name
                     val initialBook = Book(
-                        id = UUID.nameUUIDFromBytes(bookTitle.toByteArray()).toString(),
+                        id = UUID.nameUUIDFromBytes(uuidName.toByteArray()).toString(),
                         title = bookTitle,
                         author = "-",
                         pageCount = 0,
@@ -150,8 +151,9 @@ object FilesBooksRepoImpl : BooksRepository {
         return withContext(Dispatchers.IO) {
             FolioReader.get().parseEpub(file)?.let { (authorName, pageCount) ->
                 val bookTitle = file.name.removeSuffix(".epub")
+                val uuidName = bookTitle + categoryName
                 Book(
-                    id = UUID.nameUUIDFromBytes(bookTitle.toByteArray()).toString(),
+                    id = UUID.nameUUIDFromBytes(uuidName.toByteArray()).toString(),
                     title = bookTitle,
                     author = authorName,
                     pageCount = pageCount,

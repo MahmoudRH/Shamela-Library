@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,12 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.navigation.Download
-import com.shamela.library.presentation.navigation.Library
 import com.shamela.library.presentation.screens.library.ViewType
 import com.shamela.library.presentation.screens.library.ViewTypeSection
 import kotlinx.coroutines.flow.launchIn
@@ -40,6 +38,8 @@ fun DownloadScreen(
     navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
 
     ) {
+    val downloadState = viewModel.downloadState.collectAsState().value
+
     LaunchedEffect(key1 = Unit, block = {
         Download.buttons.onEach {
             if (it) {
@@ -48,7 +48,12 @@ fun DownloadScreen(
             }
         }.launchIn(this)
     })
-    val downloadState = viewModel.downloadState.collectAsState().value
+    LaunchedEffect(key1 = Unit, block ={
+        when ( downloadState.viewType){
+            ViewType.Sections -> viewModel.onEvent(DownloadEvent.LoadUserSections)
+            ViewType.Books -> viewModel.onEvent(DownloadEvent.LoadUserBooks)
+        }
+    } )
     LazyColumn(
         Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -93,7 +98,7 @@ fun DownloadScreen(
                                     viewModel.onEvent(DownloadEvent.OnClickDownloadBook(it))
                                 }) {
                                     Icon(
-                                        imageVector = Icons.Default.Download,
+                                        imageVector = Icons.Outlined.FileDownload,
                                         contentDescription = "download"
                                     )
                                 }
@@ -108,6 +113,5 @@ fun DownloadScreen(
             }
         }
     }
-    LoadingScreen(visibility = downloadState.isLoading)
 }
 

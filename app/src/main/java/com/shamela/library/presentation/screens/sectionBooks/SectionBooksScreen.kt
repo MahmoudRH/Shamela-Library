@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -70,7 +70,7 @@ fun SectionBooksScreen(
                                     )
                                 }) {
                                     Icon(
-                                        imageVector = Icons.Outlined.Download,
+                                        imageVector = Icons.Outlined.FileDownload,
                                         contentDescription = "download"
                                     )
                                 }

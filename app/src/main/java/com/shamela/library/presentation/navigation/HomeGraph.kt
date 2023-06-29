@@ -1,13 +1,13 @@
 package com.shamela.library.presentation.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DownloadForOffline
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.DownloadForOffline
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocalLibrary
 import androidx.compose.material.icons.outlined.Search
@@ -54,8 +54,8 @@ object Library : HomeHostDestination {
 
 object Download : HomeHostDestination {
     override val route = "DOWNLOAD_SCREEN"
-    override val unSelectedIcon = Icons.Outlined.DownloadForOffline
-    override val selectedIcon = Icons.Default.DownloadForOffline
+    override val unSelectedIcon = Icons.Outlined.FileDownload
+    override val selectedIcon = Icons.Default.FileDownload
     override val actionIcon = Icons.Outlined.Search
     override val label = "التحميل"
 
