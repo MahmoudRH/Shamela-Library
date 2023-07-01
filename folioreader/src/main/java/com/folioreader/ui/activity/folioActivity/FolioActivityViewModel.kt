@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.folioreader.Constants
 import com.folioreader.FolioReader
-import com.folioreader.ui.base.HtmlUtil
 import com.folioreader.util.AppUtil
 import com.folioreader.util.FileUtil
 import kotlinx.coroutines.Dispatchers

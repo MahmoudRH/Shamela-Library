@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Environment
 import androidx.compose.runtime.mutableStateMapOf
 import com.shamela.library.domain.model.Book
-import com.shamela.library.domain.usecases.books.SaveDownloadedBook
 import java.io.File
 
 class BooksDownloadManager(private val context: Context) {

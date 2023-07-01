@@ -16,19 +16,18 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.shamela.apptheme.common.EmptyListScreen
 import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.apptheme.common.SearchTopBar
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
-import com.shamela.library.presentation.screens.sectionBooks.SectionBooksEvent
 
 @Composable
 fun SearchResultsScreen(

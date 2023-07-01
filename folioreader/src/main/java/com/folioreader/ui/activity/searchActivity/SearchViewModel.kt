@@ -1,22 +1,17 @@
 package com.folioreader.ui.activity.searchActivity
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.folioreader.FolioReader
-import com.folioreader.model.locators.SearchLocator
 import com.folioreader.model.locators.toSearchLocator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.readium.r2.shared.Locator
 
 class SearchViewModel : ViewModel() {
     private val _state = MutableStateFlow<SearchState>(SearchState())

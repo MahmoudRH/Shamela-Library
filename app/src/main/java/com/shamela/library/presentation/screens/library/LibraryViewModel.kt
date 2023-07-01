@@ -2,8 +2,6 @@ package com.shamela.library.presentation.screens.library
 
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.files.FilesRepoImpl
@@ -11,7 +9,6 @@ import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn

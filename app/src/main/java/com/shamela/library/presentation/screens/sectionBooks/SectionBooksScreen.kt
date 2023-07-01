@@ -27,7 +27,6 @@ import com.shamela.apptheme.common.DefaultTopBar
 import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
-import com.shamela.library.presentation.common.LocalBookItem
 
 @Composable
 fun SectionBooksScreen(

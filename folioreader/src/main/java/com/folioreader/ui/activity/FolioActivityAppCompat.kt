@@ -15,67 +15,8 @@
  */
 package com.folioreader.ui.activity
 
-import android.Manifest
 import android.app.Activity
-import android.app.ActivityManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.graphics.Rect
-import android.graphics.drawable.ColorDrawable
-import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Environment
-import android.os.Handler
-import android.provider.Settings
-import android.text.TextUtils
-import android.util.DisplayMetrics
-import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.folioreader.Config
-import com.folioreader.Constants
-import com.folioreader.Constants.CHAPTER_SELECTED
-import com.folioreader.Constants.HIGHLIGHT_SELECTED
-import com.folioreader.Constants.LOCALHOST
-import com.folioreader.Constants.SELECTED_CHAPTER_POSITION
-import com.folioreader.Constants.STREAMER_URL_TEMPLATE
-import com.folioreader.Constants.TYPE
-import com.folioreader.FolioReader
-import com.folioreader.R
 import com.folioreader.model.DisplayUnit
-import com.folioreader.model.HighlightImpl
-import com.folioreader.model.locators.ReadLocator
-import com.folioreader.model.locators.SearchLocator
-import com.folioreader.ui.adapter.FolioPageFragmentAdapter
-import com.folioreader.ui.adapter.SearchAdapter
-import com.folioreader.ui.fragment.FolioPageFragment
-import com.folioreader.ui.view.ConfigBottomSheetDialogFragment
-import com.folioreader.ui.view.DirectionalViewpager
-import com.folioreader.ui.view.FolioAppBarLayout
-import com.folioreader.util.AppUtil
-import com.folioreader.util.FileUtil
-import com.folioreader.util.UiUtil
-import org.greenrobot.eventbus.EventBus
-import org.readium.r2.shared.Link
-import org.readium.r2.streamer.parser.EpubParser
-import org.readium.r2.streamer.parser.PubBox
-import org.readium.r2.streamer.server.Server
-import java.lang.ref.WeakReference
-import kotlin.math.ceil
 
 
 /*

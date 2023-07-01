@@ -33,8 +33,8 @@ import com.folioreader.model.DisplayUnit
 import com.folioreader.model.HighLight
 import com.folioreader.model.HighlightImpl.HighlightStyle
 import com.folioreader.model.sqlite.HighLightTable
-import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.folioreader.ui.activity.FolioActivityCallback
+import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.folioreader.ui.fragment.FolioPageFragment
 import com.folioreader.util.AppUtil
 import com.folioreader.util.HighlightUtil
