@@ -9,4 +9,5 @@ data class DownloadState(
     val viewType: ViewType = ViewType.Sections,
     val books:List<Book> = emptyList(),
     val sections:List<Category> = emptyList(),
+    val isLoading:Boolean = false,
 )

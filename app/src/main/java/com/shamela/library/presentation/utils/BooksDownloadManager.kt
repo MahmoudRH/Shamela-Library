@@ -7,13 +7,14 @@ import android.os.Environment
 import androidx.compose.runtime.mutableStateMapOf
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.usecases.books.SaveDownloadedBook
+import java.io.File
 
 class BooksDownloadManager(private val context: Context) {
 
     companion object {
         private val _downloadIdMap = mutableStateMapOf<Long, Book>()
         private val subscribers: MutableList<Subscriber> = mutableListOf()
-
+        const val FILE_ALREADY_EXISTS = -1L
         fun subscribe(subscriber: Subscriber) {
             if (!subscribers.contains(subscriber)) {
                 subscribers.add(subscriber)
@@ -26,7 +27,7 @@ class BooksDownloadManager(private val context: Context) {
             }
         }
 
-        fun downloadIsDone(downloadId: Long, saveDownloadedBook:(Book)->Unit) {
+        fun downloadIsDone(downloadId: Long, saveDownloadedBook: (Book) -> Unit) {
             if (_downloadIdMap.contains(downloadId)) {
                 subscribers.forEach {
                     it.onBookDownloaded(_downloadIdMap[downloadId]!!)
@@ -45,19 +46,22 @@ class BooksDownloadManager(private val context: Context) {
 
     fun downloadBook(downloadUri: Uri, book: Book, bookCategory: String): Long {
         val bookTitle = book.title
+        val downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val bookFileSubPath = "ShamelaDownloads/$bookCategory/$bookTitle.epub"
+        val isFileAlreadyDownloaded = File(downloadsFolder,bookFileSubPath).isFile
+        if (isFileAlreadyDownloaded || _downloadIdMap.values.contains(book)) return FILE_ALREADY_EXISTS
         val request = DownloadManager.Request(downloadUri)
         request.setTitle("المكتبة الشاملة")
         request.setDescription("جار تحميل كتاب ($bookTitle)")
         request.setMimeType("application/epub+zip")
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalPublicDir(
-            Environment.DIRECTORY_DOWNLOADS,
-            "ShamelaDownloads/$bookCategory/$bookTitle.epub"
-        )
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, bookFileSubPath)
         val downloadId = downManager.enqueue(request)
         _downloadIdMap[downloadId] = book
         return downloadId
     }
+
+
 
     fun cancelBookDownload(downloadId: Long) {
         val book = _downloadIdMap[downloadId] ?: return

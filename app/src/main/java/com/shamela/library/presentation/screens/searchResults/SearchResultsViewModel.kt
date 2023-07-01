@@ -2,6 +2,7 @@ package com.shamela.library.presentation.screens.searchResults
 
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -85,14 +86,18 @@ class SearchResultsViewModel @Inject constructor(
                 viewModelScope.launch {
                     remoteBooksUseCases.getDownloadUri(event.book.categoryName, event.book.title)
                         ?.let { uri ->
-                            _searchResultsState.update {
-                                it.copy(isLoading = true)
-                            }
-                            booksDownloadManager.downloadBook(
+                            val downloadId = booksDownloadManager.downloadBook(
                                 downloadUri = uri,
                                 book = event.book,
                                 bookCategory = event.book.categoryName
                             )
+                            if (downloadId == BooksDownloadManager.FILE_ALREADY_EXISTS){
+                                Toast.makeText(application, "تم تحميل الكتاب من قبل!", Toast.LENGTH_SHORT).show()
+                            }else{
+                                _searchResultsState.update {
+                                    it.copy(isLoading = true)
+                                }
+                            }
                         }
                 }
             }
@@ -111,6 +116,14 @@ class SearchResultsViewModel @Inject constructor(
         }
 
 
+    }
+    init {
+        BooksDownloadManager.subscribe(this)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        BooksDownloadManager.unsubscribe(this)
     }
 
     override fun onBookDownloaded(book: Book) {

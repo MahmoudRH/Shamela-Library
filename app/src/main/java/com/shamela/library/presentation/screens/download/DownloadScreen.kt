@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
 import com.shamela.library.presentation.common.SectionItem
@@ -92,7 +93,7 @@ fun DownloadScreen(
                     }
                     items(books, key = { it.id }) {
                         BookItem(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).animateItemPlacement(),
                             icon = {
                                 IconButton(onClick = {
                                     viewModel.onEvent(DownloadEvent.OnClickDownloadBook(it))
@@ -113,5 +114,6 @@ fun DownloadScreen(
             }
         }
     }
+    LoadingScreen(visibility = downloadState.isLoading)
 }
 

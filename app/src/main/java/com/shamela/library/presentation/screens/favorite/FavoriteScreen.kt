@@ -1,6 +1,7 @@
 package com.shamela.library.presentation.screens.favorite
 
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.domain.model.Book
 import com.shamela.library.presentation.common.LocalBookItem
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoriteScreen(
     viewModel: FavoriteViewModel = hiltViewModel(),
@@ -41,7 +43,8 @@ fun FavoriteScreen(
             LocalBookItem(
                 modifier = Modifier
                     .clickable { FilesBooksRepoImpl.openEpub(currentBook) }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .animateItemPlacement(),
                 onFavoriteIconClicked = {
                     viewModel.onEvent(FavoriteEvent.ToggleFavorite(currentBook))
                 },

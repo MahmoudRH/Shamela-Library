@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -61,6 +62,7 @@ class SearchActivity : ComponentActivity() {
         const val BUNDLE_SPINE_SIZE = "BUNDLE_SPINE_SIZE"
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val spineSize = intent.getIntExtra(BUNDLE_SPINE_SIZE, 0)
@@ -129,7 +131,7 @@ class SearchActivity : ComponentActivity() {
                                 }
                                 items(state.searchResults) {
                                     it.text?.let { locatorText ->
-                                        SearchResult(locatorText){
+                                        SearchResult(modifier = Modifier.animateItemPlacement(),locatorText){
                                             val intent = Intent()
                                             intent.putExtra(FolioActivity.EXTRA_SEARCH_ITEM, it as Parcelable)
                                             setResult(Activity.RESULT_OK, intent)
@@ -155,12 +157,11 @@ class SearchActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun SearchResult(locator: LocatorText, onItemClicked:()->Unit) {
+    private fun SearchResult(modifier: Modifier,locator: LocatorText, onItemClicked:()->Unit) {
         val text = buildAnnotatedString {
             val before = locator.before
             val highlightedText = locator.hightlight
             val after = locator.after
-            val isDarkTheme = AppTheme.isDarkTheme(this@SearchActivity)
 
             append("$before")
             withStyle(
@@ -176,7 +177,7 @@ class SearchActivity : ComponentActivity() {
         }
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .clickable { onItemClicked() }
         ) {
             Text(
