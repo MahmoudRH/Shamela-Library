@@ -33,11 +33,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.shamela.apptheme.common.LoadingScreen
 import com.shamela.apptheme.theme.AppFonts
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
-import com.shamela.library.presentation.common.BookItem
+import com.shamela.library.presentation.common.LocalBookItem
 import com.shamela.library.presentation.common.SectionItem
-import com.shamela.library.presentation.navigation.HomeHostDestination
 import com.shamela.library.presentation.navigation.Library
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -52,7 +50,7 @@ fun LibraryScreen(
         Library.buttons.onEach {
             if (it) {
                 Log.e("Mah ", "LibraryScreen: Search is clicked")
-                navigateToSearchResultsScreen("all","local")
+                navigateToSearchResultsScreen("all", "local")
             }
         }.launchIn(this)
     })
@@ -84,11 +82,13 @@ fun LibraryScreen(
 
             ViewType.Books -> {
                 items(libraryState.books.values.toList(), key = { it.id }) {
-                    BookItem(modifier = Modifier
+                    LocalBookItem(modifier = Modifier
                         .clickable {
                             FilesBooksRepoImpl.openEpub(it)
                         }
-                        .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        item = it,
+                        onFavoriteIconClicked = { viewModel.onEvent(LibraryEvent.ToggleFavorite(it)) })
                     Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }

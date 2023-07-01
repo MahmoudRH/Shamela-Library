@@ -82,8 +82,10 @@ dependencies {
     implementation project(':apptheme')
 
 
-    //-> SAF : Storage Access Framework dependency
-    implementation 'androidx.documentfile:documentfile:1.0.1'
+    //-> RoomDB
+    implementation "androidx.room:room-runtime:$versions.room_version"
+    kapt "androidx.room:room-compiler:$versions.room_version"
+    implementation "androidx.room:room-ktx:$versions.room_version"
 
 
     //-> Hilt DI

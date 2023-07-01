@@ -3,6 +3,7 @@ package com.shamela.library.data.local.files
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import com.folioreader.FolioReader
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
@@ -29,9 +30,17 @@ object FilesBooksRepoImpl : BooksRepository {
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
     private val shamelaBooks = File(downloadsFolder, BASE_DOWNLOAD_DIRECTORY)
 
-    fun openEpub(book: Book) {
-        val bookPath = File(shamelaBooks, "${book.categoryName}/${book.title}.epub").path
-        FolioReader.get().openBook(bookPath)
+    fun openEpub(book: Book): Boolean {
+
+        //TODO-> future work: if the file doesn't exist: handle it in the ui to show a  download button
+        val bookFile = File(shamelaBooks, "${book.categoryName}/${book.title}.epub")
+        return if (bookFile.isFile) {
+            FolioReader.get().openBook(bookFile.path)
+            true
+        } else {
+            false
+        }
+
     }
 
     override fun getCategories(): Flow<Category> = channelFlow {
@@ -58,8 +67,9 @@ object FilesBooksRepoImpl : BooksRepository {
                     val bookFiles = categoryFolder.listFiles()
                     bookFiles?.forEach { bookFile ->
                         val bookTitle = bookFile.name.removeSuffix(".epub")
+                        val uuidName = bookTitle + categoryFolder.name
                         val initialBook = Book(
-                            id = UUID.nameUUIDFromBytes(bookTitle.toByteArray()).toString(),
+                            id = UUID.nameUUIDFromBytes(uuidName.toByteArray()).toString(),
                             title = bookTitle,
                             author = "-",
                             pageCount = 0,

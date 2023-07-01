@@ -1,8 +1,11 @@
 package com.shamela.library.data.di
 
 import android.app.Application
+import androidx.room.Room
 import com.shamela.library.data.local.assets.AssetsBooksRepoImpl
 import com.shamela.library.data.local.assets.AssetsRepoImpl
+import com.shamela.library.data.local.db.BooksDao
+import com.shamela.library.data.local.db.BooksDatabase
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.usecases.books.BooksUseCases
@@ -28,39 +31,37 @@ object DataModule {
         return FilesBooksRepoImpl
     }
 
+    @Provides
+    fun provideDatabase(app: Application): BooksDatabase {
+        return Room.databaseBuilder(
+            app.applicationContext,
+            BooksDatabase::class.java,
+            BooksDatabase.DATABASE_NAME
+        ).build()
+    }
+
+    @Provides
+    fun provideDao(database: BooksDatabase): BooksDao {
+        return database.booksDao
+    }
+
     @AssetsRepoImpl
     @Singleton
     @Provides
-    fun provideAssetsBooksUseCases(repo: AssetsBooksRepoImpl): BooksUseCases {
+    fun provideAssetsBooksUseCases(repo: AssetsBooksRepoImpl, dao: BooksDao): BooksUseCases {
         return BooksUseCases(
-            repository = repo
+            repository = repo,
+            booksDao = dao
         )
     }
 
     @FilesRepoImpl
     @Singleton
     @Provides
-    fun provideFilesBooksUseCases(repo: FilesBooksRepoImpl): BooksUseCases {
+    fun provideFilesBooksUseCases(repo: FilesBooksRepoImpl, dao: BooksDao): BooksUseCases {
         return BooksUseCases(
-            repository = repo
+            repository = repo,
+            booksDao = dao
         )
     }
 }
-/*
-
-    @FilesRepoImpl
-    @Singleton
-    @Provides
-    fun provideBooksUseCases(): BooksUseCases {
-        return BooksUseCases(repository = FilesBooksRepoImpl)
-    }
-
-    @AssetsRepoImpl
-    @Singleton
-    @Provides
-    fun provideBooksUseCases(repo: AssetsBooksRepoImpl): BooksUseCases {
-        return BooksUseCases(
-            repository = repo
-        )
-    }
- */

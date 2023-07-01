@@ -55,7 +55,7 @@ fun SearchResultsScreen(
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(state.resultsList) {currentBook->
+                items(state.resultsList, key = {it.id}) {currentBook->
                     when (state.type){
                         "local"->{
                             BookItem(modifier = Modifier

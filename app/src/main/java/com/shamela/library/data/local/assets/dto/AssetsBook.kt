@@ -1,6 +1,6 @@
-package com.shamela.library.data.dto
+package com.shamela.library.data.local.assets.dto
 
-data class BookDto(
+internal data class AssetsBook(
     val id: String,
     val title: String,
     val author: String,

@@ -1,6 +1,7 @@
 package com.shamela.library.presentation.screens.sectionBooks
 
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shamela.apptheme.common.DefaultTopBar
 import com.shamela.apptheme.common.LoadingScreen
+import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
+import com.shamela.library.presentation.common.LocalBookItem
 
 @Composable
 fun SectionBooksScreen(
@@ -40,7 +43,7 @@ fun SectionBooksScreen(
             onNavigateBack = navigateBack,
             actionIcon = Icons.Outlined.Search,
             onActionClick = {
-                navigateToSearchResultsScreen(categoryName,sectionBooksState.type)
+                navigateToSearchResultsScreen(categoryName, sectionBooksState.type)
             })
         LazyColumn(
             Modifier
@@ -53,7 +56,9 @@ fun SectionBooksScreen(
                 when (sectionBooksState.type) {
                     "local" -> {
                         BookItem(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier
+                                .clickable { FilesBooksRepoImpl.openEpub(currentBook) }
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                             item = currentBook
                         )
                     }

@@ -1,22 +1,54 @@
 package com.shamela.library.presentation.screens.favorite
 
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.shamela.apptheme.theme.AppFonts
+import com.shamela.apptheme.common.EmptyListScreen
+import com.shamela.library.data.local.files.FilesBooksRepoImpl
+import com.shamela.library.domain.model.Book
+import com.shamela.library.presentation.common.LocalBookItem
 
 @Composable
 fun FavoriteScreen(
     viewModel: FavoriteViewModel = hiltViewModel(),
-){
-val favoriteState = viewModel.favoriteState.collectAsState().value
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "المفضلة", style = AppFonts.textNormal)
+) {
+    val state = viewModel.favoriteState.collectAsState().value
+
+    LaunchedEffect(key1 = Unit, block = {
+        viewModel.onEvent(FavoriteEvent.LoadFavoriteBooks)
+    })
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        items(state.favoriteBooks, key = { it.id }) { currentBook ->
+            LocalBookItem(
+                modifier = Modifier
+                    .clickable { FilesBooksRepoImpl.openEpub(currentBook) }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                onFavoriteIconClicked = {
+                    viewModel.onEvent(FavoriteEvent.ToggleFavorite(currentBook))
+                },
+                item = currentBook,
+            )
+            Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+        }
     }
+    EmptyListScreen(visibility = state.isListEmpty, text = "المفضلة فارغة، أضف بعض الكتب!")
 }

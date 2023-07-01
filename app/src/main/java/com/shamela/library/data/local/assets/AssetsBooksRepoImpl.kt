@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
-import com.shamela.library.data.dto.BookDto
+import com.shamela.library.data.local.assets.dto.AssetsBook
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
 import com.shamela.library.domain.repo.BooksRepository
@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -54,7 +53,7 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
                 val fileName = "categories/$categoryNameNoSuffix.json"
                 val inputStream = context.assets.open(fileName)
                 val books =
-                    gson.fromJson(InputStreamReader(inputStream), Array<BookDto>::class.java)
+                    gson.fromJson(InputStreamReader(inputStream), Array<AssetsBook>::class.java)
                 inputStream.close()
                 books.toList()
                     .map { book ->

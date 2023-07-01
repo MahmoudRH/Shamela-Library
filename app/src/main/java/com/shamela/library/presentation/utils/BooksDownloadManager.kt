@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Environment
 import androidx.compose.runtime.mutableStateMapOf
 import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.usecases.books.SaveDownloadedBook
 
 class BooksDownloadManager(private val context: Context) {
 
@@ -25,10 +26,13 @@ class BooksDownloadManager(private val context: Context) {
             }
         }
 
-        fun downloadIsDone(downloadId: Long) {
+        fun downloadIsDone(downloadId: Long, saveDownloadedBook:(Book)->Unit) {
             if (_downloadIdMap.contains(downloadId)) {
                 subscribers.forEach {
                     it.onBookDownloaded(_downloadIdMap[downloadId]!!)
+                }
+                _downloadIdMap[downloadId]?.let {
+                    saveDownloadedBook(it)
                 }
                 _downloadIdMap.remove(downloadId)
             }

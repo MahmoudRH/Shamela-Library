@@ -24,6 +24,7 @@ versions.compose_compiler = '1.4.7'
 versions.accompanist = '0.31.4-beta'
 
 versions.hilt_version = '2.46.1'
+versions.room_version = '2.5.2'
 
 versions.appcompat = "1.6.1"
 versions.constraintLayout = "2.1.4"
