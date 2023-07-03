@@ -32,7 +32,7 @@ object AppTheme {
         preferredTheme.value = newPreferredTheme
     }
 
-    private val colorScheme by derivedStateOf {
+    val colorScheme by derivedStateOf {
         selectedColorScheme.value
     }
 

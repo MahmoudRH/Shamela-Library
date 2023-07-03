@@ -829,11 +829,7 @@ function onTextSelectionItemClicked(id) {
 
 function onClickHtml() {
     console.debug("-> onClickHtml");
-    if (FolioWebView.isPopupShowing()) {
-        FolioWebView.dismissPopupWindow();
-    } else {
-        FolioWebView.toggleSystemUI();
-    }
+    CustomWebView.isTapped();
 }
 
 function computeLastReadCfi() {

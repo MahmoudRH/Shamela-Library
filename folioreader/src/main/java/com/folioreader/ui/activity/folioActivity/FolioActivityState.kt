@@ -15,4 +15,7 @@ data class FolioActivityState(
     val selectedPageData: String = "",
     val selectedPageUrl: String = "",
     val publication: Publication? = null,
+    val isAppBarsVisible :Boolean = true,
+    val isMenuVisible :Boolean = false,
+    val currentPageText:String = "0",
 )

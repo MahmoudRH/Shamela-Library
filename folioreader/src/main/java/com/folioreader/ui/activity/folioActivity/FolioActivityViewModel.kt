@@ -1,11 +1,14 @@
 package com.folioreader.ui.activity.folioActivity
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate.NightMode
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.folioreader.Constants
 import com.folioreader.FolioReader
+import com.folioreader.ui.base.HtmlUtil
 import com.folioreader.util.AppUtil
 import com.folioreader.util.FileUtil
 import kotlinx.coroutines.Dispatchers
@@ -49,12 +52,22 @@ class FolioActivityViewModel : ViewModel() {
                             publication = publication,
                             bookTitle = publication?.metadata?.title ?: "الشاملة",
                             streamUrl = streamUrl,
-                            isLoading = false,
                         )
                     }
                     launch {
-                        getBookPages().collect { (pageUrl, pageData) ->
-                            _state.update { it.copy(bookPages = it.bookPages + pageUrl, htmlData = it.htmlData + pageData) }
+                        getBookPages(
+                            context = event.context,
+                            fontFamily = event.fontFamilyCssClass,
+                            isNightMode = event.isNightMode,
+                            fontSize = event.fontSizeCssClass
+                        ).collect { (pageUrl, pageData) ->
+                            _state.update {
+                                it.copy(
+                                    bookPages = it.bookPages + pageUrl,
+                                    htmlData = it.htmlData + pageData,
+                                    isLoading = false,
+                                )
+                            }
                         }
                     }
                 }
@@ -71,6 +84,7 @@ class FolioActivityViewModel : ViewModel() {
 
             is FolioActivityEvent.OnChangeSelectedPage -> {
                 Log.e(TAG, "onEvent: ${event.javaClass.simpleName}, page: ${event.newPage}")
+                onEvent(FolioActivityEvent.OnCurrentPageTextChanged(event.newPage.toString()))
                 /*                viewModelScope.launch {
                                     getHtmlData(state.value.bookPages[event.newPage]).let { htmlData ->
                                         //-> mimeType is statically set...
@@ -87,17 +101,40 @@ class FolioActivityViewModel : ViewModel() {
             FolioActivityEvent.StopStreamerServer -> {
                 server.stop()
             }
+
+            FolioActivityEvent.ToggleAppBarsVisibility -> {
+                _state.update { it.copy(isAppBarsVisible = !it.isAppBarsVisible) }
+            }
+
+            FolioActivityEvent.ToggleMenuVisibility -> {
+                _state.update { it.copy(isMenuVisible = !it.isMenuVisible) }
+            }
+
+            is FolioActivityEvent.OnCurrentPageTextChanged -> {
+                _state.update { it.copy(currentPageText = event.newPage) }
+            }
         }
     }
 
-    private suspend fun getBookPages() = flow<Pair<String, String>> {
+    private suspend fun getBookPages(
+        context: Context,
+        fontFamily: String,
+        isNightMode: Boolean,
+        fontSize: String,
+    ) = flow<Pair<String, String>> {
         state.value.publication?.let { publication ->
             publication.readingOrder.forEach { link ->
                 link.href?.substring(1)?.let { pageFilePath ->
                     val pageUrl = state.value.streamUrl + pageFilePath
                     val htmlContent = getHtmlData(pageUrl)
-//                    val pageData = HtmlUtil.getHtmlContent(htmlContent,"tajawal",true,2)
-                    emit(pageUrl to htmlContent)
+                    val pageData = HtmlUtil.getHtmlContent(
+                        context = context,
+                        content = htmlContent,
+                        fontFamilyCssClass = fontFamily,
+                        isNightMode = isNightMode,
+                        fontSizeCssClass = fontSize
+                    )
+                    emit(pageUrl to pageData)
                 }
             }
         }
@@ -121,9 +158,11 @@ class FolioActivityViewModel : ViewModel() {
                 val stringBuilder = StringBuilder()
                 var line: String?
                 while (reader.readLine().also { line = it } != null) {
-                    stringBuilder.append(line).append('\n')
+                    line?.let {
+                        if (!it.contains("<hr/>") && !it.contains("¦"))
+                            stringBuilder.append(it).append('\n')
+                    }
                 }
-//                Log.e(FolioActivity.LOG_TAG, "Html data for $urlString is:\n $stringBuilder")
                 stringBuilder.toString()
             } catch (e: IOException) {
                 Log.e(FolioActivity.LOG_TAG, "HtmlTask failed", e)
