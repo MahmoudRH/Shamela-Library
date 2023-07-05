@@ -5,20 +5,21 @@ plugins {
 
 android {
     namespace 'com.shamela.apptheme'
-    compileSdk 33
+    compileSdk versions.androidCompileSdk
 
     defaultConfig {
-        minSdk 24
-        targetSdk 33
+        minSdk versions.androidMinSdk
+        targetSdk versions.androidTargetSdk
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        vectorDrawables {
+            useSupportLibrary true
+        }
     }
-
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -35,19 +36,50 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion "$versions.compose_compiler"
     }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
 }
-
 dependencies {
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     implementation platform("org.jetbrains.kotlin:kotlin-bom:$versions.kotlin_bom")
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions.lifecycle_runtime_ktx"
     implementation "androidx.activity:activity-compose:$versions.compose_activity"
 
-    //-> Compose dependencies
-    implementation platform("androidx.compose:compose-bom:$versions.compose_bom")
-    implementation 'androidx.compose.ui:ui'
-    implementation 'androidx.compose.ui:ui-graphics'
-    implementation 'androidx.compose.ui:ui-tooling-preview'
-    implementation 'androidx.compose.material3:material3'
-    implementation "androidx.compose.material:material-icons-extended"
+//    //-> Compose dependencies
+//    implementation platform("androidx.compose:compose-bom:$versions.compose_bom")
+//    implementation 'androidx.compose.ui:ui'
+//    implementation 'androidx.compose.ui:ui-graphics'
+//    implementation 'androidx.compose.ui:ui-tooling-preview'
+//    implementation 'androidx.compose.material3:material3'
+//    implementation "androidx.compose.material:material-icons-extended"
+    def compose_version = "1.4.3"
+    implementation("androidx.compose.animation:animation-core:$compose_version")
+    implementation("androidx.compose.animation:animation:$compose_version")
+    implementation("androidx.compose.ui:ui:$compose_version")
+    implementation("androidx.compose.foundation:foundation:$compose_version")
+    implementation("androidx.compose.ui:ui-geometry:$compose_version")
+    implementation("androidx.compose.ui:ui-graphics:$compose_version")
+    implementation("androidx.compose.foundation:foundation-layout:$compose_version")
+    implementation("androidx.compose.runtime:runtime-livedata:$compose_version")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha03")
+    implementation("androidx.compose.material:material:$compose_version")
+    implementation("androidx.compose.material:material-icons-core:$compose_version")
+    implementation("androidx.compose.material:material-icons-extended:$compose_version")
+    implementation("androidx.compose.runtime:runtime-rxjava2:$compose_version")
+    implementation("androidx.compose.ui:ui-text:$compose_version")
+    implementation("androidx.compose.ui:ui-util:$compose_version")
+    implementation("androidx.compose.ui:ui-viewbinding:$compose_version")
+    implementation("androidx.compose.ui:ui-tooling:$compose_version")
+
+
+
+
+    //-> Compose Navigation
+    implementation "androidx.navigation:navigation-compose:$versions.navigation_compose"
+
+    //->Kotlin Reflection
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.8.22"
 }

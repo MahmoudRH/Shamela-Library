@@ -21,7 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.shamela.apptheme.common.LoadingScreen
+import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
 import com.shamela.library.presentation.common.SectionItem

@@ -9,7 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.shamela.apptheme.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppFonts
 
 @Composable
 fun SearchScreen(

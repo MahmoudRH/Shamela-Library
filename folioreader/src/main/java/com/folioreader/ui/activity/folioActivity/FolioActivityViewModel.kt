@@ -113,6 +113,11 @@ class FolioActivityViewModel : ViewModel() {
             is FolioActivityEvent.OnCurrentPageTextChanged -> {
                 _state.update { it.copy(currentPageText = event.newPage) }
             }
+
+            FolioActivityEvent.DismissMenu -> {
+                _state.update { it.copy(isMenuVisible = false) }
+
+            }
         }
     }
 

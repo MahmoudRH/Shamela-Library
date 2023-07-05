@@ -22,10 +22,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.folioreader.Constants
-import com.shamela.apptheme.theme.AppFonts
-import com.shamela.apptheme.theme.AppTheme
-import com.shamela.library.data.local.sharedPrefs.SharedPreferencesData
-import com.shamela.library.domain.usecases.userPreferences.ReadUserPreferences
+import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.apptheme.data.sharedPrefs.SharedPreferencesData
+import com.shamela.apptheme.domain.usecases.userPreferences.ReadUserPreferences
 import com.shamela.library.presentation.reciever.DownloadCompleteReceiver
 import com.shamela.library.presentation.screens.HomeHostScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,7 +33,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val downloadCompleteReceiver = DownloadCompleteReceiver()
-    val userPreferences = SharedPreferencesData(this)
+    private val userPreferences = SharedPreferencesData(this)
     private val permissionState = mutableStateOf(false)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

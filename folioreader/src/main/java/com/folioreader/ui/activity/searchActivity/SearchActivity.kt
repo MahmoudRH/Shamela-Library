@@ -31,10 +31,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.folioreader.ui.activity.folioActivity.FolioActivity
-import com.shamela.apptheme.common.EmptyListScreen
-import com.shamela.apptheme.common.SearchTopBar
-import com.shamela.apptheme.theme.AppFonts
-import com.shamela.apptheme.theme.AppTheme
+import com.shamela.apptheme.presentation.common.DefaultTopBar
+import com.shamela.apptheme.presentation.common.EmptyListScreen
+import com.shamela.apptheme.presentation.common.LoadingScreen
+import com.shamela.apptheme.presentation.common.SearchTopBar
+import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppTheme
 import org.readium.r2.shared.LocatorText
 
 

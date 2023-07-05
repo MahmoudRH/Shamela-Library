@@ -24,8 +24,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.shamela.apptheme.common.DefaultTopBar
-import com.shamela.apptheme.theme.AppFonts
+import com.shamela.apptheme.presentation.common.DefaultTopBar
+import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.presentation.navigation.Download
 import com.shamela.library.presentation.navigation.Favorite
 import com.shamela.library.presentation.navigation.Library

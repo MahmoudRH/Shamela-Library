@@ -30,8 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.shamela.apptheme.common.LoadingScreen
-import com.shamela.apptheme.theme.AppFonts
+import com.shamela.apptheme.presentation.common.LoadingScreen
+import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.LocalBookItem
 import com.shamela.library.presentation.common.SectionItem

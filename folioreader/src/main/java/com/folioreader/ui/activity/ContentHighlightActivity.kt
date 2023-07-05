@@ -44,11 +44,11 @@ import com.folioreader.model.event.UpdateHighlightEvent
 import com.folioreader.model.sqlite.HighLightTable
 import com.folioreader.ui.composables.HighlightsItem
 import com.folioreader.ui.composables.LinkItem
-import com.shamela.apptheme.common.DefaultTopBar
-import com.shamela.apptheme.common.EmptyListScreen
-import com.shamela.apptheme.common.LoadingScreen
-import com.shamela.apptheme.theme.AppFonts
-import com.shamela.apptheme.theme.AppTheme
+import com.shamela.apptheme.presentation.common.DefaultTopBar
+import com.shamela.apptheme.presentation.common.EmptyListScreen
+import com.shamela.apptheme.presentation.common.LoadingScreen
+import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

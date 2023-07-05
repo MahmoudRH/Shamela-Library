@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.shamela.apptheme.common.DefaultTopBar
-import com.shamela.apptheme.common.LoadingScreen
+import com.shamela.apptheme.presentation.common.DefaultTopBar
+import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
 

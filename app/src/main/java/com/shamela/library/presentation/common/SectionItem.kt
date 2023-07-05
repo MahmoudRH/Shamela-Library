@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.shamela.apptheme.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.domain.model.Category
 
 

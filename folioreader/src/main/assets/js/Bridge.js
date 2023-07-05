@@ -6,28 +6,28 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
-var thisHighlight;
-var audioMarkClass;
-var wordsPerMinute = 180;
+let thisHighlight;
+let audioMarkClass;
+const wordsPerMinute = 180;
 
-var Direction = Object.freeze({
+const Direction = Object.freeze({
     VERTICAL: "VERTICAL",
     HORIZONTAL: "HORIZONTAL"
 });
 
-var DisplayUnit = Object.freeze({
+const DisplayUnit = Object.freeze({
     PX: "PX",
     DP: "DP",
     CSS_PX: "CSS_PX"
 });
 
-var scrollWidth;
-var horizontalInterval;
-var horizontalIntervalPeriod = 1000;
-var horizontalIntervalCounter = 0;
-var horizontalIntervalLimit = 3000;
+let scrollWidth;
+let horizontalInterval;
+const horizontalIntervalPeriod = 1000;
+let horizontalIntervalCounter = 0;
+const horizontalIntervalLimit = 3000;
 
-var viewportRect;
+let viewportRect;
 
 // Class manipulation
 function hasClass(ele, cls) {
@@ -40,7 +40,7 @@ function addClass(ele, cls) {
 
 function removeClass(ele, cls) {
     if (hasClass(ele, cls)) {
-        var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
+        const reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
         ele.className = ele.className.replace(reg, ' ');
     }
 }
@@ -55,7 +55,7 @@ function removeThisHighlight() {
 }
 
 function removeHighlightById(elmId) {
-    var elm = document.getElementById(elmId);
+    const elm = document.getElementById(elmId);
     elm.outerHTML = elm.innerHTML;
     return elm.id;
 }
@@ -70,22 +70,20 @@ function getBodyText() {
 
 // Method that gets the Rect of current selected text
 // and returns in a JSON format
-var getRectForSelectedText = function (elm) {
+const getRectForSelectedText = function (elm) {
     if (typeof elm === "undefined") elm = window.getSelection().getRangeAt(0);
 
-    var rect = elm.getBoundingClientRect();
+    const rect = elm.getBoundingClientRect();
     return "{{" + rect.left + "," + rect.top + "}, {" + rect.width + "," + rect.height + "}}";
 };
 
 // Reading time
 function getReadingTime() {
-    var text = document.body.innerText;
-    var totalWords = text.trim().split(/\s+/g).length;
-    var wordsPerSecond = wordsPerMinute / 60; //define words per second based on words per minute
-    var totalReadingTimeSeconds = totalWords / wordsPerSecond; //define total reading time in seconds
-    var readingTimeMinutes = Math.round(totalReadingTimeSeconds / 60);
-
-    return readingTimeMinutes;
+    const text = document.body.innerText;
+    const totalWords = text.trim().split(/\s+/g).length;
+    const wordsPerSecond = wordsPerMinute / 60; //define words per second based on words per minute
+    const totalReadingTimeSeconds = totalWords / wordsPerSecond; //define total reading time in seconds
+    return Math.round(totalReadingTimeSeconds);
 }
 
 function scrollAnchor(id) {
@@ -96,9 +94,9 @@ function scrollAnchor(id) {
  Remove All Classes - removes the given class from all elements in the DOM
  */
 function removeAllClasses(className) {
-    var els = document.body.getElementsByClassName(className)
+    const els = document.body.getElementsByClassName(className);
     if (els.length > 0)
-        for (i = 0; i <= els.length; i++) {
+        for (let i = 0; i <= els.length; i++) {
             els[i].classList.remove(className);
         }
 }
@@ -111,7 +109,7 @@ function audioMarkID(className, id) {
         removeAllClasses(audioMarkClass);
 
     audioMarkClass = className
-    var el = document.getElementById(id);
+    const el = document.getElementById(id);
 
     scrollToNodeOrRange(el);
     el.classList.add(className)
@@ -123,23 +121,23 @@ function setMediaOverlayStyle(style) {
 }
 
 function setMediaOverlayStyleColors(color, colorHighlight) {
-    var stylesheet = document.styleSheets[document.styleSheets.length - 1];
+    const stylesheet = document.styleSheets[document.styleSheets.length - 1];
 //    stylesheet.insertRule(".mediaOverlayStyle0 span.epub-media-overlay-playing { background: "+colorHighlight+" !important }")
 //    stylesheet.insertRule(".mediaOverlayStyle1 span.epub-media-overlay-playing { border-color: "+color+" !important }")
 //    stylesheet.insertRule(".mediaOverlayStyle2 span.epub-media-overlay-playing { color: "+color+" !important }")
 }
 
-var currentIndex = -1;
+let currentIndex = -1;
 
 
 function findSentenceWithIDInView(els) {
     // @NOTE: is `span` too limiting?
-    for (indx in els) {
-        var element = els[indx];
+    for (let indx in els) {
+        const element = els[indx];
 
         // Horizontal scroll
         if (document.body.scrollTop == 0) {
-            var elLeft = document.body.clientWidth * Math.floor(element.offsetTop / window.innerHeight);
+            const elLeft = document.body.clientWidth * Math.floor(element.offsetTop / window.innerHeight);
             // document.body.scrollLeft = elLeft;
 
             if (elLeft == document.body.scrollLeft) {
@@ -175,20 +173,20 @@ function rewindCurrentIndex() {
 }
 
 function getSentenceWithIndex(className) {
-    var sentence;
-    var sel = getSelection();
-    var node = null;
-    var elements = document.querySelectorAll("span.sentence");
+    let sentence;
+    const sel = getSelection();
+    let node = null;
+    const elements = document.querySelectorAll("span.sentence");
 
     // Check for a selected text, if found start reading from it
-    if (sel.toString() != "") {
+    if (sel.toString() !== "") {
         console.log(sel.anchorNode.parentNode);
         node = sel.anchorNode.parentNode;
 
-        if (node.className == "sentence") {
+        if (node.className === "sentence") {
             sentence = node;
 
-            for (var i = 0, len = elements.length; i < len; i++) {
+            for (let i = 0, len = elements.length; i < len; i++) {
                 if (elements[i] === sentence) {
                     currentIndex = i;
                     break;
@@ -203,7 +201,7 @@ function getSentenceWithIndex(className) {
         sentence = findNextSentenceInArray(elements);
     }
 
-    var text = sentence.innerText || sentence.textContent;
+    const text = sentence.innerText || sentence.textContent;
 
     scrollToNodeOrRange(sentence);
 
@@ -311,8 +309,8 @@ $(function () {
             try {
 
                 this.highlighter.highlightSelection(color, null);
-                var range = window.getSelection().toString();
-                var params = {content: range, rangy: this.getHighlights(), color: color};
+                const range = window.getSelection().toString();
+                const params = {content: range, rangy: this.getHighlights(), color: color};
                 this.clearSelection();
                 Highlight.onReceiveHighlights(JSON.stringify(params));
             } catch (err) {
@@ -375,12 +373,12 @@ $(function () {
     });
 
     $("code").each(function (i) {
-        var textarea = $("<textarea class='textarea'/>").attr("id", "input-" + i).on("input propertychange", function (event, isInit) {
+        const textarea = $("<textarea class='textarea'/>").attr("id", "input-" + i).on("input propertychange", function (event, isInit) {
             $(this).css({'height': 'auto', 'overflow-y': 'hidden'}).height(this.scrollHeight);
             $(this).next().css({'height': 'auto', 'overflow-y': 'hidden'}).height(this.scrollHeight);
 
             if (!isInit) {
-                var that = this;
+                const that = this;
                 if (timeout !== null) {
                     clearTimeout(timeout);
                 }
@@ -392,8 +390,8 @@ $(function () {
                 }, 1000);
             }
         });
-        var border = $("<div class='textarea-border' />");
-        var container = $("<div class='textarea-container' />");
+        const border = $("<div class='textarea-border' />");
+        const container = $("<div class='textarea-container' />");
 
         $(textarea).appendTo(container);
         $(border).appendTo(container);
@@ -403,7 +401,7 @@ $(function () {
 });
 
 function array_diff(array1, array2) {
-    var difference = $.grep(array1, function (el) {
+    const difference = $.grep(array1, function (el) {
         return $.inArray(el, array2) < 0
     });
     return difference.concat($.grep(array2, function (el) {
@@ -414,13 +412,13 @@ function array_diff(array1, array2) {
 
 //For testing purpose only
 function sleep(seconds) {
-    var e = new Date().getTime() + (seconds * 1000);
+    const e = new Date().getTime() + (seconds * 1000);
     while (new Date().getTime() <= e) {
     }
 }
 
 // Mock objects for testing purpose
-/*var FolioPageFragment = {
+/*const FolioPageFragment = {
 
     setHorizontalPageCount : function(pageCount) {
         console.warn("-> Mock call to FolioPageFragment.setHorizontalPageCount(" + pageCount + ")");
@@ -431,8 +429,8 @@ function sleep(seconds) {
     },
 
     getDirection : function() {
-        //var direction = Direction.VERTICAL;
-        var direction = Direction.HORIZONTAL;
+        //const direction = Direction.VERTICAL;
+        const direction = Direction.HORIZONTAL;
         console.warn("-> Mock call to FolioPageFragment.getDirection(), return " + direction);
         return direction;
     },
@@ -448,14 +446,14 @@ function sleep(seconds) {
     }
 };
 
-var FolioWebView = {
+const FolioWebView = {
 
     setCompatMode : function(compatMode) {
         console.warn("-> Mock call to FolioWebView.setCompatMode(" + compatMode + ")");
     }
 };
 
-var WebViewPager = {
+const WebViewPager = {
 
     setCurrentPage : function(pageIndex) {
         console.warn("-> Mock call to WebViewPager.setCurrentPage(" + pageIndex + ")");
@@ -470,7 +468,7 @@ var WebViewPager = {
     }
 };
 
-var LoadingView = {
+const LoadingView = {
 
     show : function() {
         console.warn("-> Mock call to LoadingView.show()");
@@ -490,7 +488,7 @@ var LoadingView = {
 };*/
 
 function goToHighlight(highlightId) {
-    var element = document.getElementById(highlightId.toString());
+    const element = document.getElementById(highlightId.toString());
     if (element)
         scrollToNodeOrRange(element);
 
@@ -498,7 +496,7 @@ function goToHighlight(highlightId) {
 }
 
 function goToAnchor(anchorId) {
-    var element = document.getElementById(anchorId);
+    const element = document.getElementById(anchorId);
     if (element)
         scrollToNodeOrRange(element);
 
@@ -508,8 +506,8 @@ function goToAnchor(anchorId) {
 function scrollToLast() {
     console.log("-> scrollToLast");
 
-    var direction = FolioWebView.getDirection();
-    var scrollingElement = bodyOrHtml();
+    const direction = FolioWebView.getDirection();
+    const scrollingElement = bodyOrHtml();
 
     switch (direction) {
         case Direction.VERTICAL:
@@ -529,8 +527,8 @@ function scrollToLast() {
 function scrollToFirst() {
     console.log("-> scrollToFirst");
 
-    var direction = FolioWebView.getDirection();
-    var scrollingElement = bodyOrHtml();
+    const direction = FolioWebView.getDirection();
+    const scrollingElement = bodyOrHtml();
 
     switch (direction) {
         case Direction.VERTICAL:
@@ -583,8 +581,8 @@ function preInitHorizontalDirection() {
 
     //console.log(window);
     //console.log("-> " + document.getElementsByTagName('title')[0].innerText);
-    var htmlElement = document.getElementsByTagName('html')[0];
-    var bodyElement = document.getElementsByTagName('body')[0];
+    const htmlElement = document.getElementsByTagName('html')[0];
+    const bodyElement = document.getElementsByTagName('body')[0];
 
     // Required when initHorizontalDirection() is called multiple times.
     // Currently it is called only once per page.
@@ -593,17 +591,17 @@ function preInitHorizontalDirection() {
     htmlElement.style.height = null;
     bodyElement.style.height = null;
 
-    var bodyStyle = bodyElement.currentStyle || window.getComputedStyle(bodyElement);
-    var paddingTop = parseInt(bodyStyle.paddingTop, 10);
-    var paddingRight = parseInt(bodyStyle.paddingRight, 10);
-    var paddingBottom = parseInt(bodyStyle.paddingBottom, 10);
-    var paddingLeft = parseInt(bodyStyle.paddingLeft, 10);
+    const bodyStyle = bodyElement.currentStyle || window.getComputedStyle(bodyElement);
+    const paddingTop = parseInt(bodyStyle.paddingTop, 10);
+    const paddingRight = parseInt(bodyStyle.paddingRight, 10);
+    const paddingBottom = parseInt(bodyStyle.paddingBottom, 10);
+    const paddingLeft = parseInt(bodyStyle.paddingLeft, 10);
     //console.log("-> padding = " + paddingTop + ", " + paddingRight + ", " + paddingBottom + ", " + paddingLeft);
 
     //document.documentElement.clientWidth is window.innerWidth excluding x scrollbar width
-    var pageWidth = document.documentElement.clientWidth - (paddingLeft + paddingRight);
+    const pageWidth = document.documentElement.clientWidth - (paddingLeft + paddingRight);
     //document.documentElement.clientHeight is window.innerHeight excluding y scrollbar height
-    var pageHeight = document.documentElement.clientHeight - (paddingTop + paddingBottom);
+    const pageHeight = document.documentElement.clientHeight - (paddingTop + paddingBottom);
 
     bodyElement.style.webkitColumnGap = (paddingLeft + paddingRight) + 'px';
     bodyElement.style.webkitColumnWidth = pageWidth + 'px';
@@ -624,30 +622,30 @@ function preInitHorizontalDirection() {
 
 function postInitHorizontalDirection() {
 
-    var htmlElement = document.getElementsByTagName('html')[0];
-    var bodyElement = document.getElementsByTagName('body')[0];
-    var bodyStyle = bodyElement.currentStyle || window.getComputedStyle(bodyElement);
-    var paddingTop = parseInt(bodyStyle.paddingTop, 10);
-    var paddingRight = parseInt(bodyStyle.paddingRight, 10);
-    var paddingBottom = parseInt(bodyStyle.paddingBottom, 10);
-    var paddingLeft = parseInt(bodyStyle.paddingLeft, 10);
-    var clientWidth = document.documentElement.clientWidth;
+    const htmlElement = document.getElementsByTagName('html')[0];
+    const bodyElement = document.getElementsByTagName('body')[0];
+    const bodyStyle = bodyElement.currentStyle || window.getComputedStyle(bodyElement);
+    const paddingTop = parseInt(bodyStyle.paddingTop, 10);
+    const paddingRight = parseInt(bodyStyle.paddingRight, 10);
+    const paddingBottom = parseInt(bodyStyle.paddingBottom, 10);
+    const paddingLeft = parseInt(bodyStyle.paddingLeft, 10);
+    const clientWidth = document.documentElement.clientWidth;
 
-    var scrollWidth = document.documentElement.scrollWidth;
+    let scrollWidth = document.documentElement.scrollWidth;
     //console.log("-> document.documentElement.offsetWidth = " + document.documentElement.offsetWidth);
     if (scrollWidth > clientWidth
         && scrollWidth > document.documentElement.offsetWidth) {
         scrollWidth += paddingRight;
     }
-    var newBodyWidth = scrollWidth - (paddingLeft + paddingRight);
+    const newBodyWidth = scrollWidth - (paddingLeft + paddingRight);
     window.scrollWidth = scrollWidth;
 
     htmlElement.style.width = scrollWidth + 'px';
     bodyElement.style.width = newBodyWidth + 'px';
 
     // pageCount deliberately rounded instead of ceiling to avoid any unexpected error
-    var pageCount = Math.round(scrollWidth / clientWidth);
-    var pageCountFloat = scrollWidth / clientWidth;
+    const pageCount = Math.round(scrollWidth / clientWidth);
+    const pageCountFloat = scrollWidth / clientWidth;
 
     if (pageCount != pageCountFloat) {
         console.warn("-> pageCount = " + pageCount + ", pageCountFloat = " + pageCountFloat
@@ -679,20 +677,20 @@ function bodyOrHtml() {
  */
 function scrollToNodeOrRange(nodeOrRange) {
 
-    var scrollingElement = bodyOrHtml();
-    var direction = FolioWebView.getDirection();
+    const scrollingElement = bodyOrHtml();
+    const direction = FolioWebView.getDirection();
 
     // For Direction.VERTICAL
-    var nodeOffsetTop, nodeOffsetHeight;
+    let nodeOffsetTop, nodeOffsetHeight;
 
     // For Direction.HORIZONTAL
-    var nodeOffsetLeft;
+    let nodeOffsetLeft;
 
     if (nodeOrRange instanceof Range || nodeOrRange.nodeType === Node.TEXT_NODE) {
 
-        var rect;
+        let rect;
         if (nodeOrRange.nodeType && nodeOrRange.nodeType === Node.TEXT_NODE) {
-            var range = document.createRange();
+            const range = document.createRange();
             range.selectNode(nodeOrRange);
             rect = RangeFix.getBoundingClientRect(range);
         } else {
@@ -715,15 +713,15 @@ function scrollToNodeOrRange(nodeOrRange) {
     switch (direction) {
 
         case Direction.VERTICAL:
-            var topDistraction = FolioWebView.getTopDistraction(DisplayUnit.DP);
-            var pageTop = scrollingElement.scrollTop + topDistraction;
-            var pageBottom = scrollingElement.scrollTop + document.documentElement.clientHeight
+            const topDistraction = FolioWebView.getTopDistraction(DisplayUnit.DP);
+            const pageTop = scrollingElement.scrollTop + topDistraction;
+            const pageBottom = scrollingElement.scrollTop + document.documentElement.clientHeight
                 - FolioWebView.getBottomDistraction(DisplayUnit.DP);
 
-            var elementTop = nodeOffsetTop - 20;
+            let elementTop = nodeOffsetTop - 20;
             elementTop = elementTop < 0 ? 0 : elementTop;
-            var elementBottom = nodeOffsetTop + nodeOffsetHeight + 20;
-            var needToScroll = (elementTop < pageTop || elementBottom > pageBottom);
+            const elementBottom = nodeOffsetTop + nodeOffsetHeight + 20;
+            const needToScroll = (elementTop < pageTop || elementBottom > pageBottom);
 
             //console.log("-> topDistraction = " + topDistraction);
             //console.log("-> pageTop = " + pageTop);
@@ -732,7 +730,7 @@ function scrollToNodeOrRange(nodeOrRange) {
             //console.log("-> elementBottom = " + elementBottom);
 
             if (needToScroll) {
-                var newScrollTop = elementTop - topDistraction;
+                let newScrollTop = elementTop - topDistraction;
                 newScrollTop = newScrollTop < 0 ? 0 : newScrollTop;
                 //console.log("-> Scrolled to = " + newScrollTop);
                 scrollingElement.scrollTop = newScrollTop;
@@ -740,9 +738,9 @@ function scrollToNodeOrRange(nodeOrRange) {
             break;
 
         case Direction.HORIZONTAL:
-            var clientWidth = document.documentElement.clientWidth;
-            var pageIndex = Math.floor(nodeOffsetLeft / clientWidth);
-            var newScrollLeft = clientWidth * pageIndex;
+            const clientWidth = document.documentElement.clientWidth;
+            const pageIndex = Math.floor(nodeOffsetLeft / clientWidth);
+            const newScrollLeft = clientWidth * pageIndex;
             //console.log("-> newScrollLeft = " + newScrollLeft);
             scrollingElement.scrollLeft = newScrollLeft;
             WebViewPager.setCurrentPage(pageIndex);
@@ -755,9 +753,9 @@ function scrollToNodeOrRange(nodeOrRange) {
 function highlightSearchLocator(rangeCfi) {
 
     try {
-        var $obj = EPUBcfi.Interpreter.getRangeTargetElements(rangeCfi, document);
+        const $obj = EPUBcfi.Interpreter.getRangeTargetElements(rangeCfi, document);
 
-        var range = document.createRange();
+        const range = document.createRange();
         range.setStart($obj.startElement, $obj.startOffset);
         range.setEnd($obj.endElement, $obj.endOffset);
 
@@ -779,7 +777,7 @@ function highlightSearchLocator(rangeCfi) {
 function getSelectionRect(element) {
     console.log("-> getSelectionRect");
 
-    var range;
+    let range;
     if (element !== undefined) {
         range = document.createRange();
         range.selectNodeContents(element);
@@ -787,8 +785,8 @@ function getSelectionRect(element) {
         range = window.getSelection().getRangeAt(0);
     }
 
-    //var rect = range.getBoundingClientRect();
-    var rect = RangeFix.getBoundingClientRect(range);
+    //const rect = range.getBoundingClientRect();
+    const rect = RangeFix.getBoundingClientRect(range);
     return {
         left: rect.left,
         top: rect.top,
@@ -807,7 +805,7 @@ function onClickHighlight(element) {
     console.log("-> onClickHighlight");
     event.stopPropagation();
     thisHighlight = element;
-    var rectJson = getSelectionRect(element);
+    const rectJson = getSelectionRect(element);
     FolioWebView.setSelectionRect(rectJson.left, rectJson.top, rectJson.right, rectJson.bottom);
 }
 
@@ -817,9 +815,9 @@ function deleteThisHighlight() {
 }
 
 function onTextSelectionItemClicked(id) {
-    var selectionType = window.getSelection().type;
-    var selectedText = "";
-    if (selectionType == "Range") {
+    const selectionType = window.getSelection().type;
+    let selectedText = "";
+    if (selectionType === "Range") {
         selectedText = window.getSelection().toString();
     } else {
         selectedText = thisHighlight.textContent;
@@ -835,9 +833,9 @@ function onClickHtml() {
 function computeLastReadCfi() {
 
     viewportRect = constructDOMRect(FolioWebView.getViewportRect(DisplayUnit.CSS_PX));
-    var node = getFirstVisibleNode(document.body) || document.body;
+    const node = getFirstVisibleNode(document.body) || document.body;
 
-    var cfi;
+    let cfi;
     if (node.nodeType === Node.TEXT_NODE) {
         cfi = EPUBcfi.Generator.generateCharacterOffsetCFIComponent(node, 0);
     } else {
@@ -850,7 +848,7 @@ function computeLastReadCfi() {
 }
 
 function constructDOMRect(rectJsonString) {
-    var rectJson = JSON.parse(rectJsonString);
+    const rectJson = JSON.parse(rectJsonString);
     return new DOMRect(rectJson.x, rectJson.y, rectJson.width, rectJson.height);
 }
 
@@ -861,14 +859,14 @@ function constructDOMRect(rectJsonString) {
  */
 function getFirstVisibleNode(node) {
 
-    var range = document.createRange();
+    const range = document.createRange();
     range.selectNode(node);
-    var rect = RangeFix.getBoundingClientRect(range);
+    const rect = RangeFix.getBoundingClientRect(range);
     if (rect == null)
         return null;
 
-    var intersects = rectIntersects(viewportRect, rect);
-    var contains = rectContains(viewportRect, rect);
+    const intersects = rectIntersects(viewportRect, rect);
+    const contains = rectContains(viewportRect, rect);
 
     if (contains) {
         // node's rect is completely inside viewportRect.
@@ -876,14 +874,14 @@ function getFirstVisibleNode(node) {
 
     } else if (intersects) {
 
-        var childNodes = node.childNodes;
-        for (var i = 0; i < childNodes.length; i++) {
+        const childNodes = node.childNodes;
+        for (let i = 0; i < childNodes.length; i++) {
 
             // EPUB CFI ignores nodes other than ELEMENT_NODE and TEXT_NODE
             // http://www.idpf.org/epub/linking/cfi/epub-cfi.html#sec-path-child-ref
 
             if (childNodes[i].nodeType === Node.ELEMENT_NODE || childNodes[i].nodeType === Node.TEXT_NODE) {
-                var childNode = getFirstVisibleNode(childNodes[i]);
+                const childNode = getFirstVisibleNode(childNodes[i]);
                 if (childNode) {
                     return childNode;
                 }
@@ -900,7 +898,7 @@ function getFirstVisibleNode(node) {
 function scrollToCfi(cfi) {
 
     try {
-        var $node = EPUBcfi.Interpreter.getTargetElement(cfi, document);
+        const $node = EPUBcfi.Interpreter.getTargetElement(cfi, document);
         scrollToNodeOrRange($node[0]);
     } catch (e) {
         console.error("-> " + e);

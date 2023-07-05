@@ -19,4 +19,5 @@ sealed class FolioActivityEvent {
     object StopStreamerServer : FolioActivityEvent()
     object ToggleAppBarsVisibility : FolioActivityEvent()
     object ToggleMenuVisibility : FolioActivityEvent()
+    object DismissMenu : FolioActivityEvent()
 }

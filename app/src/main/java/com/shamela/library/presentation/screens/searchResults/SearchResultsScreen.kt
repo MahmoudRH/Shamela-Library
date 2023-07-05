@@ -23,9 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.shamela.apptheme.common.EmptyListScreen
-import com.shamela.apptheme.common.LoadingScreen
-import com.shamela.apptheme.common.SearchTopBar
+import com.shamela.apptheme.presentation.common.EmptyListScreen
+import com.shamela.apptheme.presentation.common.LoadingScreen
+import com.shamela.apptheme.presentation.common.SearchTopBar
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
 

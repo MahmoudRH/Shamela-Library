@@ -40,11 +40,16 @@ class LibraryViewModel @Inject constructor(
             LibraryEvent.LoadUserBooksAndSections -> {
                 viewModelScope.launch {
                     Log.e("Mah ", "LibraryViewModel: loading Books")
+                    booksUseCases.getAllBooks().onEach {
+                    //reading the files under the downloads folder, saving them to database if they're not already (for externally added files)
+                    //another case is, when the app data is cleared or the app is deleted then downloaded again.
+                        booksUseCases.saveDownloadedBook(it)
+                    }.launchIn(this)
                     booksUseCases.getDownloadedBooks().onEach {
-                        val books = it.associateBy { book -> book.id }
+                        val databaseBooks = it.associateBy { book -> book.id }
                         _libraryState.update { state ->
                             state.copy(
-                                books = state.books + books,
+                                books = state.books + databaseBooks,
                                 isLoading = false
                             )
                         }

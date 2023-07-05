@@ -19,12 +19,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,6 +48,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -50,13 +60,21 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.FormatListBulleted
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.LocalLibrary
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
@@ -70,6 +88,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -100,11 +119,12 @@ import com.folioreader.FolioReader
 import com.folioreader.model.locators.SearchLocator
 import com.folioreader.ui.activity.searchActivity.SearchActivity
 import com.folioreader.ui.base.HtmlUtil
-import com.folioreader.ui.fragment.FolioPageFragment
-import com.shamela.apptheme.common.DefaultTopBar
-import com.shamela.apptheme.common.LoadingScreen
-import com.shamela.apptheme.theme.AppFonts
-import com.shamela.apptheme.theme.AppTheme
+import com.folioreader.util.HighlightUtil
+import com.shamela.apptheme.presentation.common.DefaultTopBar
+import com.shamela.apptheme.presentation.common.EmptyListScreen
+import com.shamela.apptheme.presentation.common.LoadingScreen
+import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
@@ -125,7 +145,7 @@ class FolioActivity : ComponentActivity() {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    @OptIn(ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.e(LOG_TAG, "-> onCreate")
@@ -162,125 +182,99 @@ class FolioActivity : ComponentActivity() {
                                 exit = slideOutVertically(
                                     targetOffsetY = { -it },
                                     animationSpec = tween(250)
-                                ),
-
-                                ) {
-                                DefaultTopBar(
-                                    title = state.bookTitle,
-                                    actionIcon = Icons.Outlined.Search,
-                                    onActionClick = {
-                                        val intent =
-                                            Intent(this@FolioActivity, SearchActivity::class.java)
-                                        intent.putExtra(
-                                            SearchActivity.BUNDLE_SPINE_SIZE,
-                                            state.publication?.readingOrder?.size ?: 0
+                                )
+                            ) {
+                                val interactionSource = remember { MutableInteractionSource() }
+                                CenterAlignedTopAppBar(
+                                    modifier = Modifier,
+                                    title = {
+                                        Text(
+                                            text = state.bookTitle,
+                                            style = AppFonts.textLargeBold
                                         )
-                                        searchLauncher.launch(intent)
                                     },
-                                    onNavigateBack = {
-                                        finish()
+                                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                            15.dp
+                                        ),
+                                    ),
+                                    actions = {
+
+                                        IconButton(onClick = {
+                                            onSearchButtonClick(state.publication?.readingOrder?.size)
+                                        }) {
+                                            Icon(
+                                                Icons.Outlined.Search,
+                                                contentDescription = null
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.size(4.dp))
+
+                                        IconButton(onClick = {
+                                            viewModel.onEvent(FolioActivityEvent.ToggleMenuVisibility)
+                                        }) {
+                                            Icon(Icons.Outlined.MoreVert, contentDescription = null)
+                                        }
+                                        DropdownMenu(
+                                            expanded = state.isMenuVisible,
+                                            onDismissRequest = { viewModel.onEvent(FolioActivityEvent.DismissMenu) }
+                                        ) {
+                                            DropdownMenuItem(
+                                                onClick = { /*TODO*/ },
+                                                leadingIcon = {
+                                                    Icon(Icons.Outlined.Settings, null)
+                                                },
+                                                text = {
+                                                    Text(
+                                                        text = "الإعدادات",
+                                                        style = AppFonts.textNormal
+                                                    )
+                                                })
+                                            DropdownMenuItem(
+                                                onClick = { /*TODO*/ },
+                                                text = {
+                                                    Text(
+                                                        text = "الفهرس",
+                                                        style = AppFonts.textNormal
+                                                    )
+                                                },
+                                                leadingIcon = {
+                                                    Icon(Icons.Outlined.FormatListBulleted, null)
+                                                })
+                                        }
+
+                                    },
+                                    navigationIcon = {
+                                        IconButton(onClick = { finish() }) {
+                                            Icon(
+                                                Icons.Default.ArrowForwardIos,
+                                                contentDescription = null
+                                            )
+                                        }
                                     }
                                 )
                             }
                         },
                         containerColor = Color(backgroundColor),
-                        floatingActionButton = {
-                            AnimatedVisibility(
-                                visible = state.isAppBarsVisible,
-                                enter = slideInVertically(initialOffsetY = { it }),
-                                exit = slideOutVertically(
-                                    targetOffsetY = { it },
-                                    animationSpec = tween(250)
-                                ),
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    AnimatedVisibility(
-                                        visible = state.isMenuVisible,
-                                        enter = expandVertically(),
-                                        exit = shrinkVertically()
-                                    ) {
-                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Text(
-                                                    text = "الإعدادات",
-                                                    style = AppFonts.textSmall,
-                                                    modifier = Modifier
-                                                        .clip(RoundedCornerShape(25))
-                                                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                                                        .clickable { /* TODO: Open Settings */ }
-                                                        .padding(
-                                                            horizontal = 10.dp,
-                                                            vertical = 5.dp
-                                                        ),
-                                                    color = MaterialTheme.colorScheme.contentColorFor(
-                                                        MaterialTheme.colorScheme.secondaryContainer
-                                                    )
-                                                )
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                SmallFloatingActionButton(
-                                                    onClick = { /*TODO: Open Settings*/ },
-                                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Outlined.Settings,
-                                                        contentDescription = null
-                                                    )
-                                                }
-                                            }
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Text(
-                                                    text = "الفهرس",
-                                                    style = AppFonts.textSmall,
-                                                    modifier = Modifier
-                                                        .clip(RoundedCornerShape(25))
-                                                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                                                        .clickable { /* TODO: Open Table Of Contents */ }
-                                                        .padding(
-                                                            horizontal = 10.dp,
-                                                            vertical = 5.dp
-                                                        ),
-                                                    color = MaterialTheme.colorScheme.contentColorFor(
-                                                        MaterialTheme.colorScheme.secondaryContainer
-                                                    )
-                                                )
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                SmallFloatingActionButton(
-                                                    onClick = { /*TODO: Open Table Of Contents*/ },
-                                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Outlined.FormatListBulleted,
-                                                        contentDescription = null
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                    FloatingActionButton(
-                                        modifier = Modifier.align(Alignment.End),
-                                        onClick = { viewModel.onEvent(FolioActivityEvent.ToggleMenuVisibility) },
-                                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.LocalLibrary,
-                                            contentDescription = null
-                                        )
-                                    }
-                                }
-                            }
-                        },
                         bottomBar = {
                             BottomBar(
                                 visibility = state.isAppBarsVisible,
                                 currentPage = state.currentPageText,
-                                onCurrentPageChange = { viewModel.onEvent(FolioActivityEvent.OnCurrentPageTextChanged(it)) },
+                                onCurrentPageChange = {
+                                    viewModel.onEvent(
+                                        FolioActivityEvent.OnCurrentPageTextChanged(
+                                            it
+                                        )
+                                    )
+                                },
                                 onDone = {
-                                  scope.launch {
-                                      state.currentPageText.toIntOrNull()?.let{
-                                          val page = it.coerceIn(0,state.bookPages.size-1)
-                                          pagerState?.scrollToPage(page)
-                                      }
-                                  }
+                                    scope.launch {
+                                        state.currentPageText.toIntOrNull()?.let {
+                                            val page = it.coerceIn(0, state.bookPages.size - 1)
+                                            pagerState?.scrollToPage(page)
+                                        }
+                                    }
                                 },
                                 isPrevButtonEnabled = pagerState?.currentPage != 0,
                                 isNextButtonEnabled = pagerState?.currentPage != state.bookPages.size - 1,
@@ -307,8 +301,8 @@ class FolioActivity : ComponentActivity() {
                                 pageCount = { state.bookPages.size }
                             )
                             LaunchedEffect(key1 = Unit, block = {
-                                snapshotFlow { pagerState?.currentPage }.collect {page->
-                                    page?.let{
+                                snapshotFlow { pagerState?.currentPage }.collect { page ->
+                                    page?.let {
                                         viewModel.onEvent(FolioActivityEvent.OnChangeSelectedPage(it))
                                     }
                                 }
@@ -357,13 +351,13 @@ class FolioActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
     @Composable
     private fun BottomBar(
         visibility: Boolean,
         currentPage: String,
         onCurrentPageChange: (String) -> Unit,
-        onDone:()->Unit,
+        onDone: () -> Unit,
         isPrevButtonEnabled: Boolean,
         isNextButtonEnabled: Boolean,
         onPrevButtonClick: () -> Unit,
@@ -411,7 +405,10 @@ class FolioActivity : ComponentActivity() {
                     modifier = Modifier
                         .width(60.dp)
                         .height(30.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
                     keyboardActions = KeyboardActions(onDone = { onDone(); focusManager.clearFocus() }),
                     textStyle = AppFonts.textNormal.copy(textAlign = TextAlign.Center)
                 ) {
@@ -445,6 +442,14 @@ class FolioActivity : ComponentActivity() {
             }
         }
     }
+
+
+    private fun onSearchButtonClick(spineSize: Int?) {
+        val intent = Intent(this@FolioActivity, SearchActivity::class.java)
+        intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, spineSize ?: 0)
+        searchLauncher.launch(intent)
+    }
+
 
     @OptIn(ExperimentalFoundationApi::class)
     private val searchLauncher =
@@ -493,7 +498,7 @@ class FolioActivity : ComponentActivity() {
                 try {
                     return WebResourceResponse("image/png", null, null)
                 } catch (e: Exception) {
-                    Log.e(FolioPageFragment.LOG_TAG, "shouldInterceptRequest failed", e)
+                    Log.e(LOG_TAG, "shouldInterceptRequest failed", e)
                 }
 
             }
@@ -504,6 +509,9 @@ class FolioActivity : ComponentActivity() {
             super.onPageFinished(view, url)
             view?.let {
                 Log.e("MAH ", "onPageFinished:url($url) ")
+                view.evaluateJavascript("getReadingTime();") { result ->
+                    Log.e(LOG_TAG, "readingTime : $result ,onPageFinished[$url]")
+                }
                 searchResultToBeHighlighted.let {
                     if (it.isNotBlank()) {
                         Log.e(LOG_TAG, "onPageFinished:webView.loadUrl($it) ")
@@ -525,8 +533,12 @@ class FolioActivity : ComponentActivity() {
         backgroundColor: Int,
         onTapped: () -> Unit,
     ) {
+        val scope = rememberCoroutineScope()
         AndroidView(factory = { context ->
-            WebView(context).apply {
+            com.folioreader.ui.view.CustomWebView(
+                context,
+                isNightMode = AppTheme.isDarkTheme(context)
+            ).apply {
                 setBackgroundColor(backgroundColor)
                 settings.javaScriptEnabled = true
                 settings.defaultTextEncodingName = "UTF-8"
@@ -540,11 +552,43 @@ class FolioActivity : ComponentActivity() {
                     }
 
                 }, "CustomWebView")
+                addJavascriptInterface(this, "FolioWebView")
                 loadDataWithBaseURL(url, data, mimeType, "UTF-8", null)
             }
         }, update = {
 
         })
+    }
+
+    @JavascriptInterface
+    fun onReceiveHighlights(html: String?) {
+//        if (html != null) {
+//           val rangy = HighlightUtil.createHighlightRangy(
+//                applicationContext,
+//                html,
+//                viewModel.state,
+//                pageName,
+//                spineIndex,
+//                rangy
+//            )
+//        }
+    }
+
+    @JavascriptInterface
+    fun getUpdatedHighlightId(id: String?, style: String) {
+//        if (id != null) {
+//            val highlightImpl = HighLightTable.updateHighlightStyle(id, style)
+//            if (highlightImpl != null) {
+//                HighlightUtil.sendHighlightBroadcastEvent(
+//                    requireActivity().applicationContext,
+//                    highlightImpl,
+//                    HighLight.HighLightAction.MODIFY
+//                )
+//            }
+//            val rangyString = HighlightUtil.generateRangyString(pageName)
+//            requireActivity().runOnUiThread { loadRangy(rangyString) }
+//
+//        }
     }
 
 

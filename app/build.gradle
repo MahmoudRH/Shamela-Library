@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace 'com.shamela.library'
-    compileSdk 33
+    compileSdk versions.androidCompileSdk
 
     defaultConfig {
         applicationId "com.shamela.library"
-        minSdk 24
-        targetSdk 33
+        minSdk versions.androidMinSdk
+        targetSdk versions.androidTargetSdk
         versionCode 1
         versionName "1.0"
 
@@ -108,7 +108,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     //-> Compose Testing
-    androidTestImplementation platform('androidx.compose:compose-bom:2022.10.00')
+    androidTestImplementation platform("androidx.compose:compose-bom:$versions.compose_bom")
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'

@@ -11,7 +11,7 @@ object HtmlUtil {
      * Function modifies input html string by adding extra css,js and font information.
      *
      * @param context     Activity Context
-     * @param htmlContent input html raw data
+     * @param content input html raw data
      * @return modified raw html string
      */
     fun getHtmlContent(

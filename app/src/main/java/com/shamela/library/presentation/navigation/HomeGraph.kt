@@ -25,7 +25,7 @@ import com.shamela.library.presentation.screens.library.LibraryScreen
 import com.shamela.library.presentation.screens.search.SearchScreen
 import com.shamela.library.presentation.screens.searchResults.SearchResultsScreen
 import com.shamela.library.presentation.screens.sectionBooks.SectionBooksScreen
-import com.shamela.library.presentation.screens.settings.SettingsScreen
+import com.shamela.apptheme.presentation.settings.SettingsScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
