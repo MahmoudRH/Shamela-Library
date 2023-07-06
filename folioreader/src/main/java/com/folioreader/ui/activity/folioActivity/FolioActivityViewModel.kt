@@ -164,7 +164,7 @@ class FolioActivityViewModel : ViewModel() {
                 var line: String?
                 while (reader.readLine().also { line = it } != null) {
                     line?.let {
-                        if (!it.contains("<hr/>") && !it.contains("¦"))
+//                        if (!it.contains("<hr/>") && !it.contains("¦"))
                             stringBuilder.append(it).append('\n')
                     }
                 }

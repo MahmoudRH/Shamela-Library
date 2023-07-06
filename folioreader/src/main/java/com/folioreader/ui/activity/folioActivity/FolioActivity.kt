@@ -19,29 +19,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,21 +41,15 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.FormatListBulleted
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.LocalLibrary
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
@@ -76,33 +57,28 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.input.ImeAction
@@ -118,21 +94,21 @@ import com.folioreader.Constants
 import com.folioreader.FolioReader
 import com.folioreader.model.locators.SearchLocator
 import com.folioreader.ui.activity.searchActivity.SearchActivity
-import com.folioreader.ui.base.HtmlUtil
-import com.folioreader.util.HighlightUtil
-import com.shamela.apptheme.presentation.common.DefaultTopBar
-import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
 
 class FolioActivity : ComponentActivity() {
     private val viewModel: FolioActivityViewModel by viewModels()
-    private var searchResultToBeHighlighted = ""
+    private var searchResultsFlow = emptyFlow<Pair<String,String>>()
 
     @OptIn(ExperimentalFoundationApi::class)
     private var pagerState: PagerState? = null
@@ -172,6 +148,8 @@ class FolioActivity : ComponentActivity() {
             val state = viewModel.state.collectAsState().value
             val backgroundColor = if (AppTheme.isDarkTheme(this)) 0xff131313 else 0xffffffff
             val scope = rememberCoroutineScope()
+            val webViews = remember(LocalContext.current) { mutableStateMapOf<Int, WebView>() }
+
             AppTheme.ShamelaLibraryTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Scaffold(
@@ -218,7 +196,11 @@ class FolioActivity : ComponentActivity() {
                                         }
                                         DropdownMenu(
                                             expanded = state.isMenuVisible,
-                                            onDismissRequest = { viewModel.onEvent(FolioActivityEvent.DismissMenu) }
+                                            onDismissRequest = {
+                                                viewModel.onEvent(
+                                                    FolioActivityEvent.DismissMenu
+                                                )
+                                            }
                                         ) {
                                             DropdownMenuItem(
                                                 onClick = { /*TODO*/ },
@@ -300,13 +282,22 @@ class FolioActivity : ComponentActivity() {
                                 initialPageOffsetFraction = 0f,
                                 pageCount = { state.bookPages.size }
                             )
-                            LaunchedEffect(key1 = Unit, block = {
+                            LaunchedEffect(pagerState!!.currentPage) {
+                                webViews.keys.forEach { key ->
+                                    val maxCacheDistance = 3
+                                    if (abs(key - pagerState!!.currentPage) >= maxCacheDistance) {
+                                        webViews.remove(key)
+                                        println("webView $key deinited")
+                                    }
+                                }
+                            }
+                            LaunchedEffect(Unit){
                                 snapshotFlow { pagerState?.currentPage }.collect { page ->
                                     page?.let {
                                         viewModel.onEvent(FolioActivityEvent.OnChangeSelectedPage(it))
                                     }
                                 }
-                            })
+                            }
                             pagerState?.let { pagerState ->
                                 HorizontalPager(
                                     state = pagerState,
@@ -330,15 +321,39 @@ class FolioActivity : ComponentActivity() {
                                             .fillMaxSize()
                                             .verticalScroll(rememberScrollState())
                                     ) {
-                                        CustomWebView(
-                                            url = state.bookPages[currentPageIndex],
-                                            data = state.htmlData[currentPageIndex],
-                                            mimeType = state.mimeType,
-                                            backgroundColor = backgroundColor.toInt(),
-                                            onTapped = {
-                                                viewModel.onEvent(FolioActivityEvent.ToggleAppBarsVisibility)
+                                       val searchResult =  searchResultsFlow.collectAsState(initial = "" to "").value
+                                        AndroidView(factory = { context ->
+                                            webViews[currentPageIndex] ?: run{
+                                                com.folioreader.ui.view.CustomWebView(
+                                                    context,
+                                                    isNightMode = AppTheme.isDarkTheme(context)
+                                                ).apply {
+                                                    setBackgroundColor(backgroundColor.toInt())
+                                                    settings.javaScriptEnabled = true
+                                                    settings.defaultTextEncodingName = "UTF-8"
+                                                    settings.allowFileAccess = true
+                                                    webViewClient = mMebViewClient
+                                                    addJavascriptInterface(object {
+                                                        @JavascriptInterface
+                                                        fun isTapped() {
+                                                            Log.e("CustomWebView", "onClickHtml: isTapped")
+                                                            viewModel.onEvent(FolioActivityEvent.ToggleAppBarsVisibility)
+                                                        }
+                                                    }, "CustomWebView")
+                                                    addJavascriptInterface(this, "FolioWebView")
+                                                    loadDataWithBaseURL(state.bookPages[currentPageIndex], state.htmlData[currentPageIndex], state.mimeType, "UTF-8", null)
+                                                    webViews [currentPageIndex] = this
+                                                }
                                             }
-                                        )
+                                        }, update = { webview ->
+                                            scope.launch {
+                                                delay(200)
+                                                val (href,javascriptCall) = searchResult
+                                                if (state.bookPages[currentPageIndex].contains(href) && javascriptCall.isNotBlank()) {
+                                                    webview.loadUrl(javascriptCall)
+                                                }
+                                            }
+                                        })
                                     }
 
                                 }
@@ -351,7 +366,7 @@ class FolioActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BottomBar(
         visibility: Boolean,
@@ -469,11 +484,9 @@ class FolioActivity : ComponentActivity() {
                                 it.contains(searchLocator.href)
                             }
                             pagerState?.scrollToPage(page)
-                            searchResultToBeHighlighted = highlightSearchLocator(searchLocator)
-                            Log.e(
-                                LOG_TAG,
-                                "searchResultToBeHighlighted:${searchResultToBeHighlighted} ",
-                            )
+                            searchResultsFlow = flow<Pair<String,String>> {
+                                emit(searchLocator.href to highlightSearchLocator(searchLocator) )
+                            }
                         }
                     }
                 }
@@ -504,62 +517,7 @@ class FolioActivity : ComponentActivity() {
             }
             return null
         }
-
-        override fun onPageFinished(view: WebView?, url: String?) {
-            super.onPageFinished(view, url)
-            view?.let {
-                Log.e("MAH ", "onPageFinished:url($url) ")
-                view.evaluateJavascript("getReadingTime();") { result ->
-                    Log.e(LOG_TAG, "readingTime : $result ,onPageFinished[$url]")
-                }
-                searchResultToBeHighlighted.let {
-                    if (it.isNotBlank()) {
-                        Log.e(LOG_TAG, "onPageFinished:webView.loadUrl($it) ")
-                        view.loadUrl(it)
-                        searchResultToBeHighlighted = ""
-                    }
-                }
-            }
-
-        }
     }
-
-    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
-    @Composable
-    private fun CustomWebView(
-        url: String,
-        data: String,
-        mimeType: String = "application/xhtml+xml",
-        backgroundColor: Int,
-        onTapped: () -> Unit,
-    ) {
-        val scope = rememberCoroutineScope()
-        AndroidView(factory = { context ->
-            com.folioreader.ui.view.CustomWebView(
-                context,
-                isNightMode = AppTheme.isDarkTheme(context)
-            ).apply {
-                setBackgroundColor(backgroundColor)
-                settings.javaScriptEnabled = true
-                settings.defaultTextEncodingName = "UTF-8"
-                settings.allowFileAccess = true
-                webViewClient = mMebViewClient
-                addJavascriptInterface(object {
-                    @JavascriptInterface
-                    fun isTapped() {
-                        Log.e("CustomWebView", "onClickHtml: isTapped")
-                        onTapped()
-                    }
-
-                }, "CustomWebView")
-                addJavascriptInterface(this, "FolioWebView")
-                loadDataWithBaseURL(url, data, mimeType, "UTF-8", null)
-            }
-        }, update = {
-
-        })
-    }
-
     @JavascriptInterface
     fun onReceiveHighlights(html: String?) {
 //        if (html != null) {

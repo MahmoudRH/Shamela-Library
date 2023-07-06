@@ -761,12 +761,37 @@ function highlightSearchLocator(rangeCfi) {
 
         window.getSelection().removeAllRanges();
         window.getSelection().addRange(range);
-        scrollToNodeOrRange(range);
+
+        highlightSelectedText();
     } catch (e) {
         console.error("-> " + e);
     }
 
     LoadingView.hide();
+}
+function highlightSelectedText() {
+  if (window.getSelection) {
+    var selection = window.getSelection();
+
+    // Check if any text is selected
+    if (!selection.isCollapsed) {
+      var range = selection.getRangeAt(0);
+      var newNode = document.createElement('span');
+
+      // Set the background color and other styles for highlighting
+      newNode.style.backgroundColor = 'yellow';
+      newNode.style.color = 'black';
+
+      // Surround the selected text with the new span element
+      range.surroundContents(newNode);
+
+      // Clear the selection
+      selection.removeAllRanges();
+
+            newNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    }
+  }
 }
 
 /**
