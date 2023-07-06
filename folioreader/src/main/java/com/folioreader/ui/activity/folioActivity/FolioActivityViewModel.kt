@@ -195,12 +195,7 @@ class FolioActivityViewModel : ViewModel() {
     }
 
     private fun getStreamerUrl(bookFileName: String): String {
-        val url = String.format(
-            Constants.STREAMER_URL_TEMPLATE,
-            Constants.LOCALHOST,
-            portNumber,
-            bookFileName
-        )
+        val url = "${Constants.LOCALHOST}:$portNumber/$bookFileName/"
         return Uri.parse(url).toString()
     }
 }

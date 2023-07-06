@@ -41,9 +41,10 @@ class LibraryViewModel @Inject constructor(
                 viewModelScope.launch {
                     Log.e("Mah ", "LibraryViewModel: loading Books")
                     booksUseCases.getAllBooks().onEach {
-                    //reading the files under the downloads folder, saving them to database if they're not already (for externally added files)
-                    //another case is, when the app data is cleared or the app is deleted then downloaded again.
-                        booksUseCases.saveDownloadedBook(it)
+                        //reading the files under the downloads folder, saving them to database if they're not already (for externally added files)
+                        //another case is, when the app data is cleared or the app is deleted then downloaded again.
+                        if (it.pageCount > 0)  /* books are initially not parsed*/
+                            booksUseCases.saveDownloadedBook(it)
                     }.launchIn(this)
                     booksUseCases.getDownloadedBooks().onEach {
                         val databaseBooks = it.associateBy { book -> book.id }

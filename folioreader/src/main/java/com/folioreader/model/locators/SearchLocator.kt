@@ -52,7 +52,7 @@ class SearchLocator : Locator, Parcelable {
     }
 
     override fun toString(): String {
-        return "SearchLocator(primaryContents='$primaryContents', searchItemType=$searchItemType,  href = ${this.href}, title = ${this.title}, text =${this.text.toString()}"
+        return "SearchLocator(primaryContents='$primaryContents', searchItemType=$searchItemType,  href = ${this.href}, title = ${this.title}, text =${this.text.toString()}, locations: $locations"
     }
 
     companion object {
