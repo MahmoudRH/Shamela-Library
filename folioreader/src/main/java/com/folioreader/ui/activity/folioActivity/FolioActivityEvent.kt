@@ -14,7 +14,14 @@ sealed class FolioActivityEvent {
 
     class OnChangeTopActivity(val isTopActivity: Boolean) : FolioActivityEvent()
     class OnChangeTaskImportance(val taskImportance: Int) : FolioActivityEvent()
-    class OnChangeSelectedPage(val newPage: Int) : FolioActivityEvent()
+    class OnChangeSelectedPage(
+        val pageIndex: Int,
+        val fontSizeCssClass: String,
+        val fontFamilyCssClass: String,
+        val isNightMode: Boolean,
+        val context: Context,
+    ) : FolioActivityEvent()
+
     class OnCurrentPageTextChanged(val newPage: String) : FolioActivityEvent()
     object StopStreamerServer : FolioActivityEvent()
     object ToggleAppBarsVisibility : FolioActivityEvent()

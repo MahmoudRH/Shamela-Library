@@ -108,10 +108,10 @@ import kotlin.math.min
 
 class FolioActivity : ComponentActivity() {
     private val viewModel: FolioActivityViewModel by viewModels()
-    private var searchResultsFlow = emptyFlow<Pair<String,String>>()
+    private var searchResultsFlow = emptyFlow<Pair<String, String>>()
 
     @OptIn(ExperimentalFoundationApi::class)
-    private var pagerState: PagerState? = null
+    private lateinit var pagerState: PagerState
 
     companion object {
         const val LOG_TAG = "FolioActivityCompose"
@@ -152,215 +152,251 @@ class FolioActivity : ComponentActivity() {
 
             AppTheme.ShamelaLibraryTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Scaffold(
-                        topBar = {
-                            AnimatedVisibility(
-                                visible = state.isAppBarsVisible,
-                                enter = slideInVertically(initialOffsetY = { -it }),
-                                exit = slideOutVertically(
-                                    targetOffsetY = { -it },
-                                    animationSpec = tween(250)
-                                )
-                            ) {
-                                val interactionSource = remember { MutableInteractionSource() }
-                                CenterAlignedTopAppBar(
-                                    modifier = Modifier,
-                                    title = {
-                                        Text(
-                                            text = state.bookTitle,
-                                            style = AppFonts.textLargeBold
-                                        )
-                                    },
-                                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                            15.dp
-                                        ),
-                                    ),
-                                    actions = {
-
-                                        IconButton(onClick = {
-                                            onSearchButtonClick(state.publication?.readingOrder?.size)
-                                        }) {
-                                            Icon(
-                                                Icons.Outlined.Search,
-                                                contentDescription = null
+                    state.publication?.let { publication ->
+                        pagerState = rememberPagerState(
+                            initialPage = 0,
+                            initialPageOffsetFraction = 0f,
+                            pageCount = { publication.readingOrder.size }
+                        )
+                        Scaffold(
+                            topBar = {
+                                AnimatedVisibility(
+                                    visible = state.isAppBarsVisible,
+                                    enter = slideInVertically(initialOffsetY = { -it }),
+                                    exit = slideOutVertically(
+                                        targetOffsetY = { -it },
+                                        animationSpec = tween(250)
+                                    )
+                                ) {
+                                    CenterAlignedTopAppBar(
+                                        modifier = Modifier,
+                                        title = {
+                                            Text(
+                                                text = state.bookTitle,
+                                                style = AppFonts.textLargeBold
                                             )
-                                        }
+                                        },
+                                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                15.dp
+                                            ),
+                                        ),
+                                        actions = {
 
-                                        Spacer(modifier = Modifier.size(4.dp))
-
-                                        IconButton(onClick = {
-                                            viewModel.onEvent(FolioActivityEvent.ToggleMenuVisibility)
-                                        }) {
-                                            Icon(Icons.Outlined.MoreVert, contentDescription = null)
-                                        }
-                                        DropdownMenu(
-                                            expanded = state.isMenuVisible,
-                                            onDismissRequest = {
-                                                viewModel.onEvent(
-                                                    FolioActivityEvent.DismissMenu
+                                            IconButton(onClick = {
+                                                onSearchButtonClick(publication.readingOrder.size)
+                                            }) {
+                                                Icon(
+                                                    Icons.Outlined.Search,
+                                                    contentDescription = null
                                                 )
                                             }
-                                        ) {
-                                            DropdownMenuItem(
-                                                onClick = { /*TODO*/ },
-                                                leadingIcon = {
-                                                    Icon(Icons.Outlined.Settings, null)
-                                                },
-                                                text = {
-                                                    Text(
-                                                        text = "الإعدادات",
-                                                        style = AppFonts.textNormal
-                                                    )
-                                                })
-                                            DropdownMenuItem(
-                                                onClick = { /*TODO*/ },
-                                                text = {
-                                                    Text(
-                                                        text = "الفهرس",
-                                                        style = AppFonts.textNormal
-                                                    )
-                                                },
-                                                leadingIcon = {
-                                                    Icon(Icons.Outlined.FormatListBulleted, null)
-                                                })
-                                        }
 
-                                    },
-                                    navigationIcon = {
-                                        IconButton(onClick = { finish() }) {
-                                            Icon(
-                                                Icons.Default.ArrowForwardIos,
-                                                contentDescription = null
+                                            Spacer(modifier = Modifier.size(4.dp))
+
+                                            IconButton(onClick = {
+                                                viewModel.onEvent(FolioActivityEvent.ToggleMenuVisibility)
+                                            }) {
+                                                Icon(
+                                                    Icons.Outlined.MoreVert,
+                                                    contentDescription = null
+                                                )
+                                            }
+                                            DropdownMenu(
+                                                expanded = state.isMenuVisible,
+                                                onDismissRequest = {
+                                                    viewModel.onEvent(
+                                                        FolioActivityEvent.DismissMenu
+                                                    )
+                                                }
+                                            ) {
+                                                DropdownMenuItem(
+                                                    onClick = { /*TODO*/ },
+                                                    leadingIcon = {
+                                                        Icon(Icons.Outlined.Settings, null)
+                                                    },
+                                                    text = {
+                                                        Text(
+                                                            text = "الإعدادات",
+                                                            style = AppFonts.textNormal
+                                                        )
+                                                    })
+                                                DropdownMenuItem(
+                                                    onClick = { /*TODO*/ },
+                                                    text = {
+                                                        Text(
+                                                            text = "الفهرس",
+                                                            style = AppFonts.textNormal
+                                                        )
+                                                    },
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            Icons.Outlined.FormatListBulleted,
+                                                            null
+                                                        )
+                                                    })
+                                            }
+
+                                        },
+                                        navigationIcon = {
+                                            IconButton(onClick = { finish() }) {
+                                                Icon(
+                                                    Icons.Default.ArrowForwardIos,
+                                                    contentDescription = null
+                                                )
+                                            }
+                                        }
+                                    )
+                                }
+                            },
+                            containerColor = Color(backgroundColor),
+                            bottomBar = {
+                                BottomBar(
+                                    visibility = state.isAppBarsVisible,
+                                    currentPage = state.currentPageText,
+                                    onCurrentPageChange = {
+                                        viewModel.onEvent(
+                                            FolioActivityEvent.OnCurrentPageTextChanged(
+                                                it
                                             )
+                                        )
+                                    },
+                                    onDone = {
+                                        scope.launch {
+                                            state.currentPageText.toIntOrNull()?.let {
+                                                val page = it.coerceIn(
+                                                    0,
+                                                    publication.readingOrder.size - 1
+                                                )
+                                                pagerState.scrollToPage(page)
+                                            }
+                                        }
+                                    },
+                                    isPrevButtonEnabled = pagerState.currentPage != 0,
+                                    isNextButtonEnabled = pagerState.currentPage != publication.readingOrder.size - 1,
+                                    onPrevButtonClick = {
+                                        pagerState.apply {
+                                            val previousPage = max(0, currentPage - 1)
+                                            scope.launch { animateScrollToPage(previousPage) }
+                                        }
+                                    },
+                                    onNextButtonClick = {
+                                        pagerState.apply {
+                                            val nextPage =
+                                                min(
+                                                    currentPage + 1,
+                                                    publication.readingOrder.size - 1
+                                                )
+                                            scope.launch { animateScrollToPage(nextPage) }
                                         }
                                     }
                                 )
                             }
-                        },
-                        containerColor = Color(backgroundColor),
-                        bottomBar = {
-                            BottomBar(
-                                visibility = state.isAppBarsVisible,
-                                currentPage = state.currentPageText,
-                                onCurrentPageChange = {
-                                    viewModel.onEvent(
-                                        FolioActivityEvent.OnCurrentPageTextChanged(
-                                            it
-                                        )
-                                    )
-                                },
-                                onDone = {
-                                    scope.launch {
-                                        state.currentPageText.toIntOrNull()?.let {
-                                            val page = it.coerceIn(0, state.bookPages.size - 1)
-                                            pagerState?.scrollToPage(page)
-                                        }
-                                    }
-                                },
-                                isPrevButtonEnabled = pagerState?.currentPage != 0,
-                                isNextButtonEnabled = pagerState?.currentPage != state.bookPages.size - 1,
-                                onPrevButtonClick = {
-                                    pagerState?.apply {
-                                        val previousPage = max(0, currentPage - 1)
-                                        scope.launch { animateScrollToPage(previousPage) }
-                                    }
-                                },
-                                onNextButtonClick = {
-                                    pagerState?.apply {
-                                        val nextPage =
-                                            min(currentPage + 1, state.bookPages.size - 1)
-                                        scope.launch { animateScrollToPage(nextPage) }
-                                    }
-                                }
-                            )
-                        }
-                    ) { paddingValues ->
-                        state.publication?.let { publication ->
-                            pagerState = rememberPagerState(
-                                initialPage = 0,
-                                initialPageOffsetFraction = 0f,
-                                pageCount = { state.bookPages.size }
-                            )
-                            LaunchedEffect(pagerState!!.currentPage) {
+                        ) { paddingValues ->
+
+
+                            LaunchedEffect(pagerState.currentPage) {
                                 webViews.keys.forEach { key ->
-                                    val maxCacheDistance = 3
-                                    if (abs(key - pagerState!!.currentPage) >= maxCacheDistance) {
+                                    val maxCacheDistance = 5
+                                    if (abs(key - pagerState.currentPage) >= maxCacheDistance) {
                                         webViews.remove(key)
                                         println("webView $key deinited")
                                     }
                                 }
                             }
-                            LaunchedEffect(Unit){
-                                snapshotFlow { pagerState?.currentPage }.collect { page ->
-                                    page?.let {
-                                        viewModel.onEvent(FolioActivityEvent.OnChangeSelectedPage(it))
-                                    }
+                            LaunchedEffect(Unit) {
+                                snapshotFlow { pagerState.currentPage }.collect { page ->
+                                    viewModel.onEvent(
+                                        FolioActivityEvent.OnChangeSelectedPage(
+                                            pageIndex = page,
+                                            context = applicationContext,
+                                            fontFamilyCssClass = fontFamilyCss,
+                                            isNightMode = isDarkTheme,
+                                            fontSizeCssClass = fontSizeCss
+                                        )
+                                    )
                                 }
                             }
-                            pagerState?.let { pagerState ->
-                                HorizontalPager(
-                                    state = pagerState,
-                                    contentPadding = paddingValues,
+
+                            HorizontalPager(
+                                state = pagerState,
+                                contentPadding = paddingValues,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .pointerInput(true) {
+                                        detectTapGestures(
+                                            onTap = {
+                                                //when the webview doesn't fill the whole screen and the user clicks outside of the webview
+                                                viewModel.onEvent(FolioActivityEvent.ToggleAppBarsVisibility)
+                                            }
+                                        )
+                                    },
+                                key = { index ->
+                                    publication.readingOrder[index].href ?: index.toString()
+                                },
+                            ) { currentPageIndex ->
+                                Column(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .pointerInput(true) {
-                                            detectTapGestures(
-                                                onTap = {
-                                                    //when the webview doesn't fill the whole screen and the user clicks outside of the webview
-                                                    viewModel.onEvent(FolioActivityEvent.ToggleAppBarsVisibility)
-                                                }
-                                            )
-                                        },
-                                    key = { index ->
-                                        publication.readingOrder[index].href ?: index.toString()
-                                    },
-                                ) { currentPageIndex ->
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .verticalScroll(rememberScrollState())
-                                    ) {
-                                       val searchResult =  searchResultsFlow.collectAsState(initial = "" to "").value
-                                        AndroidView(factory = { context ->
-                                            webViews[currentPageIndex] ?: run{
-                                                com.folioreader.ui.view.CustomWebView(
-                                                    context,
-                                                    isNightMode = AppTheme.isDarkTheme(context)
-                                                ).apply {
-                                                    setBackgroundColor(backgroundColor.toInt())
-                                                    settings.javaScriptEnabled = true
-                                                    settings.defaultTextEncodingName = "UTF-8"
-                                                    settings.allowFileAccess = true
-                                                    webViewClient = mMebViewClient
-                                                    addJavascriptInterface(object {
-                                                        @JavascriptInterface
-                                                        fun isTapped() {
-                                                            Log.e("CustomWebView", "onClickHtml: isTapped")
-                                                            viewModel.onEvent(FolioActivityEvent.ToggleAppBarsVisibility)
-                                                        }
-                                                    }, "CustomWebView")
-                                                    addJavascriptInterface(this, "FolioWebView")
-                                                    loadDataWithBaseURL(state.bookPages[currentPageIndex], state.htmlData[currentPageIndex], state.mimeType, "UTF-8", null)
-                                                    webViews [currentPageIndex] = this
-                                                }
+                                        .verticalScroll(rememberScrollState())
+                                ) {
+                                    val searchResult =
+                                        searchResultsFlow.collectAsState(initial = "" to "").value
+                                    AndroidView(factory = { context ->
+                                        webViews[currentPageIndex] ?: run {
+                                            com.folioreader.ui.view.CustomWebView(
+                                                context,
+                                                isNightMode = AppTheme.isDarkTheme(context)
+                                            ).apply {
+                                                setBackgroundColor(backgroundColor.toInt())
+                                                settings.javaScriptEnabled = true
+                                                settings.defaultTextEncodingName = "UTF-8"
+                                                settings.allowFileAccess = true
+                                                webViewClient = mMebViewClient
+                                                addJavascriptInterface(object {
+                                                    @JavascriptInterface
+                                                    fun isTapped() {
+                                                        Log.e(
+                                                            "CustomWebView",
+                                                            "onClickHtml: isTapped"
+                                                        )
+                                                        viewModel.onEvent(FolioActivityEvent.ToggleAppBarsVisibility)
+                                                    }
+                                                }, "CustomWebView")
+                                                addJavascriptInterface(this, "FolioWebView")
                                             }
-                                        }, update = { webview ->
-                                            scope.launch {
-                                                delay(200)
-                                                val (href,javascriptCall) = searchResult
-                                                if (state.bookPages[currentPageIndex].contains(href) && javascriptCall.isNotBlank()) {
-                                                    webview.loadUrl(javascriptCall)
-                                                }
+                                        }
+                                    }, update = { webview ->
+                                        webViews[currentPageIndex] ?: run{
+                                            val (url, htmlData) = state.pagesMap[currentPageIndex] ?: ("" to "")
+                                            if (url.isNotBlank()) {
+                                                webview.loadDataWithBaseURL(
+                                                    url,
+                                                    htmlData,
+                                                    state.mimeType,
+                                                    "UTF-8",
+                                                    null
+                                                )
+                                                webViews[currentPageIndex] = webview
                                             }
-                                        })
-                                    }
-
+                                        }
+                                        scope.launch {
+                                            delay(200)
+                                            val (href, javascriptCall) = searchResult
+                                            if (state.pagesMap[currentPageIndex]?.first?.contains(href) == true && javascriptCall.isNotBlank()
+                                            ) {
+                                                webview.loadUrl(javascriptCall)
+                                            }
+                                        }
+                                    })
                                 }
+
                             }
                         }
+
+                        LoadingScreen(state.isLoading)
+
                     }
-                    LoadingScreen(state.isLoading)
                 }
             }
         }
@@ -480,10 +516,10 @@ class FolioActivity : ComponentActivity() {
                     Log.e(LOG_TAG, "data of searchLauncher: ${searchLocator.toString()}")
                     lifecycleScope.launch {
                         searchLocator?.let {
-                            val page = viewModel.state.value.bookPages.indexOfFirst {
-                                it.contains(searchLocator.href)
+                            val page = viewModel.state.value.pagesMap.values.indexOfFirst {
+                                it.first.contains(searchLocator.href)
                             }
-                            pagerState?.scrollToPage(page)
+                            pagerState.scrollToPage(page)
                             searchResultsFlow = flow<Pair<String,String>> {
                                 emit(searchLocator.href to highlightSearchLocator(searchLocator) )
                             }
@@ -518,6 +554,7 @@ class FolioActivity : ComponentActivity() {
             return null
         }
     }
+
     @JavascriptInterface
     fun onReceiveHighlights(html: String?) {
 //        if (html != null) {

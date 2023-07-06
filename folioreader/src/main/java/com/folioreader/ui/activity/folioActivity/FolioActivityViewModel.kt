@@ -3,7 +3,6 @@ package com.folioreader.ui.activity.folioActivity
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.appcompat.app.AppCompatDelegate.NightMode
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.folioreader.Constants
@@ -16,6 +15,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,29 +48,24 @@ class FolioActivityViewModel : ViewModel() {
                     val bookFileName = FileUtil.getEpubFilename(event.filePath)
                     val publication = initBook(bookFileName, event.filePath)
                     val streamUrl = getStreamerUrl(bookFileName)
-                    _state.update {
-                        it.copy(
-                            publication = publication,
-                            bookTitle = publication?.metadata?.title ?: "الشاملة",
-                            streamUrl = streamUrl,
-                        )
-                    }
-                    launch {
-                        getBookPages(
-                            context = event.context,
-                            fontFamily = event.fontFamilyCssClass,
-                            isNightMode = event.isNightMode,
-                            fontSize = event.fontSizeCssClass
-                        ).collect { (pageUrl, pageData) ->
-                            _state.update {
-                                it.copy(
-                                    bookPages = it.bookPages + pageUrl,
-                                    htmlData = it.htmlData + pageData,
-                                    isLoading = false,
-                                )
-                            }
+                    publication?.let {
+                        _state.update {
+                            it.copy(
+                                publication = publication,
+                                bookTitle = publication.metadata.title,
+                                streamUrl = streamUrl,
+                            )
                         }
                     }
+                    onEvent(
+                        FolioActivityEvent.OnChangeSelectedPage(
+                            0,
+                            event.fontSizeCssClass,
+                            event.fontFamilyCssClass,
+                            event.isNightMode,
+                            event.context
+                        )
+                    )
                 }
             }
 
@@ -83,19 +79,26 @@ class FolioActivityViewModel : ViewModel() {
             }
 
             is FolioActivityEvent.OnChangeSelectedPage -> {
-                Log.e(TAG, "onEvent: ${event.javaClass.simpleName}, page: ${event.newPage}")
-                onEvent(FolioActivityEvent.OnCurrentPageTextChanged(event.newPage.toString()))
-                /*                viewModelScope.launch {
-                                    getHtmlData(state.value.bookPages[event.newPage]).let { htmlData ->
-                                        //-> mimeType is statically set...
-                                        _state.update {
-                                            it.copy(
-                                                htmlData = htmlData,
-                                                mimeType = "application/xhtml+xml"
-                                            )
-                                        }
-                                    }
-                                }*/
+                Log.e(TAG, "onEvent: ${event.javaClass.simpleName}, page: ${event.pageIndex}")
+                onEvent(FolioActivityEvent.OnCurrentPageTextChanged(event.pageIndex.toString()))
+                    viewModelScope.launch {
+                        getBookPages(
+                            context = event.context,
+                            fontFamily = event.fontFamilyCssClass,
+                            isNightMode = event.isNightMode,
+                            fontSize = event.fontSizeCssClass,
+                            pageIndex = event.pageIndex,
+                            totalPages = _state.value.publication!!.readingOrder.lastIndex
+                        ).collect { map->
+                            if (_state.value.pagesMap[map.keys.first()] == null)
+                            _state.update {
+                                it.copy(
+                                    pagesMap = it.pagesMap + mapOf(map.keys.first() to map.values.first()),
+                                    isLoading = false
+                                )
+                            }
+                        }
+                    }
             }
 
             FolioActivityEvent.StopStreamerServer -> {
@@ -121,33 +124,36 @@ class FolioActivityViewModel : ViewModel() {
         }
     }
 
+
     private suspend fun getBookPages(
         context: Context,
+        pageIndex: Int,
+        totalPages:Int,
         fontFamily: String,
         isNightMode: Boolean,
         fontSize: String,
-    ) = flow<Pair<String, String>> {
+    ) = flow<Map<Int,Pair<String, String>>> {
+        val range = (maxOf(0, pageIndex -2))..(minOf(pageIndex +2,totalPages) )
         state.value.publication?.let { publication ->
-            publication.readingOrder.forEach { link ->
-                link.href?.substring(1)?.let { pageFilePath ->
-                    val pageUrl = state.value.streamUrl + pageFilePath
-                    val htmlContent = getHtmlData(pageUrl)
-                    val pageData = HtmlUtil.getHtmlContent(
-                        context = context,
-                        content = htmlContent,
-                        fontFamilyCssClass = fontFamily,
-                        isNightMode = isNightMode,
-                        fontSizeCssClass = fontSize
-                    )
-                    emit(pageUrl to pageData)
+            range.forEach{page->
+                publication.readingOrder[page].let { link ->
+                    link.href?.substring(1)?.let { pageFilePath ->
+                        val pageUrl = state.value.streamUrl + pageFilePath
+                        val htmlContent = getHtmlData(pageUrl)
+                        val pageData = HtmlUtil.getHtmlContent(
+                            context = context,
+                            content = htmlContent,
+                            fontFamilyCssClass = fontFamily,
+                            isNightMode = isNightMode,
+                            fontSizeCssClass = fontSize
+                        )
+                    emit(mapOf(page to Pair(pageUrl,pageData)))
+                    }
                 }
             }
         }
     }
-
     private suspend fun getHtmlData(urlString: String): String {
-//        Log.e(FolioActivity.LOG_TAG, "Getting html data for $urlString")
-
         return withContext(Dispatchers.IO) {
             try {
                 val url = URL(urlString)
@@ -165,7 +171,7 @@ class FolioActivityViewModel : ViewModel() {
                 while (reader.readLine().also { line = it } != null) {
                     line?.let {
 //                        if (!it.contains("<hr/>") && !it.contains("¦"))
-                            stringBuilder.append(it).append('\n')
+                        stringBuilder.append(it).append('\n')
                     }
                 }
                 stringBuilder.toString()
