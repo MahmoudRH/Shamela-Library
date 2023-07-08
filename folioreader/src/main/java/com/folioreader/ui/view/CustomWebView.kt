@@ -120,7 +120,7 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
     }
 
 
-    private inner class TextSelectionCallback : ActionMode.Callback {
+ /*   private inner class TextSelectionCallback : ActionMode.Callback {
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             Log.d(LOG_TAG, "-> onCreateActionMode")
@@ -193,12 +193,12 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
         actionMode = super.startActionMode(TextSelectionCallback())
         actionMode?.finish()
 
-        /*try {
+        *//*try {
             applyThemeColorToHandles()
         } catch (e: Exception) {
             Log.w(LOG_TAG, "-> startActionMode -> Failed to apply theme colors to selection " +
                     "handles", e)
-        }*/
+        }*//*
 
         return actionMode as ActionMode
 
@@ -212,18 +212,18 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
         actionMode = super.startActionMode(TextSelectionCb2(), type)
         actionMode?.finish()
 
-        /*try {
+        *//*try {
             applyThemeColorToHandles()
         } catch (e: Exception) {
             Log.w(LOG_TAG, "-> startActionMode -> Failed to apply theme colors to selection " +
                     "handles", e)
-        }*/
+        }*//*
 
         return actionMode as ActionMode
 
         //Comment above code and uncomment below line for stock text selection
         //return super.startActionMode(callback, type)
-    }
+    }*/
     @JavascriptInterface
     fun setSelectionRect(left: Int, top: Int, right: Int, bottom: Int) {
 

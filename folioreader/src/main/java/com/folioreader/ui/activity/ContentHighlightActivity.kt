@@ -10,6 +10,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.folioreader.Constants
+import com.folioreader.Constants.CHAPTER_SELECTED
 import com.folioreader.FolioReader
 import com.folioreader.model.HighlightImpl
 import com.folioreader.model.event.UpdateHighlightEvent
@@ -61,7 +63,7 @@ class ContentHighlightActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val bookPath = intent.getStringExtra(Constants.EPUB_FILE_PATH)
-        val bookId = intent.getStringExtra(FolioReader.EXTRA_BOOK_ID)
+//        val bookId = intent.getStringExtra(FolioReader.EXTRA_BOOK_ID)
         val bookTitle = intent.getStringExtra(Constants.BOOK_TITLE)
 
         val linkItems = mutableStateListOf<Link>()
@@ -79,8 +81,8 @@ class ContentHighlightActivity : ComponentActivity() {
                 }
             }
             withContext(Dispatchers.IO) {
-                val list = HighLightTable.getAllHighlights(bookId = bookId).toList()
-                highlightsItems.addAll(list)
+//                val list = HighLightTable.getAllHighlights(bookId = bookId).toList()
+//                highlightsItems.addAll(list)
             }
         }
 
@@ -97,40 +99,41 @@ class ContentHighlightActivity : ComponentActivity() {
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(it),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            contentPadding = PaddingValues(vertical = 16.dp)
                         ) {
-                            item {
-                                ViewTypeSection(
-                                    modifier = Modifier,
-                                    selectedViewType = selectedViewType.value
-                                ) { viewType -> selectedViewType.value = viewType }
-                            }
+//                            item {
+//                                ViewTypeSection(
+//                                    modifier = Modifier,
+//                                    selectedViewType = selectedViewType.value
+//                                ) { viewType -> selectedViewType.value = viewType }
+//                            }
 
-                            when (selectedViewType.value) {
-                                ViewType.TableOfContents -> {
+//                            when (selectedViewType.value) {
+//                                ViewType.TableOfContents -> {
                                     items(linkItems) { link ->
                                         LinkItem(link, 0, link == linkItems.first(), ::onTocClicked)
                                     }
-                                }
+//                                }
 
-                                ViewType.Highlights -> {
-                                    bookId?.let {
-                                        items(highlightsItems) { highlightItem ->
-                                            HighlightsItem(
-                                                item = highlightItem,
-                                                onItemClick = ::onHighlightItemClicked,
-                                                onDeleteClicked = {
-                                                    deleteHighlightedItem(highlightItem.id)
-                                                    highlightsItems.remove(highlightItem)
-                                                }
-                                            )
-                                        }
-                                        item {
-                                            EmptyListScreen(highlightsItems.isEmpty(), "لا توجد أي تظليلات", modifier = Modifier.fillParentMaxSize())
-                                        }
-                                    }
-                                }
-                            }
+//                                ViewType.Highlights -> {
+//                                    bookId?.let {
+//                                        items(highlightsItems) { highlightItem ->
+//                                            HighlightsItem(
+//                                                item = highlightItem,
+//                                                onItemClick = ::onHighlightItemClicked,
+//                                                onDeleteClicked = {
+//                                                    deleteHighlightedItem(highlightItem.id)
+//                                                    highlightsItems.remove(highlightItem)
+//                                                }
+//                                            )
+//                                        }
+//                                        item {
+//                                            EmptyListScreen(highlightsItems.isEmpty(), "لا توجد أي تظليلات", modifier = Modifier.fillParentMaxSize())
+//                                        }
+//                                    }
+//                                }
+//                            }
                         }
                     }
 
@@ -156,9 +159,9 @@ class ContentHighlightActivity : ComponentActivity() {
 
     private fun onTocClicked(title: String?, href: String?) {
         val intent = Intent()
-        intent.putExtra(Constants.SELECTED_CHAPTER_POSITION, href)
-        intent.putExtra(Constants.BOOK_TITLE, title)
-        intent.putExtra(Constants.TYPE, Constants.CHAPTER_SELECTED)
+        intent.putExtra(CHAPTER_SELECTED, href)
+//        intent.putExtra(Constants.BOOK_TITLE, title)
+//        intent.putExtra(Constants.TYPE, CHAPTER_SELECTED)
         setResult(Activity.RESULT_OK, intent)
         finish()
     }

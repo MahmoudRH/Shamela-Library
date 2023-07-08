@@ -94,7 +94,7 @@ fun LinkItem(
                 )
 
             }
-            .clickable { onLinkClicked(item.title, item.href) }
+            .clickable { onLinkClicked(item.title, item.href)  }
             .padding(vertical = 4.dp)
         ,
         verticalAlignment = Alignment.CenterVertically

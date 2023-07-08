@@ -2,10 +2,12 @@ package com.folioreader.util
 
 import android.app.Activity
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import com.folioreader.Config
+import com.folioreader.Constants
 import com.folioreader.util.SharedPreferenceUtil.getSharedPreferencesString
 import org.json.JSONException
 import org.json.JSONObject
@@ -84,6 +86,11 @@ object AppUtil {
             view = View(activity)
         imm.hideSoftInputFromWindow(view.windowToken, 0)
         view.clearFocus()
+    }
+    fun getStreamerUrl(bookFileName: String,portNumber:Int): String {
+//        val portNumber = getAvailablePortNumber(Constants.DEFAULT_PORT_NUMBER)
+        val url = "${Constants.LOCALHOST}:$portNumber/$bookFileName/"
+        return Uri.parse(url).toString()
     }
 
     fun getAvailablePortNumber(portNumber: Int): Int {
