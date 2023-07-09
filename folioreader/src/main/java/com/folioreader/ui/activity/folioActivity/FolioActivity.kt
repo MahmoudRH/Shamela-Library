@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
@@ -30,6 +31,7 @@ import com.folioreader.model.locators.SearchLocator
 import com.folioreader.ui.activity.ContentHighlightActivity
 import com.folioreader.ui.activity.folioActivity.book.BookScreen
 import com.folioreader.ui.activity.searchActivity.SearchActivity
+import com.folioreader.util.AppUtil
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.flow.emptyFlow
@@ -68,7 +70,8 @@ class FolioActivity : ComponentActivity() {
             AppTheme.ShamelaLibraryTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     state.publication?.let { publication ->
-                        val searchResult = searchResultsFlow.collectAsState(initial = "" to "").value
+                        val searchResult =
+                            searchResultsFlow.collectAsState(initial = "" to "").value
                         val selectedChapter = selectedChapterFlow.collectAsState(initial = "").value
                         val settingsChanged = settingsChangedFlow.collectAsState(initial = 0).value
 
@@ -117,7 +120,10 @@ class FolioActivity : ComponentActivity() {
         val intent = Intent(this@FolioActivity, ContentHighlightActivity::class.java)
         intent.putExtra(CHAPTER_SELECTED, currentHref)
         intent.putExtra(EPUB_FILE_PATH, epubFilePath)
-        intent.putExtra(ContentHighlightActivity.SELECTED_VIEW_TYPE, ContentHighlightActivity.TableOfContent)
+        intent.putExtra(
+            ContentHighlightActivity.SELECTED_VIEW_TYPE,
+            ContentHighlightActivity.TableOfContent
+        )
         intent.putExtra(BOOK_TITLE, title)
         contentHighlightLauncher.launch(intent)
     }
@@ -126,7 +132,10 @@ class FolioActivity : ComponentActivity() {
         val intent = Intent(this@FolioActivity, ContentHighlightActivity::class.java)
         intent.putExtra(CHAPTER_SELECTED, currentHref)
         intent.putExtra(EPUB_FILE_PATH, epubFilePath)
-        intent.putExtra(ContentHighlightActivity.SELECTED_VIEW_TYPE, ContentHighlightActivity.Settings)
+        intent.putExtra(
+            ContentHighlightActivity.SELECTED_VIEW_TYPE,
+            ContentHighlightActivity.Settings
+        )
         intent.putExtra(BOOK_TITLE, title)
         contentHighlightLauncher.launch(intent)
     }
@@ -171,7 +180,7 @@ class FolioActivity : ComponentActivity() {
                             emit(href)
                         }
                     }
-                    data.getIntExtra(SETTINGS_CHANGED,0).let{ hash->
+                    data.getIntExtra(SETTINGS_CHANGED, 0).let { hash ->
                         Log.e(LOG_TAG, "TableOfContentsScreen: SettingsChanged: $hash ")
                         settingsChangedFlow = flow<Int> {
                             emit(hash)

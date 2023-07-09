@@ -54,6 +54,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateMapOf
@@ -75,10 +76,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.folioreader.ui.view.CustomWebView
+import com.folioreader.util.AppUtil
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.readium.r2.shared.Publication
 import kotlin.math.abs
@@ -106,11 +109,24 @@ fun BookScreen(
     val scope = rememberCoroutineScope()
     val webViews = remember(context) { mutableStateMapOf<Int, WebView>() }
 
+
     val pagerState = rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0f,
         pageCount = { publication.readingOrder.size }
     )
+    LaunchedEffect(Unit) {
+        val bookId = publication.metadata.title.hashCode()
+        val lastReadHref = AppUtil.getLastReadFromSharedPreferences(
+            context = context,
+            bookId = bookId.toString()
+        )
+        Log.e("BookScreen", "Unit, lastReadHref: $lastReadHref ")
+        if (lastReadHref.isNotBlank()) {
+            val pageToScrollTo = publication.readingOrder.indexOfFirst { it.href == lastReadHref }
+            pagerState.scrollToPage(pageToScrollTo)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -296,7 +312,7 @@ fun BookScreen(
         }
         LaunchedEffect(settingsChanged) {
             Log.e("BooksScreen", "SettingsChanged! : $settingsChanged")
-            if (settingsChanged!=0) {
+            if (settingsChanged != 0) {
                 val temp = pagerState.currentPage
                 Log.e("BooksScreen", "pagerState.currentPage! : $temp")
                 webViews.clear()
@@ -391,6 +407,26 @@ fun BookScreen(
         }
     }
     LoadingScreen(state.isLoading)
+
+    DisposableEffect(Unit) {
+        onDispose {
+            try {
+                val bookId = publication.metadata.title.hashCode()
+                publication.readingOrder[pagerState.currentPage].href?.let { lastReadHref ->
+                    AppUtil.saveLastReadToSharedPreferences(
+                        context = context,
+                        bookId = bookId.toString(),
+                        lastHref = lastReadHref
+                    )
+                }
+            } catch (e: IndexOutOfBoundsException) {
+                Log.e(
+                    "BooksScreen",
+                    "IndexOutOfBoundsException while saving last read: \n${e.stackTrace}",
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -452,9 +488,12 @@ private fun BottomBar(
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { onDone(); focusManager.clearFocus() }),
-                textStyle = AppFonts.textNormal.copy(textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground),
+                textStyle = AppFonts.textNormal.copy(
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground
+                ),
 
-            ) {
+                ) {
                 OutlinedTextFieldDefaults.DecorationBox(
                     value = currentPage,
                     innerTextField = it,

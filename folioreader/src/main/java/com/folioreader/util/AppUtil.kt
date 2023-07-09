@@ -1,11 +1,9 @@
 package com.folioreader.util
 
-import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
-import android.view.View
-import android.view.inputmethod.InputMethodManager
 import com.folioreader.Config
 import com.folioreader.Constants
 import com.folioreader.util.SharedPreferenceUtil.getSharedPreferencesString
@@ -75,18 +73,6 @@ object AppUtil {
         return null
     }
 
-
-    fun hideKeyboard(activity: Activity) {
-
-        val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        //Find the currently focused view, so we can grab the correct window token from it.
-        var view = activity.currentFocus
-        //If no view currently has focus, create a new one, just so we can grab a window token
-        if (view == null)
-            view = View(activity)
-        imm.hideSoftInputFromWindow(view.windowToken, 0)
-        view.clearFocus()
-    }
     fun getStreamerUrl(bookFileName: String,portNumber:Int): String {
 //        val portNumber = getAvailablePortNumber(Constants.DEFAULT_PORT_NUMBER)
         val url = "${Constants.LOCALHOST}:$portNumber/$bookFileName/"
@@ -114,6 +100,17 @@ object AppUtil {
         }
 
         return portNumberAvailable
+    }
+
+    fun saveLastReadToSharedPreferences(context: Context, bookId: String, lastHref: String) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("LastRead", Context.MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+        editor.putString(bookId, lastHref)
+        editor.apply()
+    }
+    fun getLastReadFromSharedPreferences(context: Context, bookId: String): String {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("LastRead", Context.MODE_PRIVATE)
+        return sharedPreferences.getString(bookId, null)?:""
     }
 }
 
