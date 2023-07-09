@@ -57,6 +57,10 @@ class BookViewModel : ViewModel() {
             BookEvent.ToggleAppBarsVisibility -> _state.update { it.copy(isAppBarsVisible = !it.isAppBarsVisible) }
             BookEvent.ToggleMenuVisibility -> _state.update { it.copy(isMenuVisible = !it.isMenuVisible) }
             BookEvent.DismissMenu -> _state.update { it.copy(isMenuVisible = false) }
+            BookEvent.ClearCachedPages -> _state.update {
+                Log.e(TAG, "onEvent: CachedPagesCleared", )
+                it.copy(pagesMap = mapOf())
+            }
         }
     }
 

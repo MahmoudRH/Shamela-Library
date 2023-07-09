@@ -10,7 +10,6 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.webkit.JavascriptInterface
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +24,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.Constants.BOOK_TITLE
 import com.folioreader.Constants.CHAPTER_SELECTED
 import com.folioreader.Constants.EPUB_FILE_PATH
+import com.folioreader.Constants.SETTINGS_CHANGED
 import com.folioreader.FolioReader
 import com.folioreader.model.locators.SearchLocator
 import com.folioreader.ui.activity.ContentHighlightActivity
@@ -41,9 +41,7 @@ class FolioActivity : ComponentActivity() {
     private val viewModel: FolioActivityViewModel by viewModels()
     private var searchResultsFlow = emptyFlow<Pair<String, String>>()
     private var selectedChapterFlow = emptyFlow<String>()
-
-//    @OptIn(ExperimentalFoundationApi::class)
-//    private lateinit var pagerState: PagerState
+    private var settingsChangedFlow = emptyFlow<Int>()
 
     companion object {
         const val LOG_TAG = "FolioActivityCompose"
@@ -58,17 +56,6 @@ class FolioActivity : ComponentActivity() {
         Log.e(LOG_TAG, "-> onCreate")
         val epubFilePath = intent.getStringExtra(INTENT_EPUB_SOURCE_PATH) ?: ""
         viewModel.onEvent(FolioActivityEvent.InitializeBook(epubFilePath))
-
-//        val linkItems = mutableStateListOf<Link>()
-//        lifecycleScope.launch {
-//            withContext(Dispatchers.IO) {
-//                EpubParser().parse(epubFilePath, "")?.let { pubBox ->
-//                    val list =
-//                        pubBox.publication.tableOfContents.ifEmpty { pubBox.publication.readingOrder }
-//                    linkItems.addAll(list)
-//                }
-//            }
-//        }
         LocalBroadcastManager.getInstance(this).registerReceiver(
             closeBroadcastReceiver,
             IntentFilter(FolioReader.ACTION_CLOSE_FOLIOREADER)
@@ -83,6 +70,7 @@ class FolioActivity : ComponentActivity() {
                     state.publication?.let { publication ->
                         val searchResult = searchResultsFlow.collectAsState(initial = "" to "").value
                         val selectedChapter = selectedChapterFlow.collectAsState(initial = "").value
+                        val settingsChanged = settingsChangedFlow.collectAsState(initial = 0).value
 
 
                         BookScreen(
@@ -92,7 +80,13 @@ class FolioActivity : ComponentActivity() {
                                     publication.metadata.title,
                                     epubFilePath
                                 )
-//                                navController.navigate("TableOfContents")
+                            },
+                            navigateToSettings = { selectedPage ->
+                                onSettingsSelected(
+                                    publication.readingOrder[selectedPage].href ?: "",
+                                    publication.metadata.title,
+                                    epubFilePath
+                                )
                             },
                             navigateToSearchScreen = {
                                 onSearchButtonClick(publication.readingOrder.size)
@@ -102,23 +96,8 @@ class FolioActivity : ComponentActivity() {
                             streamUrl = viewModel.streamUrl,
                             searchResult = searchResult,
                             selectedChapter = selectedChapter,
+                            settingsChanged = settingsChanged,
                         )
-
-
-                        /*                        TableOfContentsScreen(
-                                                    publication = publication,
-                                                    navigateToHref = { href ->
-                                                        Log.e(LOG_TAG, "TableOfContentsScreen: Navigating to href: $href ")
-
-                                                        val pageIndex = publication.readingOrder.indexOfFirst {
-                                                            it.href == href.split('#').first()
-                                                        }
-                                                        Log.e(
-                                                            LOG_TAG,
-                                                            "TableOfContentsScreen: Navigating to pageIndex: $pageIndex ",
-                                                        )
-                                                    })*/
-
                     }
 
                 }
@@ -138,6 +117,16 @@ class FolioActivity : ComponentActivity() {
         val intent = Intent(this@FolioActivity, ContentHighlightActivity::class.java)
         intent.putExtra(CHAPTER_SELECTED, currentHref)
         intent.putExtra(EPUB_FILE_PATH, epubFilePath)
+        intent.putExtra(ContentHighlightActivity.SELECTED_VIEW_TYPE, ContentHighlightActivity.TableOfContent)
+        intent.putExtra(BOOK_TITLE, title)
+        contentHighlightLauncher.launch(intent)
+    }
+
+    private fun onSettingsSelected(currentHref: String, title: String, epubFilePath: String) {
+        val intent = Intent(this@FolioActivity, ContentHighlightActivity::class.java)
+        intent.putExtra(CHAPTER_SELECTED, currentHref)
+        intent.putExtra(EPUB_FILE_PATH, epubFilePath)
+        intent.putExtra(ContentHighlightActivity.SELECTED_VIEW_TYPE, ContentHighlightActivity.Settings)
         intent.putExtra(BOOK_TITLE, title)
         contentHighlightLauncher.launch(intent)
     }
@@ -157,10 +146,6 @@ class FolioActivity : ComponentActivity() {
                     Log.e(LOG_TAG, "data of searchLauncher: ${searchLocator.toString()}")
                     lifecycleScope.launch {
                         searchLocator?.let {
-//                        val page = viewModel.state.value.pagesMap.values.indexOfFirst {
-//                            it.first.contains(searchLocator.href)
-//                        }
-//                        pagerState.scrollToPage(page)
                             searchResultsFlow = flow<Pair<String, String>> {
                                 emit(searchLocator.href to highlightSearchLocator(searchLocator))
                             }
@@ -185,73 +170,16 @@ class FolioActivity : ComponentActivity() {
                         selectedChapterFlow = flow<String> {
                             emit(href)
                         }
-//                        val pageIndex = publication.readingOrder.indexOfFirst {
-//                            it.href == href.split('#').first()
-//                        }
-//                        Log.e(
-//                            LOG_TAG,
-//                            "TableOfContentsScreen: Navigating to pageIndex: $pageIndex ",
-//                        )
+                    }
+                    data.getIntExtra(SETTINGS_CHANGED,0).let{ hash->
+                        Log.e(LOG_TAG, "TableOfContentsScreen: SettingsChanged: $hash ")
+                        settingsChangedFlow = flow<Int> {
+                            emit(hash)
+                        }
                     }
                 }
             }
         }
-
-
-    /*    private fun startContentHighlightActivity(epubFilePath:String, currentHref:String) {
-
-            val intent = Intent(this@FolioActivity, ContentHighlightActivity::class.java)
-    //        val tableOfContents = pubBox.publication.tableOfContents.ifEmpty { pubBox.publication.readingOrder }
-            intent.putExtra(Constants.EPUB_FILE_PATH, epubFilePath)
-            try {
-                intent.putExtra(CHAPTER_SELECTED,currentHref)
-            } catch (e: NullPointerException) {
-                Log.w(LOG_TAG, "-> ", e)
-                intent.putExtra(CHAPTER_SELECTED, "")
-            } catch (e: IndexOutOfBoundsException) {
-                Log.w(LOG_TAG, "-> ", e)
-                intent.putExtra(CHAPTER_SELECTED, "")
-            }
-
-    //        intent.putExtra(FolioReader.EXTRA_BOOK_ID, mBookId)
-    //        intent.putExtra(Constants.BOOK_TITLE, bookFileName)
-
-            startActivityForResult(intent, RequestCode.CONTENT_HIGHLIGHT.value)
-            overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up)
-        }*/
-
-
-    @JavascriptInterface
-    fun onReceiveHighlights(html: String?) {
-//        if (html != null) {
-//           val rangy = HighlightUtil.createHighlightRangy(
-//                applicationContext,
-//                html,
-//                viewModel.state,
-//                pageName,
-//                spineIndex,
-//                rangy
-//            )
-//        }
-    }
-
-    @JavascriptInterface
-    fun getUpdatedHighlightId(id: String?, style: String) {
-//        if (id != null) {
-//            val highlightImpl = HighLightTable.updateHighlightStyle(id, style)
-//            if (highlightImpl != null) {
-//                HighlightUtil.sendHighlightBroadcastEvent(
-//                    requireActivity().applicationContext,
-//                    highlightImpl,
-//                    HighLight.HighLightAction.MODIFY
-//                )
-//            }
-//            val rangyString = HighlightUtil.generateRangyString(pageName)
-//            requireActivity().runOnUiThread { loadRangy(rangyString) }
-//
-//        }
-    }
-
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)

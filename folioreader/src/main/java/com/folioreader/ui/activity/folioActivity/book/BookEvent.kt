@@ -30,5 +30,6 @@ sealed class BookEvent {
     object ToggleAppBarsVisibility : BookEvent()
     object ToggleMenuVisibility : BookEvent()
     object DismissMenu : BookEvent()
+    object ClearCachedPages : BookEvent()
 //    object StopStreamerServer : BookEvent()
 }

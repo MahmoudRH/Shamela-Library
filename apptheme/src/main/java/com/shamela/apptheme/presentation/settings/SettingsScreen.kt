@@ -43,14 +43,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun SettingsScreen(
+    modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
+    onSettingsChanged:(Int)->Unit = {}
 ) {
     val settingsState = viewModel.settingsState.collectAsState().value
     val isSystemDark = isSystemInDarkTheme()
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
@@ -73,6 +75,7 @@ fun SettingsScreen(
                     settingsState.userPrefs.copy(theme = it)
                 )
             )
+            onSettingsChanged(settingsState.userPrefs.hashCode())
         }
         SettingsSection(
             title = "تغيير اللون",
@@ -90,12 +93,14 @@ fun SettingsScreen(
                     settingsState.userPrefs.copy(colorScheme = it)
                 )
             )
+            onSettingsChanged(settingsState.userPrefs.hashCode())
         }
         FontSizeSelector(
             title = "حجم الخط",
             sliderPosition = settingsState.sliderPosition,
             onSliderPositionChanged = {
                 viewModel.onEvent(SettingsEvent.OnChangeSliderPosition(it))
+                onSettingsChanged(settingsState.userPrefs.hashCode())
             },
             list = settingsState.availableFontSizes,
             onValueChangeFinished = {
@@ -123,6 +128,7 @@ fun SettingsScreen(
                     )
                 )
             )
+            onSettingsChanged(settingsState.userPrefs.hashCode())
         }
     }
 }

@@ -9,6 +9,7 @@ object Constants {
     const val SELECTED_CHAPTER_POSITION = "selected_chapter_position"
     const val TYPE = "type"
     const val CHAPTER_SELECTED = "chapter_selected"
+    const val SETTINGS_CHANGED = "settings_changed"
     const val EPUB_FILE_PATH = "epub_file_path"
 
     const val HIGHLIGHT_SELECTED = "highlight_selected"

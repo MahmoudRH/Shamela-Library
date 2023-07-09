@@ -3,7 +3,6 @@ package com.folioreader.ui.activity.folioActivity.book
 
 import android.annotation.SuppressLint
 import android.util.Log
-import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -57,7 +56,6 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -66,7 +64,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -96,8 +93,10 @@ fun BookScreen(
     streamUrl: String,
     searchResult: Pair<String, String>,
     selectedChapter: String,
+    settingsChanged: Int,
     publication: Publication,
     navigateToTableOfContent: (Int) -> Unit,
+    navigateToSettings: (Int) -> Unit,
     navigateToSearchScreen: () -> Unit,
     navigateBack: () -> Unit,
 ) {
@@ -106,9 +105,6 @@ fun BookScreen(
     val backgroundColor = if (AppTheme.isDarkTheme(context)) 0xff131313 else 0xffffffff
     val scope = rememberCoroutineScope()
     val webViews = remember(context) { mutableStateMapOf<Int, WebView>() }
-    val isDarkTheme = AppTheme.isDarkTheme(context)
-    val fontFamilyCss = AppFonts.selectedFontFamilyCssClass()
-    val fontSizeCss = AppFonts.selectedFontSizeCssClass()
 
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -169,7 +165,7 @@ fun BookScreen(
                             DropdownMenuItem(
                                 onClick = {
                                     viewModel.onEvent(BookEvent.DismissMenu)
-                                    //TODO: Navigate To Settings
+                                    navigateToSettings(pagerState.currentPage)
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Outlined.Settings, null)
@@ -274,9 +270,9 @@ fun BookScreen(
                     BookEvent.OnChangeSelectedPage(
                         pageIndex = page,
                         context = context,
-                        fontFamilyCssClass = fontFamilyCss,
-                        isNightMode = isDarkTheme,
-                        fontSizeCssClass = fontSizeCss,
+                        fontFamilyCssClass = AppFonts.selectedFontFamilyCssClass(),
+                        isNightMode = AppTheme.isDarkTheme(context),
+                        fontSizeCssClass = AppFonts.selectedFontSizeCssClass(),
                         publication = publication,
                         streamUrl = streamUrl
                     )
@@ -296,6 +292,29 @@ fun BookScreen(
                     it.href == selectedChapter.split('#').first()
                 }
                 pagerState.scrollToPage(pageToScrollTo)
+            }
+        }
+        LaunchedEffect(settingsChanged) {
+            Log.e("BooksScreen", "SettingsChanged! : $settingsChanged")
+            if (settingsChanged!=0) {
+                val temp = pagerState.currentPage
+                Log.e("BooksScreen", "pagerState.currentPage! : $temp")
+                webViews.clear()
+                viewModel.onEvent(BookEvent.ClearCachedPages)
+//                delay(200)
+                viewModel.onEvent(
+                    BookEvent.OnChangeSelectedPage(
+                        pageIndex = temp,
+                        context = context,
+                        fontFamilyCssClass = AppFonts.selectedFontFamilyCssClass(),
+                        isNightMode = AppTheme.isDarkTheme(context),
+                        fontSizeCssClass = AppFonts.selectedFontSizeCssClass(),
+                        publication = publication,
+                        streamUrl = streamUrl
+                    )
+                )
+                pagerState.scrollToPage(temp)
+
             }
         }
         HorizontalPager(
@@ -361,7 +380,7 @@ fun BookScreen(
                     }
                     scope.launch {
                         delay(200)
-                        val (href, javascriptCall) = searchResult
+                        val (_, javascriptCall) = searchResult
                         if (javascriptCall.isNotBlank()) {
                             webview.loadUrl(javascriptCall)
                         }
@@ -433,7 +452,8 @@ private fun BottomBar(
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { onDone(); focusManager.clearFocus() }),
-                textStyle = AppFonts.textNormal.copy(textAlign = TextAlign.Center)
+                textStyle = AppFonts.textNormal.copy(textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground),
+
             ) {
                 OutlinedTextFieldDefaults.DecorationBox(
                     value = currentPage,
@@ -441,6 +461,11 @@ private fun BottomBar(
                     enabled = true,
                     singleLine = true,
                     visualTransformation = VisualTransformation.None,
+//                    colors = OutlinedTextFieldDefaults.colors(
+//                        cursorColor = MaterialTheme.colorScheme.onBackground,
+//                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+//                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+//                    ),
                     interactionSource = interactionSource,
                     contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
                         start = 4.dp,
