@@ -3,7 +3,7 @@ package com.shamela.library.presentation.utils
 import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
-import android.os.Environment
+import com.shamela.library.ShamelaApp
 import androidx.compose.runtime.mutableStateMapOf
 import com.shamela.library.domain.model.Book
 import java.io.File
@@ -45,7 +45,7 @@ class BooksDownloadManager(private val context: Context) {
 
     fun downloadBook(downloadUri: Uri, book: Book, bookCategory: String): Long {
         val bookTitle = book.title
-        val downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val downloadsFolder = ShamelaApp.externalMediaDir
         val bookFileSubPath = "ShamelaDownloads/$bookCategory/$bookTitle.epub"
         val isFileAlreadyDownloaded = File(downloadsFolder,bookFileSubPath).isFile
         if (isFileAlreadyDownloaded || _downloadIdMap.values.contains(book)) return FILE_ALREADY_EXISTS
@@ -54,7 +54,8 @@ class BooksDownloadManager(private val context: Context) {
         request.setDescription("جار تحميل كتاب ($bookTitle)")
         request.setMimeType("application/epub+zip")
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, bookFileSubPath)
+        val destinationFile = File(downloadsFolder,bookFileSubPath)
+        request.setDestinationUri(Uri.fromFile(destinationFile))
         val downloadId = downManager.enqueue(request)
         _downloadIdMap[downloadId] = book
         return downloadId

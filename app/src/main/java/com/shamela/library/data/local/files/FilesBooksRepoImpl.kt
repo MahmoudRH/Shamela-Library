@@ -1,7 +1,7 @@
 package com.shamela.library.data.local.files
 
 import android.net.Uri
-import android.os.Environment
+import com.shamela.library.ShamelaApp
 import android.util.Log
 import com.folioreader.FolioReader
 import com.shamela.library.domain.model.Book
@@ -25,8 +25,7 @@ object FilesBooksRepoImpl : BooksRepository {
     private const val TAG = "FilesBooksRepoImpl"
     private const val BASE_DOWNLOAD_DIRECTORY = "ShamelaDownloads"
 
-    private val downloadsFolder =
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+    private val downloadsFolder = ShamelaApp.externalMediaDir
     private val shamelaBooks = File(downloadsFolder, BASE_DOWNLOAD_DIRECTORY)
 
     fun openEpub(book: Book): Boolean {
@@ -35,8 +34,10 @@ object FilesBooksRepoImpl : BooksRepository {
         val bookFile = File(shamelaBooks, "${book.categoryName}/${book.title}.epub")
         return if (bookFile.isFile) {
             FolioReader.get().openBook(bookFile.path)
+            Log.d(TAG, "openEpub: $book is a file, absolute path: ${bookFile.absoluteFile}", )
             true
         } else {
+            Log.e(TAG, "openEpub: $book is NOT a file, absolute path: ${bookFile.absoluteFile}", )
             false
         }
 
