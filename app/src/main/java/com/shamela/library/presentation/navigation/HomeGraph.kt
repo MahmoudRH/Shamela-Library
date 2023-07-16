@@ -214,9 +214,16 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
             )
         ) {
 
-//            it.arguments?.getString("categoryName")?.let { categoryName ->
-            SearchResultsScreen() { navController.popBackStack() }
-//            }
+            SearchResultsScreen(navigateToSectionBooksScreen = { categoryName: String, type: String ->
+                navController.navigate(
+                    SectionBooks.createRoute(
+                        categoryName,
+                        type
+                    )
+                ){
+                    popUpTo(Download.route)
+                }
+            }) { navController.popBackStack() }
         }
 
 

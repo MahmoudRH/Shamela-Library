@@ -44,8 +44,13 @@ fun DownloadScreen(
     LaunchedEffect(key1 = Unit, block = {
         Download.buttons.onEach {
             if (it) {
-                Log.e("Mah ", "DownloadScreen: Search is clicked")
-                navigateToSearchResultsScreen("all", "remote")
+                if (downloadState.viewType == ViewType.Books){
+                    Log.e("Mah ", "DownloadScreen: Search Books is clicked")
+                    navigateToSearchResultsScreen("all", "remote")
+                }else{
+                    Log.e("Mah ", "DownloadScreen: Search Sections is clicked")
+                    navigateToSearchResultsScreen("all", "sections")
+                }
             }
         }.launchIn(this)
     })

@@ -16,6 +16,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,39 +40,59 @@ class SearchResultsViewModel @Inject constructor(
             is SearchResultsEvent.Search -> {
                 searchJob = viewModelScope.launch {
                     event.query.trim().let { query ->
-
                         searchJob?.cancel()
+
                         _searchResultsState.update {
                             it.copy(
                                 isLoading = true,
-                                resultsList = emptyList()
+                                booksResultsList = emptyList(),
+                                sectionsResultsList = emptyList(),
                             )
                         }
-                        val categoryName =
-                            handle.get<String>("categoryName").toString().ifBlank { "all" }
+                        val categoryName = handle.get<String>("categoryName").toString().ifBlank { "all" }
                         val type = handle.get<String>("type").toString()
                         _searchResultsState.update { it.copy(type = type) }
                         val repo = when (type) {
                             "local" -> localBooksUseCases
                             "remote" -> remoteBooksUseCases
+                            "sections" -> remoteBooksUseCases
                             else -> localBooksUseCases
                         }
                         launch {
-                            repo.searchForABook(categoryName, query).collect { book ->
+                            if (type == "sections"){
                                 _searchResultsState.update {
-                                    val newList = it.resultsList + book
+                                    val newList =  repo.getAllCategories().filter {category->
+                                        category.name.contains(query)
+                                    }.toList()
                                     it.copy(
-                                        resultsList = newList,
+                                        sectionsResultsList = newList,
                                         lastQuery = if (newList.isNotEmpty()) query else "",
                                         isLoading = false
                                     )
+                                }
+                            }else{
+                                repo.searchForABook(categoryName, query).collect { book ->
+                                    _searchResultsState.update {
+                                        val newList = it.booksResultsList + book
+                                        it.copy(
+                                            booksResultsList = newList,
+                                            lastQuery = if (newList.isNotEmpty()) query else "",
+                                            isLoading = false
+                                        )
+                                    }
                                 }
                             }
                         }
                         launch {
                             delay(500)
-                            _searchResultsState.update {
-                                it.copy(isListEmpty = it.resultsList.isEmpty())
+                            if (type == "sections"){
+                                _searchResultsState.update {
+                                    it.copy(isListEmpty = it.sectionsResultsList.isEmpty())
+                                }
+                            }else{
+                                _searchResultsState.update {
+                                    it.copy(isListEmpty = it.booksResultsList.isEmpty())
+                                }
                             }
                         }
 

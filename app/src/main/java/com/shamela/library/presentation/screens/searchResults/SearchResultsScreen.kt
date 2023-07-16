@@ -28,10 +28,12 @@ import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.common.SearchTopBar
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
+import com.shamela.library.presentation.common.SectionItem
 
 @Composable
 fun SearchResultsScreen(
     viewModel: SearchResultsViewModel = hiltViewModel(),
+    navigateToSectionBooksScreen: (categoryName: String, type: String) -> Unit,
     navigateBack: () -> Unit,
 ) {
     val state = viewModel.searchResultsState.collectAsState().value
@@ -46,6 +48,11 @@ fun SearchResultsScreen(
             onClickClear = { viewModel.onEvent(SearchResultsEvent.ClearSearchQuery) },
             onClickSearch = { query -> viewModel.onEvent(SearchResultsEvent.Search(query)) },
         )
+        LoadingScreen(visibility = state.isLoading)
+        EmptyListScreen(
+            visibility = state.isListEmpty,
+            text = "لم يتم العثور على أي نتائج..",
+        )
         Box(
             Modifier
                 .fillMaxSize()
@@ -54,45 +61,56 @@ fun SearchResultsScreen(
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(state.resultsList, key = {it.id}) {currentBook->
-                    when (state.type){
-                        "local"->{
-                            BookItem(modifier = Modifier
-                                .clickable { FilesBooksRepoImpl.openEpub(currentBook) }
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                                item = currentBook,
-                                highlightText = state.lastQuery
-                            )
-                        }
-                        "remote"->{
-                            BookItem(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                item = currentBook,
-                                icon = {
-                                    IconButton(onClick = {
-                                        viewModel.onEvent(SearchResultsEvent.OnClickDownloadBook(currentBook))
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.FileDownload,
-                                            contentDescription = "download"
-                                        )
-                                    }
-                                },
-                                highlightText = state.lastQuery
-                            )
-                        }
+                if (state.type == "sections"){
+                    items(state.sectionsResultsList, key = {it.id}){
+                        SectionItem(modifier = Modifier
+                            .clickable {
+                                navigateToSectionBooksScreen(it.name, "remote")
+                            }
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            item = it,
+                            highlightText = state.lastQuery)
+                        Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                     }
+                }else{
+                    items(state.booksResultsList, key = {it.id}) { currentBook->
+                        when (state.type){
+                            "local"->{
+                                BookItem(modifier = Modifier
+                                    .clickable { FilesBooksRepoImpl.openEpub(currentBook) }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                    item = currentBook,
+                                    highlightText = state.lastQuery
+                                )
+                            }
+                            "remote"->{
+                                BookItem(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    item = currentBook,
+                                    icon = {
+                                        IconButton(onClick = {
+                                            viewModel.onEvent(SearchResultsEvent.OnClickDownloadBook(currentBook))
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.FileDownload,
+                                                contentDescription = "download"
+                                            )
+                                        }
+                                    },
+                                    highlightText = state.lastQuery
+                                )
+                            }
+                        }
 
-                    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                        Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                    }
                 }
+
+
             }
         }
     }
-    LoadingScreen(visibility = state.isLoading)
-    EmptyListScreen(
-        visibility = state.isListEmpty,
-        text = "لم يتم العثور على أي نتائج..",
-    )
+
 
 
     DisposableEffect(Unit) {
