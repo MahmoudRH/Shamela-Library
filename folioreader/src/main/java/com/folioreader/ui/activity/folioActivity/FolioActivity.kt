@@ -57,6 +57,7 @@ class FolioActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Log.e(LOG_TAG, "-> onCreate")
         val epubFilePath = intent.getStringExtra(INTENT_EPUB_SOURCE_PATH) ?: ""
+        val startPageHref = intent.getStringExtra(FolioReader.START_PAGE_HREF) ?:""
         viewModel.onEvent(FolioActivityEvent.InitializeBook(epubFilePath))
         LocalBroadcastManager.getInstance(this).registerReceiver(
             closeBroadcastReceiver,
@@ -100,6 +101,7 @@ class FolioActivity : ComponentActivity() {
                             searchResult = searchResult,
                             selectedChapter = selectedChapter,
                             settingsChanged = settingsChanged,
+                            startPageHref = startPageHref
                         )
                     }
 

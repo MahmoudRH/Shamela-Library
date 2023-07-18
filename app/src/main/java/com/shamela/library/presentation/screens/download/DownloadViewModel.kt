@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.usecases.books.BooksUseCases
-import com.shamela.library.presentation.screens.library.ViewType
+import com.shamela.library.presentation.screens.library.BooksViewType
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -32,10 +32,10 @@ class DownloadViewModel @Inject constructor(
     fun onEvent(event: DownloadEvent) {
         when (event) {
             is DownloadEvent.OnChangeViewType -> {
-                _downloadState.update { it.copy(viewType = event.newViewType) }
-                when (event.newViewType) {
-                    ViewType.Sections -> onEvent(DownloadEvent.LoadUserSections)
-                    ViewType.Books -> onEvent(DownloadEvent.LoadUserBooks)
+                _downloadState.update { it.copy(booksViewType = event.newBooksViewType) }
+                when (event.newBooksViewType) {
+                    BooksViewType.Sections -> onEvent(DownloadEvent.LoadUserSections)
+                    BooksViewType.Books -> onEvent(DownloadEvent.LoadUserBooks)
                 }
             }
 

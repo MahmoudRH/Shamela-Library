@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/copy_selection"
+        android:title="نسخ" />
+    <item
+        android:id="@+id/share_selection"
+        android:title="مشاركة" />
+    <item
+        android:id="@+id/add_selection_to_favorite"
+        android:title="اضافة للمفضلة" />
+</menu>

@@ -16,34 +16,43 @@ import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.PopupWindow
-import android.widget.Toast
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
+import com.folioreader.FolioReader
 import com.folioreader.R
-import com.folioreader.databinding.TextSelectionBinding
+import com.folioreader.databinding.TextSelectionNewBinding
 import com.folioreader.model.DisplayUnit
-import com.folioreader.model.HighlightImpl
 import com.folioreader.util.UiUtil
+import com.shamela.apptheme.presentation.theme.AppFonts
 import org.json.JSONObject
 import kotlin.math.ceil
 
-class CustomWebView(private val context: Context, private val isNightMode:Boolean) : WebView(context) {
+class CustomWebView(
+    private val context: Context,
+    private val isNightMode: Boolean,
+    private val currentPageIndex:Int,
+    private val currentPageHref:String?
+) : WebView(context) {
     private var actionMode: ActionMode? = null
     private var density: Float = 0f
     private var popupWindow = PopupWindow()
     private var selectionRect = Rect()
     private val popupRect = Rect()
     private var handleHeight: Int = 0
-    private lateinit var viewTextSelection: View
+    private lateinit var viewTextSelectionNew: View
     private lateinit var uiHandler: Handler
     private val LOG_TAG = "CustomWebView"
+    val fullScreenMode = mutableStateOf(false)
+
     init {
         density = resources.displayMetrics.density
         uiHandler = Handler()
-        initViewTextSelection()
+        initViewTextSelectionNew()
     }
-    private lateinit var binding: TextSelectionBinding
-    fun initViewTextSelection() {
-        Log.v(LOG_TAG, "-> initViewTextSelection")
+
+    private lateinit var binding: TextSelectionNewBinding
+    fun initViewTextSelectionNew() {
+        Log.v(LOG_TAG, "-> initViewTextSelectionNew")
 
         val textSelectionMiddleDrawable = ContextCompat.getDrawable(
             context,
@@ -51,7 +60,6 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
         )
         handleHeight = textSelectionMiddleDrawable?.intrinsicHeight ?: (24 * density).toInt()
 
-//        val config = AppUtil.getSavedConfig(context)!!
         val ctw = if (isNightMode) {
             ContextThemeWrapper(context, R.style.FolioNightTheme)
         } else {
@@ -59,33 +67,10 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
         }
 
         val inflater = LayoutInflater.from(ctw)
-        binding = TextSelectionBinding.inflate(inflater)
-        viewTextSelection = binding.root
-        viewTextSelection.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
-        viewTextSelection.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
-
-        binding.yellowHighlight.setOnClickListener {
-            Log.v(LOG_TAG, "-> onClick -> yellowHighlight")
-            onHighlightColorItemsClicked(HighlightImpl.HighlightStyle.Yellow, false)
-        }
-        binding.greenHighlight.setOnClickListener {
-            Log.v(LOG_TAG, "-> onClick -> greenHighlight")
-            onHighlightColorItemsClicked(HighlightImpl.HighlightStyle.Green, false)
-        }
-        binding.blueHighlight.setOnClickListener {
-            Log.v(LOG_TAG, "-> onClick -> blueHighlight")
-            onHighlightColorItemsClicked(HighlightImpl.HighlightStyle.Blue, false)
-        }
-        binding.pinkHighlight.setOnClickListener {
-            Log.v(LOG_TAG, "-> onClick -> pinkHighlight")
-            onHighlightColorItemsClicked(HighlightImpl.HighlightStyle.Pink, false)
-        }
-        binding.deleteHighlight.setOnClickListener {
-            Log.v(LOG_TAG, "-> onClick -> deleteHighlight")
-            dismissPopupWindow()
-            loadUrl("javascript:clearSelection()")
-            loadUrl("javascript:deleteThisHighlight()")
-        }
+        binding = TextSelectionNewBinding.inflate(inflater)
+        viewTextSelectionNew = binding.root
+        viewTextSelectionNew.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
+        viewTextSelectionNew.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
 
         binding.copySelection.setOnClickListener {
             dismissPopupWindow()
@@ -95,41 +80,23 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
             dismissPopupWindow()
             loadUrl("javascript:onTextSelectionItemClicked(${it.id})")
         }
-    }
-    private fun onHighlightColorItemsClicked(style: HighlightImpl.HighlightStyle, isAlreadyCreated: Boolean) {
-        highlight(style, isAlreadyCreated)
-        dismissPopupWindow()
-    }
-
-    fun highlight(style: HighlightImpl.HighlightStyle, isAlreadyCreated: Boolean) {
-        if (!isAlreadyCreated) {
-            this.loadUrl(
-                String.format(
-                    "javascript:if(typeof ssReader !== \"undefined\"){ssReader.highlightSelection('%s');}",
-                    HighlightImpl.HighlightStyle.classForStyle(style)
-                )
-            )
-        } else {
-            this.loadUrl(
-                String.format(
-                    "javascript:setHighlightStyle('%s')",
-                    HighlightImpl.HighlightStyle.classForStyle(style)
-                )
-            )
+        binding.addSelectionToFavirite.setOnClickListener {
+            dismissPopupWindow()
+            loadUrl("javascript:onTextSelectionItemClicked(${it.id})")
+            //TODO:) this code must be changed
         }
     }
 
 
- /*   private inner class TextSelectionCallback : ActionMode.Callback {
+    override fun startActionMode(callback: ActionMode.Callback?, type: Int): ActionMode {
+        actionMode = super.startActionMode(ActionModeCallBack(), type)
+        actionMode?.finish()
+        return actionMode as ActionMode
+    }
 
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            Log.d(LOG_TAG, "-> onCreateActionMode")
-            return true
-        }
-
+    inner class ActionModeCallBack : ActionMode.Callback {
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean { return true }
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            Log.d(LOG_TAG, "-> onPrepareActionMode")
-
             evaluateJavascript("javascript:getSelectionRect()") { value ->
                 val rectJson = JSONObject(value)
                 setSelectionRect(
@@ -140,90 +107,13 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
             return false
         }
 
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            Log.d(LOG_TAG, "-> onActionItemClicked")
-            return false
-        }
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean { return false }
 
-        override fun onDestroyActionMode(mode: ActionMode) {
-            Log.d(LOG_TAG, "-> onDestroyActionMode")
-//            dismissPopupWindow()
-        }
+        override fun onDestroyActionMode(mode: ActionMode) { dismissPopupWindow() }
+
     }
 
-    private inner class TextSelectionCb2 : ActionMode.Callback2() {
 
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            Log.d(LOG_TAG, "-> onCreateActionMode")
-            menu.clear()
-            return true
-        }
-
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            Log.d(LOG_TAG, "-> onPrepareActionMode")
-            return false
-        }
-
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            Log.d(LOG_TAG, "-> onActionItemClicked")
-            return false
-        }
-
-        override fun onDestroyActionMode(mode: ActionMode) {
-            Log.d(LOG_TAG, "-> onDestroyActionMode")
-//            dismissPopupWindow()
-        }
-
-        override fun onGetContentRect(mode: ActionMode, view: View, outRect: Rect) {
-            Log.d(LOG_TAG, "-> onGetContentRect")
-
-            evaluateJavascript("javascript:getSelectionRect()") { value ->
-                val rectJson = JSONObject(value)
-                setSelectionRect(
-                    rectJson.getInt("left"), rectJson.getInt("top"),
-                    rectJson.getInt("right"), rectJson.getInt("bottom")
-                )
-            }
-        }
-    }
-
-    override fun startActionMode(callback: ActionMode.Callback): ActionMode {
-        Log.d(LOG_TAG, "-> startActionMode")
-
-        actionMode = super.startActionMode(TextSelectionCallback())
-        actionMode?.finish()
-
-        *//*try {
-            applyThemeColorToHandles()
-        } catch (e: Exception) {
-            Log.w(LOG_TAG, "-> startActionMode -> Failed to apply theme colors to selection " +
-                    "handles", e)
-        }*//*
-
-        return actionMode as ActionMode
-
-        //Comment above code and uncomment below line for stock text selection
-        //return super.startActionMode(callback)
-    }
-
-    override fun startActionMode(callback: ActionMode.Callback, type: Int): ActionMode {
-        Log.d(LOG_TAG, "-> startActionMode")
-
-        actionMode = super.startActionMode(TextSelectionCb2(), type)
-        actionMode?.finish()
-
-        *//*try {
-            applyThemeColorToHandles()
-        } catch (e: Exception) {
-            Log.w(LOG_TAG, "-> startActionMode -> Failed to apply theme colors to selection " +
-                    "handles", e)
-        }*//*
-
-        return actionMode as ActionMode
-
-        //Comment above code and uncomment below line for stock text selection
-        //return super.startActionMode(callback, type)
-    }*/
     @JavascriptInterface
     fun setSelectionRect(left: Int, top: Int, right: Int, bottom: Int) {
 
@@ -247,21 +137,39 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
             R.id.copySelection -> {
                 Log.v(LOG_TAG, "-> onTextSelectionItemClicked -> copySelection -> $selectedText")
                 UiUtil.copyToClipboard(context, selectedText)
-                Toast.makeText(context, context.getString(R.string.copied), Toast.LENGTH_SHORT).show()
             }
+
             R.id.shareSelection -> {
                 Log.v(LOG_TAG, "-> onTextSelectionItemClicked -> shareSelection -> $selectedText")
                 UiUtil.share(context, selectedText)
             }
+
+            R.id.addSelectionToFavirite -> {
+                Log.v(
+                    LOG_TAG,
+                    "-> onTextSelectionItemClicked -> addSelectionToFavorite -> $selectedText, currentPageIndex= $currentPageIndex",
+                )
+                selectedText?.let {
+
+                    FolioReader.get().onAddQuoteToFavorite(
+                        quote = it,
+                        pageIndex = currentPageIndex,
+                        pageHref = currentPageHref?:""
+                    )
+                }
+            }
+
             else -> {
                 Log.w(LOG_TAG, "-> onTextSelectionItemClicked -> unknown id = $id")
             }
         }
     }
+
     @JavascriptInterface
     fun isPopupShowing(): Boolean {
         return popupWindow.isShowing
     }
+
     @JavascriptInterface
     fun dismissPopupWindow(): Boolean {
 //        Log.d(LOG_TAG, "-> dismissPopupWindow -> " + parentFragment.spineItem.href)
@@ -276,14 +184,14 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
     }
 
     private fun computeViewportRect(): Rect {
-        //Log.v(LOG_TAG, "-> computeViewportRect");
+        Log.v(LOG_TAG, "-> computeViewportRect");
         val displayMetrics = resources.displayMetrics
         val viewportRect = Rect()
 
-            viewportRect.left = 0
+        viewportRect.left = 0
         viewportRect.top = 0
 //        if (distractionFreeMode) {
-            viewportRect.right = displayMetrics!!.widthPixels
+        viewportRect.right = displayMetrics!!.widthPixels
 //        } else {
 //            viewportRect.right = displayMetrics!!.widthPixels - viewportRect.right
 //        }
@@ -362,8 +270,8 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
         //popupRect initialisation for belowSelectionRect
         popupRect.left = viewportRect.left
         popupRect.top = belowSelectionRect.top
-        popupRect.right = popupRect.left + viewTextSelection.measuredWidth
-        popupRect.bottom = popupRect.top + viewTextSelection.measuredHeight
+        popupRect.right = popupRect.left + viewTextSelectionNew.measuredWidth
+        popupRect.bottom = popupRect.top + viewTextSelectionNew.measuredHeight
         //Log.d(LOG_TAG, "-> Pre decision popupRect -> " + popupRect);
 
         val popupY: Int
@@ -375,7 +283,7 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
 
             // popupRect initialisation for aboveSelectionRect
             popupRect.top = aboveSelectionRect.top
-            popupRect.bottom = popupRect.top + viewTextSelection.measuredHeight
+            popupRect.bottom = popupRect.top + viewTextSelectionNew.measuredHeight
 
             popupY = if (aboveSelectionRect.contains(popupRect)) {
                 Log.i(LOG_TAG, "-> show above")
@@ -384,12 +292,12 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
             } else {
 
                 Log.i(LOG_TAG, "-> show in middle")
-                val popupYDiff = (viewTextSelection.measuredHeight - selectionRect.height()) / 2
+                val popupYDiff = (viewTextSelectionNew.measuredHeight - selectionRect.height()) / 2
                 selectionRect.top - popupYDiff
             }
         }
 
-        val popupXDiff = (viewTextSelection.measuredWidth - selectionRect.width()) / 2
+        val popupXDiff = (viewTextSelectionNew.measuredWidth - selectionRect.width()) / 2
         val popupX = selectionRect.left - popupXDiff
 
         popupRect.offsetTo(popupX, popupY)
@@ -408,25 +316,49 @@ class CustomWebView(private val context: Context, private val isNightMode:Boolea
             popupRect.right -= dx
         }
     }
+
     private fun showTextSelectionPopup() {
         Log.v(LOG_TAG, "-> showTextSelectionPopup")
         Log.d(LOG_TAG, "-> showTextSelectionPopup -> To be laid out popupRect -> $popupRect")
-
         popupWindow.dismiss()
-
         val isScrollingRunnable = Runnable {
-                Log.i(LOG_TAG, "-> Stopped scrolling, show Popup")
-                popupWindow.dismiss()
-                popupWindow = PopupWindow(viewTextSelection, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-                popupWindow.isClippingEnabled = false
-                popupWindow.showAtLocation(this@CustomWebView, Gravity.NO_GRAVITY, popupRect.left, popupRect.top)
+            Log.i(
+                LOG_TAG,
+                "-> Stopped scrolling, show Popup, fullScreenMode= ${fullScreenMode.value}"
+            )
+            val selectedFontSize = AppFonts.selectedFontSizeCssClass()
+            val currentFontSize = when (selectedFontSize) {
+                "textSizeOne" -> 13
+                "textSizeTwo" -> 15
+                "textSizeThree" -> 17
+                "textSizeFour" -> 19
+                "textSizeFive" -> 21
+                else -> 0
+            }
+            val lineOffset = (currentFontSize * density).toInt() + currentFontSize
+            Log.e(LOG_TAG, "selectedFontSize: $selectedFontSize ")
+            Log.e(LOG_TAG, "currentFontSize: $currentFontSize ")
+            val verticalOffset = 16 + if (fullScreenMode.value) lineOffset else lineOffset * 3
+            popupWindow.dismiss()
+            popupWindow = PopupWindow(
+                viewTextSelectionNew,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            popupWindow.isClippingEnabled = false
+            popupWindow.showAtLocation(
+                this@CustomWebView,
+                Gravity.NO_GRAVITY,
+                popupRect.left,
+                popupRect.top + verticalOffset
+            )
 
         }
 
-            uiHandler.postDelayed(isScrollingRunnable, IS_SCROLLING_CHECK_TIMER.toLong())
+        uiHandler.postDelayed(isScrollingRunnable, IS_SCROLLING_CHECK_TIMER.toLong())
     }
 
-    companion object{
+    companion object {
         private const val IS_SCROLLING_CHECK_TIMER = 100
     }
 }

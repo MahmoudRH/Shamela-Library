@@ -25,5 +25,8 @@ interface BooksDao {
     @Query("SELECT * FROM downloadedBooks WHERE isFavorite = 1  ")
     fun getFavoriteBooks(): Flow<List<Book>>
 
+    @Query("SELECT * FROM downloadedBooks WHERE id = :bookId")
+    suspend fun getBookById(bookId: String): Book?
+
 
 }

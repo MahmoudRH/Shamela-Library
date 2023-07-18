@@ -56,7 +56,15 @@ fun SectionBooksScreen(
                     "local" -> {
                         BookItem(
                             modifier = Modifier
-                                .clickable { FilesBooksRepoImpl.openEpub(currentBook) }
+                                .clickable {
+                                    FilesBooksRepoImpl.openEpub(
+                                        currentBook,
+                                        onAddQuoteToFavorite = {quote ->
+                                            viewModel.onEvent(
+                                                SectionBooksEvent.AddQuoteToFavorite(quote)
+                                            )
+                                        })
+                                }
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             item = currentBook
                         )

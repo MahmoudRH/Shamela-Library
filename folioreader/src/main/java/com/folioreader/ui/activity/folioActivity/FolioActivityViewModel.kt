@@ -55,9 +55,9 @@ class FolioActivityViewModel : ViewModel() {
                 val publication = it.publication
                 val portNumber = AppUtil.getAvailablePortNumber(Constants.DEFAULT_PORT_NUMBER)
                 server = Server(portNumber)
-                server.addEpub(it.publication, it.container, "/${publication.metadata.title}", null)
+                server.addEpub(it.publication, it.container, "/${publication.metadata.title.hashCode()}", null)
                 server.start()
-                streamUrl = AppUtil.getStreamerUrl(publication.metadata.title,portNumber)
+                streamUrl = AppUtil.getStreamerUrl(publication.metadata.title.hashCode().toString(),portNumber)
                 FolioReader.initRetrofit(streamUrl)
                 Log.v(TAG, "initBook [streamUrl]: $streamUrl, ${server.isAlive}")
                 publication

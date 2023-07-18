@@ -6,6 +6,7 @@ import android.util.Log
 import com.folioreader.FolioReader
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
+import com.shamela.library.domain.model.Quote
 import com.shamela.library.domain.repo.BooksRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,16 +29,35 @@ object FilesBooksRepoImpl : BooksRepository {
     private val downloadsFolder = ShamelaApp.externalMediaDir
     private val shamelaBooks = File(downloadsFolder, BASE_DOWNLOAD_DIRECTORY)
 
-    fun openEpub(book: Book): Boolean {
+    fun openEpub(
+        book: Book,
+        startPageHref: String = "",
+        onAddQuoteToFavorite: (quote: Quote) -> Unit,
+    ): Boolean {
 
         //TODO-> future work: if the file doesn't exist: handle it in the ui to show a  download button
         val bookFile = File(shamelaBooks, "${book.categoryName}/${book.title}.epub")
         return if (bookFile.isFile) {
-            FolioReader.get().openBook(bookFile.path)
-            Log.d(TAG, "openEpub: $book is a file, absolute path: ${bookFile.absoluteFile}", )
+            FolioReader.get().openBook(
+                assetOrSdcardPath = bookFile.path,
+                startPageHref= startPageHref,
+                onAddQuoteToFavorite = { pageIndex: Int, pageHref: String, text: String ->
+                    Log.e(TAG, "openEpub: onAddQuoteToFavorite title: ${book.title}", )
+                    onAddQuoteToFavorite(
+                        Quote(
+                            text = text,
+                            pageIndex = pageIndex,
+                            pageHref = pageHref,
+                            bookName = book.title,
+                            bookId = book.id,
+                        )
+                    )
+                }
+            )
+            Log.d(TAG, "openEpub: $book is a file, absolute path: ${bookFile.absoluteFile}")
             true
         } else {
-            Log.e(TAG, "openEpub: $book is NOT a file, absolute path: ${bookFile.absoluteFile}", )
+            Log.e(TAG, "openEpub: $book is NOT a file, absolute path: ${bookFile.absoluteFile}")
             false
         }
 

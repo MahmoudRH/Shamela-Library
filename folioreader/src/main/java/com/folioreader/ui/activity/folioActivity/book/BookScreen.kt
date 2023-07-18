@@ -51,18 +51,23 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -71,6 +76,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -81,7 +87,6 @@ import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.readium.r2.shared.Publication
 import kotlin.math.abs
@@ -98,6 +103,7 @@ fun BookScreen(
     selectedChapter: String,
     settingsChanged: Int,
     publication: Publication,
+    startPageHref:String,
     navigateToTableOfContent: (Int) -> Unit,
     navigateToSettings: (Int) -> Unit,
     navigateToSearchScreen: () -> Unit,
@@ -122,7 +128,10 @@ fun BookScreen(
             bookId = bookId.toString()
         )
         Log.e("BookScreen", "Unit, lastReadHref: $lastReadHref ")
-        if (lastReadHref.isNotBlank()) {
+        if (startPageHref.isNotBlank()){
+            val pageToScrollTo = publication.readingOrder.indexOfFirst { it.href == startPageHref }
+            pagerState.scrollToPage(pageToScrollTo)
+        }else if (lastReadHref.isNotBlank()) {
             val pageToScrollTo = publication.readingOrder.indexOfFirst { it.href == lastReadHref }
             pagerState.scrollToPage(pageToScrollTo)
         }
@@ -138,12 +147,25 @@ fun BookScreen(
                     animationSpec = tween(250)
                 )
             ) {
-                CenterAlignedTopAppBar(
+                TopAppBar(
                     modifier = Modifier,
                     title = {
+                        var titleTextStyle by remember{ mutableStateOf(AppFonts.textLargeBold)}
+                        var readyToDraw by remember { mutableStateOf(false) }
                         Text(
                             text = publication.metadata.title,
-                            style = AppFonts.textLargeBold
+                            style = titleTextStyle,
+                            maxLines = 2,
+                            modifier = Modifier.drawWithContent {
+                                if (readyToDraw) drawContent()
+                            },
+                            onTextLayout = {textLayoutResult->
+                                if (textLayoutResult.didOverflowHeight) {
+                                    titleTextStyle = titleTextStyle.copy(fontSize = titleTextStyle.fontSize * 0.9)
+                                }else{
+                                    readyToDraw = true
+                                }
+                            }
                         )
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -359,7 +381,9 @@ fun BookScreen(
                     webViews[currentPageIndex] ?: run {
                         CustomWebView(
                             context,
-                            isNightMode = AppTheme.isDarkTheme(context)
+                            isNightMode = AppTheme.isDarkTheme(context),
+                            currentPageIndex = currentPageIndex,
+                            currentPageHref = publication.readingOrder[currentPageIndex].href
                         ).apply {
                             setBackgroundColor(backgroundColor.toInt())
                             settings.javaScriptEnabled = true
@@ -375,11 +399,16 @@ fun BookScreen(
                                     )
                                     viewModel.onEvent(BookEvent.ToggleAppBarsVisibility)
                                 }
+                                @JavascriptInterface
+                                fun textSelected(text:String){
+                                    Log.e("CustomWebView", "textSelected: $text", )
+                                }
                             }, "CustomWebView")
                             addJavascriptInterface(this, "FolioWebView")
                         }
                     }
                 }, update = { webview ->
+                    (webview as CustomWebView).fullScreenMode.value = !state.isAppBarsVisible
                     webViews[currentPageIndex] ?: run {
                         val (url, htmlData) = state.pagesMap[currentPageIndex]
                             ?: ("" to "")
@@ -410,6 +439,10 @@ fun BookScreen(
 
     DisposableEffect(Unit) {
         onDispose {
+            /*
+            to prevent modifying the last read href when the user is viewing a quote,
+            check if startPageHref is blank or not
+             */
             try {
                 val bookId = publication.metadata.title.hashCode()
                 publication.readingOrder[pagerState.currentPage].href?.let { lastReadHref ->

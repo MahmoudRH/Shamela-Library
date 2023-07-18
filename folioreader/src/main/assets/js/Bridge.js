@@ -852,8 +852,36 @@ function onTextSelectionItemClicked(id) {
 
 function onClickHtml() {
     console.debug("-> onClickHtml");
-    CustomWebView.isTapped();
+    const selection = document.getSelection().toString().trim();
+    if(!selection){
+    console.debug(`isTapped, selection '${selection}'`);
+        CustomWebView.isTapped();
+    }
 }
+
+function detectSelection(event) {
+  const selection = document.getSelection().toString();
+  console.debug("-> detectSelection");
+  if(selection){
+     CustomWebView.textSelected(selection);
+  }
+}
+// One-off debounce function, delay after first event
+ function oneOffDebounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(() => {
+            timeout = null;
+            func(...args);
+        }, wait);
+    };
+}
+
+document.addEventListener("selectionchange", oneOffDebounce(detectSelection, 1000));
+
 
 function computeLastReadCfi() {
 

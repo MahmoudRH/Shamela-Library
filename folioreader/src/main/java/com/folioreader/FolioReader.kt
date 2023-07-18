@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Parcelable
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.model.HighLight.HighLightAction
 import com.folioreader.model.HighlightImpl
@@ -18,7 +19,14 @@ import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
 import com.google.gson.GsonBuilder
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import org.readium.r2.streamer.parser.EpubParser
@@ -124,11 +132,36 @@ class FolioReader private constructor(private var context: Context) {
             }
         }
     }
+    private var quote = MutableStateFlow(Triple(0, "", ""))
 
-    fun openBook(assetOrSdcardPath: String?): FolioReader? {
+    fun openBook(
+        assetOrSdcardPath: String,
+        startPageHref:String? = null,
+        onAddQuoteToFavorite: (pageIndex: Int, pageHref: String, text: String) -> Unit,
+    ): FolioReader? {
+        quote = MutableStateFlow(Triple(0, "", ""))
         val intent = getIntentFromUrl(assetOrSdcardPath)
+        intent.putExtra(START_PAGE_HREF,startPageHref)
         context.startActivity(intent)
+
+        val scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+//            EpubParser().parse(assetOrSdcardPath)?.publication?.metadata?.let{metadata->
+                quote.onEach { (pageIndex, pageHref, text) ->
+                    if (text.isNotBlank() && pageHref.isNotBlank()) {
+                        Log.e("FolioReader", "onAddQuoteToFavorite: collected quote=$quote ")
+                        onAddQuoteToFavorite(pageIndex, pageHref, text)
+                        quote = MutableStateFlow(Triple(0, "", ""))
+                    }
+                }.launchIn(scope)
+//            }
+        }
         return singleton
+    }
+
+    fun onAddQuoteToFavorite(quote: String, pageIndex: Int, pageHref: String) {
+        Log.e("FolioReader", "onAddQuoteToFavorite: quote=$quote ")
+        this.quote.update { Triple(pageIndex, pageHref, quote) }
     }
 
     private fun getIntentFromUrl(assetOrSdcardPath: String?): Intent {
@@ -166,6 +199,7 @@ class FolioReader private constructor(private var context: Context) {
         private var singleton: FolioReader? = null
         const val EXTRA_BOOK_ID = "com.folioreader.extra.BOOK_ID"
         const val EXTRA_READ_LOCATOR = "com.folioreader.extra.READ_LOCATOR"
+        const val START_PAGE_HREF = "StartPageHrefExtra"
         const val EXTRA_PORT_NUMBER = "com.folioreader.extra.PORT_NUMBER"
         const val ACTION_SAVE_READ_LOCATOR = "com.folioreader.action.SAVE_READ_LOCATOR"
         const val ACTION_CLOSE_FOLIOREADER = "com.folioreader.action.CLOSE_FOLIOREADER"

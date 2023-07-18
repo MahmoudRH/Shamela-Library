@@ -16,4 +16,5 @@ data class BooksUseCases(
     val updateBook: UpdateBook = UpdateBook(booksDao),
     val saveDownloadedBook: SaveDownloadedBook = SaveDownloadedBook(booksDao),
     val deleteBook: DeleteBook = DeleteBook(booksDao),
+    val getBookById: GetBookById = GetBookById(booksDao)
 )

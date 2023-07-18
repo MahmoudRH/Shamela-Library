@@ -1,12 +1,16 @@
 package com.shamela.library.presentation.screens.library
 
 
+import android.app.Application
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.model.Quote
 import com.shamela.library.domain.usecases.books.BooksUseCases
+import com.shamela.library.domain.usecases.quotes.QuotesUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     @FilesRepoImpl private val booksUseCases: BooksUseCases,
+    private val quotesUseCases: QuotesUseCases,
+    private val application: Application
 ) : ViewModel(), BooksDownloadManager.Subscriber {
     private val _libraryState = MutableStateFlow<LibraryState>(LibraryState())
     val libraryState = _libraryState.asStateFlow()
@@ -34,7 +40,7 @@ class LibraryViewModel @Inject constructor(
     fun onEvent(event: LibraryEvent) {
         when (event) {
             is LibraryEvent.OnChangeViewType -> {
-                _libraryState.update { it.copy(viewType = event.newViewType) }
+                _libraryState.update { it.copy(booksViewType = event.newBooksViewType) }
             }
 
             LibraryEvent.LoadUserBooksAndSections -> {
@@ -78,6 +84,14 @@ class LibraryViewModel @Inject constructor(
                 }
                 viewModelScope.launch {
                     booksUseCases.updateBook(book.id, if (newState) 1 else 0)
+                }
+            }
+
+            is LibraryEvent.AddQuoteToFavorite -> {
+                viewModelScope.launch {
+                    Log.e("LibraryViewModel", "AddQuoteToFavorite ${event.quote}")
+                    quotesUseCases.saveQuote(event.quote)
+                    Toast.makeText(application, "تمت الإضافة بنجاح", Toast.LENGTH_SHORT).show()
                 }
             }
         }

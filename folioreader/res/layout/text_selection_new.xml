@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="6dp"
+        app:cardUseCompatPadding="true"
+        >
+
+        <LinearLayout
+            android:id="@+id/firstSectionLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?popUpWindowBackground"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/copySelection"
+                style="@style/TextViewTextSelector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/copy" />
+
+            <TextView
+                android:id="@+id/shareSelection"
+                style="@style/TextViewTextSelector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/share" />
+            <TextView
+                android:id="@+id/addSelectionToFavirite"
+                style="@style/TextViewTextSelector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/addToFavorite" />
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</FrameLayout>

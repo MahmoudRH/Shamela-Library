@@ -6,9 +6,11 @@ import com.shamela.library.data.local.assets.AssetsBooksRepoImpl
 import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.data.local.db.BooksDao
 import com.shamela.library.data.local.db.BooksDatabase
+import com.shamela.library.data.local.db.QuotesDao
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.usecases.books.BooksUseCases
+import com.shamela.library.domain.usecases.quotes.QuotesUseCases
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,12 +39,23 @@ object DataModule {
             app.applicationContext,
             BooksDatabase::class.java,
             BooksDatabase.DATABASE_NAME
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 
     @Provides
-    fun provideDao(database: BooksDatabase): BooksDao {
+    fun provideBooksDao(database: BooksDatabase): BooksDao {
         return database.booksDao
+    }
+
+    @Provides
+    fun provideQuotesDao(database: BooksDatabase): QuotesDao {
+        return database.quotesDao
+    }
+
+    @Singleton
+    @Provides
+    fun provideQuotesUseCases(dao: QuotesDao):QuotesUseCases{
+        return QuotesUseCases(dao =dao,)
     }
 
     @AssetsRepoImpl

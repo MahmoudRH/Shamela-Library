@@ -2,6 +2,7 @@ package com.shamela.library.presentation.screens.sectionBooks
 
 
 import android.app.Application
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,7 +10,9 @@ import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.model.Quote
 import com.shamela.library.domain.usecases.books.BooksUseCases
+import com.shamela.library.domain.usecases.quotes.QuotesUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +26,8 @@ class SectionBooksViewModel @Inject constructor(
     @AssetsRepoImpl private val remoteBooksUseCases: BooksUseCases,
     @FilesRepoImpl private val localBooksUseCases: BooksUseCases,
     private val handle: SavedStateHandle,
-    private val application: Application,
+    private val quotesUseCases: QuotesUseCases,
+    private val application: Application
 ) : ViewModel(), BooksDownloadManager.Subscriber {
     private val _sectionBooksState = MutableStateFlow<SectionBooksState>(SectionBooksState())
     val sectionBooksState = _sectionBooksState.asStateFlow()
@@ -68,6 +72,14 @@ class SectionBooksViewModel @Inject constructor(
                             }
                         }
                     }
+                }
+            }
+
+            is SectionBooksEvent.AddQuoteToFavorite -> {
+                viewModelScope.launch {
+                    Log.e("SectionBooksViewModel", "AddQuoteToFavorite ${event.quote}")
+                    quotesUseCases.saveQuote(event.quote)
+                    Toast.makeText(application, "تمت الإضافة بنجاح", Toast.LENGTH_SHORT).show()
                 }
             }
         }

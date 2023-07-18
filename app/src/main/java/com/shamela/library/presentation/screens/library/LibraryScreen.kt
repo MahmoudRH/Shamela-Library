@@ -62,14 +62,14 @@ fun LibraryScreen(
         item {
             ViewTypeSection(
                 modifier = Modifier,
-                selectedViewType = libraryState.viewType
+                selectedBooksViewType = libraryState.booksViewType
             ) { viewModel.onEvent(LibraryEvent.OnChangeViewType(it)) }
         }
         item {
             LoadingScreen(visibility = libraryState.isLoading)
         }
-        when (libraryState.viewType) {
-            ViewType.Sections -> {
+        when (libraryState.booksViewType) {
+            BooksViewType.Sections -> {
                 items(libraryState.sections.values.toList(), key = { it.id }) {
                     SectionItem(modifier = Modifier
                         .clickable {
@@ -80,11 +80,15 @@ fun LibraryScreen(
                 }
             }
 
-            ViewType.Books -> {
+            BooksViewType.Books -> {
                 items(libraryState.books.values.toList(), key = { it.id }) {
                     LocalBookItem(modifier = Modifier
                         .clickable {
-                            FilesBooksRepoImpl.openEpub(it)
+                            FilesBooksRepoImpl.openEpub(
+                                it,
+                                onAddQuoteToFavorite = { quote ->
+                                    viewModel.onEvent(LibraryEvent.AddQuoteToFavorite(quote))
+                                })
                         }
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                         item = it,
@@ -97,7 +101,7 @@ fun LibraryScreen(
 }
 
 @Composable
-fun ViewTypeSection(modifier: Modifier, selectedViewType: ViewType, onClick: (ViewType) -> Unit) {
+fun ViewTypeSection(modifier: Modifier, selectedBooksViewType: BooksViewType, onClick: (BooksViewType) -> Unit) {
     Row(
         modifier
             .fillMaxWidth(0.8f)
@@ -106,12 +110,12 @@ fun ViewTypeSection(modifier: Modifier, selectedViewType: ViewType, onClick: (Vi
             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), CircleShape)
             .height(IntrinsicSize.Min)
     ) {
-        ViewType.values().forEach {
+        BooksViewType.values().forEach {
             Text(
                 modifier = Modifier
                     .weight(1f)
                     .background(
-                        if (selectedViewType == it) MaterialTheme.colorScheme.primary.copy(
+                        if (selectedBooksViewType == it) MaterialTheme.colorScheme.primary.copy(
                             alpha = 0.4f
                         ) else Color.Transparent
                     )
@@ -121,7 +125,7 @@ fun ViewTypeSection(modifier: Modifier, selectedViewType: ViewType, onClick: (Vi
                 style = AppFonts.textNormalBold,
                 textAlign = TextAlign.Center
             )
-            if (it != ViewType.values().last()) {
+            if (it != BooksViewType.values().last()) {
                 Box(
                     Modifier
                         .width(2.dp)

@@ -2,6 +2,7 @@ package com.shamela.library.presentation.screens.searchResults
 
 
 import android.app.Application
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,7 +10,9 @@ import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.model.Quote
 import com.shamela.library.domain.usecases.books.BooksUseCases
+import com.shamela.library.domain.usecases.quotes.QuotesUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -26,6 +29,7 @@ import javax.inject.Inject
 class SearchResultsViewModel @Inject constructor(
     @AssetsRepoImpl private val remoteBooksUseCases: BooksUseCases,
     @FilesRepoImpl private val localBooksUseCases: BooksUseCases,
+    private val quotesUseCases: QuotesUseCases,
     private val handle: SavedStateHandle,
     private val application: Application,
 ) : ViewModel(), BooksDownloadManager.Subscriber {
@@ -49,7 +53,8 @@ class SearchResultsViewModel @Inject constructor(
                                 sectionsResultsList = emptyList(),
                             )
                         }
-                        val categoryName = handle.get<String>("categoryName").toString().ifBlank { "all" }
+                        val categoryName =
+                            handle.get<String>("categoryName").toString().ifBlank { "all" }
                         val type = handle.get<String>("type").toString()
                         _searchResultsState.update { it.copy(type = type) }
                         val repo = when (type) {
@@ -59,9 +64,9 @@ class SearchResultsViewModel @Inject constructor(
                             else -> localBooksUseCases
                         }
                         launch {
-                            if (type == "sections"){
+                            if (type == "sections") {
                                 _searchResultsState.update {
-                                    val newList =  repo.getAllCategories().filter {category->
+                                    val newList = repo.getAllCategories().filter { category ->
                                         category.name.contains(query)
                                     }.toList()
                                     it.copy(
@@ -70,7 +75,7 @@ class SearchResultsViewModel @Inject constructor(
                                         isLoading = false
                                     )
                                 }
-                            }else{
+                            } else {
                                 repo.searchForABook(categoryName, query).collect { book ->
                                     _searchResultsState.update {
                                         val newList = it.booksResultsList + book
@@ -85,11 +90,11 @@ class SearchResultsViewModel @Inject constructor(
                         }
                         launch {
                             delay(500)
-                            if (type == "sections"){
+                            if (type == "sections") {
                                 _searchResultsState.update {
                                     it.copy(isListEmpty = it.sectionsResultsList.isEmpty())
                                 }
-                            }else{
+                            } else {
                                 _searchResultsState.update {
                                     it.copy(isListEmpty = it.booksResultsList.isEmpty())
                                 }
@@ -110,9 +115,13 @@ class SearchResultsViewModel @Inject constructor(
                                 book = event.book,
                                 bookCategory = event.book.categoryName
                             )
-                            if (downloadId == BooksDownloadManager.FILE_ALREADY_EXISTS){
-                                Toast.makeText(application, "تم تحميل الكتاب من قبل!", Toast.LENGTH_SHORT).show()
-                            }else{
+                            if (downloadId == BooksDownloadManager.FILE_ALREADY_EXISTS) {
+                                Toast.makeText(
+                                    application,
+                                    "تم تحميل الكتاب من قبل!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
                                 _searchResultsState.update {
                                     it.copy(isLoading = true)
                                 }
@@ -132,10 +141,19 @@ class SearchResultsViewModel @Inject constructor(
                 _searchResultsState.update { it.copy(query = "", isLoading = false) }
                 searchJob?.cancel()
             }
+
+            is SearchResultsEvent.AddQuoteToFavorite -> {
+                viewModelScope.launch {
+                    Log.e("SearchResultsViewModel", "AddQuoteToFavorite ${event.quote}")
+                    quotesUseCases.saveQuote(event.quote)
+                    Toast.makeText(application, "تمت الإضافة بنجاح", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
 
     }
+
     init {
         BooksDownloadManager.subscribe(this)
     }

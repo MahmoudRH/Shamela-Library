@@ -26,7 +26,7 @@ import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.navigation.Download
-import com.shamela.library.presentation.screens.library.ViewType
+import com.shamela.library.presentation.screens.library.BooksViewType
 import com.shamela.library.presentation.screens.library.ViewTypeSection
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -44,7 +44,7 @@ fun DownloadScreen(
     LaunchedEffect(key1 = Unit, block = {
         Download.buttons.onEach {
             if (it) {
-                if (downloadState.viewType == ViewType.Books){
+                if (downloadState.booksViewType == BooksViewType.Books){
                     Log.e("Mah ", "DownloadScreen: Search Books is clicked")
                     navigateToSearchResultsScreen("all", "remote")
                 }else{
@@ -55,9 +55,9 @@ fun DownloadScreen(
         }.launchIn(this)
     })
     LaunchedEffect(key1 = Unit, block ={
-        when ( downloadState.viewType){
-            ViewType.Sections -> viewModel.onEvent(DownloadEvent.LoadUserSections)
-            ViewType.Books -> viewModel.onEvent(DownloadEvent.LoadUserBooks)
+        when ( downloadState.booksViewType){
+            BooksViewType.Sections -> viewModel.onEvent(DownloadEvent.LoadUserSections)
+            BooksViewType.Books -> viewModel.onEvent(DownloadEvent.LoadUserBooks)
         }
     } )
     LazyColumn(
@@ -67,13 +67,13 @@ fun DownloadScreen(
         item {
             ViewTypeSection(
                 modifier = Modifier,
-                selectedViewType = downloadState.viewType
+                selectedBooksViewType = downloadState.booksViewType
             ) { viewModel.onEvent(DownloadEvent.OnChangeViewType(it)) }
         }
 
 
-        when (downloadState.viewType) {
-            ViewType.Sections -> {
+        when (downloadState.booksViewType) {
+            BooksViewType.Sections -> {
                 items(downloadState.sections, key = { it.id }) {
                     SectionItem(modifier = Modifier
                         .clickable {
@@ -84,7 +84,7 @@ fun DownloadScreen(
                 }
             }
 
-            ViewType.Books -> {
+            BooksViewType.Books -> {
 
 
                 val booksList =
