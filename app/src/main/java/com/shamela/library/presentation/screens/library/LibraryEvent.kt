@@ -8,7 +8,7 @@ sealed class LibraryEvent {
     class OnChangeViewType(val newBooksViewType: BooksViewType) : LibraryEvent()
     class ToggleFavorite(val book: Book) : LibraryEvent()
     class AddQuoteToFavorite(val quote: Quote) : LibraryEvent()
-
+    class DeleteBook(val book: Book) : LibraryEvent()
     object LoadUserBooksAndSections : LibraryEvent()
 
 }

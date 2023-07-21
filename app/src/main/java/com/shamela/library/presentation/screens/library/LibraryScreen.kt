@@ -2,6 +2,7 @@ package com.shamela.library.presentation.screens.library
 
 
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,13 +35,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
-import com.shamela.library.presentation.common.LocalBookItem
+import com.shamela.library.presentation.common.LibraryBookItem
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.navigation.Library
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel(),
@@ -82,7 +85,7 @@ fun LibraryScreen(
 
             BooksViewType.Books -> {
                 items(libraryState.books.values.toList(), key = { it.id }) {
-                    LocalBookItem(modifier = Modifier
+                    LibraryBookItem(modifier = Modifier
                         .clickable {
                             FilesBooksRepoImpl.openEpub(
                                 it,
@@ -90,9 +93,12 @@ fun LibraryScreen(
                                     viewModel.onEvent(LibraryEvent.AddQuoteToFavorite(quote))
                                 })
                         }
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(horizontal = 16.dp, vertical = 8.dp).animateItemPlacement(),
                         item = it,
-                        onFavoriteIconClicked = { viewModel.onEvent(LibraryEvent.ToggleFavorite(it)) })
+                        onFavoriteIconClicked = { viewModel.onEvent(LibraryEvent.ToggleFavorite(it)) },
+                        onSwipeOut = {
+                            viewModel.onEvent(LibraryEvent.DeleteBook(it))
+                        })
                     Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }

@@ -171,6 +171,23 @@ object FilesBooksRepoImpl : BooksRepository {
         }
     }
 
+    suspend fun deleteBookFile(book: Book):Boolean{
+        val baseFolder = shamelaBooks
+        val bookFilePath = "${book.categoryName}/${book.title}.epub"
+        val fileToBeDeleted = File(baseFolder,bookFilePath)
+        Log.e(TAG, "deleteBookFile: ${fileToBeDeleted.absoluteFile}", )
+
+        return withContext(Dispatchers.IO){
+            val delete = fileToBeDeleted.delete()
+            if (delete){
+                Log.e(TAG, "deleteBookFile: Book Deleted Successfully", )
+            }else {
+                Log.e(TAG, "deleteBookFile: Book Deletion Failed", )
+            }
+             delete
+        }
+    }
+
     override suspend fun getDownloadLink(categoryName: String, bookName: String): Uri? {
         return null
     }

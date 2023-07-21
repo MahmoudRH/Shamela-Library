@@ -33,10 +33,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
-import com.shamela.library.presentation.common.LocalBookItem
+import com.shamela.library.presentation.common.FavoriteBookItem
 import com.shamela.library.presentation.common.QuoteItem
 import com.shamela.library.presentation.common.StringHeader
-import com.shamela.library.presentation.screens.library.LibraryEvent
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -89,7 +88,7 @@ fun FavoriteScreen(
             }
             FavoriteViewType.Books -> {
                 items(state.favoriteBooks, key = { it.id }) { currentBook ->
-                    LocalBookItem(
+                    FavoriteBookItem(
                         modifier = Modifier
                             .clickable {
                                 FilesBooksRepoImpl.openEpub(

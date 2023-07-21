@@ -94,6 +94,18 @@ class LibraryViewModel @Inject constructor(
                     Toast.makeText(application, "تمت الإضافة بنجاح", Toast.LENGTH_SHORT).show()
                 }
             }
+
+            is LibraryEvent.DeleteBook -> {
+                viewModelScope.launch {
+                    val book = event.book
+                    booksUseCases.deleteBook(book).let{isDeleteSuccess->
+                        if (isDeleteSuccess){
+                            _libraryState.update { it.copy(books = it.books - book.id) }
+                        }
+                    }
+
+                }
+            }
         }
     }
 
