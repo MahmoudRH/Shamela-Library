@@ -10,15 +10,16 @@ import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.model.Book
-import com.shamela.library.domain.model.Quote
 import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.domain.usecases.quotes.QuotesUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,6 +36,26 @@ class SectionBooksViewModel @Inject constructor(
 
     fun onEvent(event: SectionBooksEvent) {
         when (event) {
+            SectionBooksEvent.OnClickDownloadSection -> {
+                viewModelScope.launch {
+                    val categoryName = handle.get<String>("categoryName").toString()
+                    if (sectionBooksState.value.books.isEmpty()) {
+                        loadRemoteBooksOfSection(categoryName)
+                    }
+                    val bookUriMap = sectionBooksState.value.books.values.associateWith { book ->
+                        async { remoteBooksUseCases.getDownloadUri(categoryName, book.title) }
+                    }
+
+                    val bookUriList = withContext(coroutineContext) {
+                        bookUriMap.mapValues { it.value.await() }
+                    }
+                    Log.e("SectionBooksViewModel", "bookUriList: ${bookUriList.values}", )
+                    booksDownloadManager.downloadSection(bookUriList)
+                    _sectionBooksState.update {
+                        it.copy(isDownloadButtonEnabled = false, isLoading = true)
+                    }
+                }
+            }
             is SectionBooksEvent.OnClickDownloadBook -> {
                 viewModelScope.launch {
                     remoteBooksUseCases.getDownloadUri(event.book.categoryName, event.book.title)
@@ -116,10 +137,13 @@ class SectionBooksViewModel @Inject constructor(
         BooksDownloadManager.unsubscribe(this)
     }
 
-    override fun onBookDownloaded(book: Book) {
-        _sectionBooksState.update {
-            it.copy(isLoading = false)
+    override fun onBookDownloaded(book: Book, isLastBook:Boolean) {
+        if(!sectionBooksState.value.isDownloadButtonEnabled){
+            if (isLastBook) { _sectionBooksState.update { it.copy(isLoading = false) } }
+        }else{
+            _sectionBooksState.update { it.copy(isLoading = false) }
         }
+
     }
 
 }

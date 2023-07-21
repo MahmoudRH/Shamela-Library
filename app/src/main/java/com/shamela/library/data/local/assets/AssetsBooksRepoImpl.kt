@@ -115,10 +115,12 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
     }
 
     override suspend fun getDownloadLink(categoryName: String, bookName: String): Uri? {
+        Log.d(TAG, "getDownloadLink: (categoryName, bookName ) = ($categoryName, $bookName)", )
         try {
             val bookRef = storage.reference.child("shamela_epub/$categoryName/$bookName.epub")
             return bookRef.downloadUrl.await()
         } catch (e: Exception) {
+            Log.e(TAG, "ERROR: getDownloadLink: (categoryName, bookName ) = ($categoryName, $bookName)", )
             e.printStackTrace()
         }
         return null

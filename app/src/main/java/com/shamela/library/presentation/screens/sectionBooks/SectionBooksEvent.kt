@@ -7,5 +7,6 @@ import com.shamela.library.domain.model.Quote
 sealed class SectionBooksEvent {
     object LoadBooks : SectionBooksEvent()
     class OnClickDownloadBook(val book: Book) : SectionBooksEvent()
+    object OnClickDownloadSection : SectionBooksEvent()
     class AddQuoteToFavorite(val quote: Quote) : SectionBooksEvent()
 }

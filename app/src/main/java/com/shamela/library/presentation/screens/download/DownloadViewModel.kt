@@ -91,7 +91,7 @@ class DownloadViewModel @Inject constructor(
         BooksDownloadManager.unsubscribe(this)
     }
 
-    override fun onBookDownloaded(book: Book) {
+    override fun onBookDownloaded(book: Book, isLastBook:Boolean) {
         _downloadState.update {
             it.copy(isLoading = false)
         }

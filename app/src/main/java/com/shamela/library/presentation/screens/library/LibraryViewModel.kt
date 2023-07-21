@@ -103,7 +103,7 @@ class LibraryViewModel @Inject constructor(
         BooksDownloadManager.unsubscribe(this)
     }
 
-    override fun onBookDownloaded(book: Book) {
+    override fun onBookDownloaded(book: Book, isLastBook:Boolean) {
         _libraryState.update {
             it.copy(
                 books = it.books + (book.id to book),

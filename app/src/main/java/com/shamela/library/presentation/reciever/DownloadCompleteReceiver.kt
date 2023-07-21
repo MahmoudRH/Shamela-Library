@@ -22,10 +22,13 @@ class DownloadCompleteReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
         if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == action) {
-            val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-            BooksDownloadManager.downloadIsDone(downloadId){
-                CoroutineScope(Dispatchers.IO).launch {
-                    booksUseCases.saveDownloadedBook(it)
+            intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1).let { downloadId ->
+                if (downloadId != -1L) {
+                    BooksDownloadManager.downloadIsDone(downloadId) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            booksUseCases.saveDownloadedBook(it)
+                        }
+                    }
                 }
             }
         }

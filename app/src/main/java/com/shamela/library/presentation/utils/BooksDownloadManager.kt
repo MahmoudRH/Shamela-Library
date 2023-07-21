@@ -3,6 +3,7 @@ package com.shamela.library.presentation.utils
 import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.shamela.library.ShamelaApp
 import androidx.compose.runtime.mutableStateMapOf
 import com.shamela.library.domain.model.Book
@@ -13,6 +14,7 @@ class BooksDownloadManager(private val context: Context) {
     companion object {
         private val _downloadIdMap = mutableStateMapOf<Long, Book>()
         private val subscribers: MutableList<Subscriber> = mutableListOf()
+        const val TAG = "BooksDownloadManager"
         const val FILE_ALREADY_EXISTS = -1L
         fun subscribe(subscriber: Subscriber) {
             if (!subscribers.contains(subscriber)) {
@@ -28,13 +30,17 @@ class BooksDownloadManager(private val context: Context) {
 
         fun downloadIsDone(downloadId: Long, saveDownloadedBook: (Book) -> Unit) {
             if (_downloadIdMap.contains(downloadId)) {
-                subscribers.forEach {
-                    it.onBookDownloaded(_downloadIdMap[downloadId]!!)
-                }
-                _downloadIdMap[downloadId]?.let {
+                 val temp =  _downloadIdMap[downloadId]
+                  _downloadIdMap.remove(downloadId)
+                temp?.let {
                     saveDownloadedBook(it)
+                    Log.e(TAG, "downloadIsDone: Book = $it ", )
+                    Log.e(TAG, "downloadIsDone: _downloadIdMap.size = ${_downloadIdMap.size-1} ", )
                 }
-                _downloadIdMap.remove(downloadId)
+                subscribers.forEach {
+                    it.onBookDownloaded(temp!!, _downloadIdMap.isEmpty())
+                }
+
             }
         }
     }
@@ -61,6 +67,29 @@ class BooksDownloadManager(private val context: Context) {
         return downloadId
     }
 
+    fun downloadSection(booksMap: Map<Book, Uri?>){
+        Log.e(TAG, "booksMap: ${booksMap.values}", )
+        booksMap.forEach { (book, uri) ->
+            if (uri!=null){
+                val bookTitle = book.title
+                val downloadsFolder = ShamelaApp.externalMediaDir
+                val bookFileSubPath = "ShamelaDownloads/${book.categoryName}/$bookTitle.epub"
+                if(!File(downloadsFolder,bookFileSubPath).isFile){
+                    val request = DownloadManager.Request(uri)
+                    request.setTitle("المكتبة الشاملة")
+                    request.setDescription("جار تحميل كتاب ($bookTitle)")
+                    request.setMimeType("application/epub+zip")
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    val destinationFile = File(downloadsFolder,bookFileSubPath)
+                    request.setDestinationUri(Uri.fromFile(destinationFile))
+                    val downloadId = downManager.enqueue(request)
+                    Log.e(TAG, "enqueued downloadId: $downloadId ", )
+                    _downloadIdMap[downloadId] = book
+                }
+            }
+        }
+    }
+
 
 
     fun cancelBookDownload(downloadId: Long) {
@@ -70,7 +99,7 @@ class BooksDownloadManager(private val context: Context) {
     }
 
     interface Subscriber {
-        fun onBookDownloaded(book: Book)
+        fun onBookDownloaded(book: Book, isLastBook:Boolean)
     }
 }
 

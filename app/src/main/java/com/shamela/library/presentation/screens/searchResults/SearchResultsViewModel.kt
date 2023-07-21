@@ -163,7 +163,7 @@ class SearchResultsViewModel @Inject constructor(
         BooksDownloadManager.unsubscribe(this)
     }
 
-    override fun onBookDownloaded(book: Book) {
+    override fun onBookDownloaded(book: Book, isLastBook:Boolean) {
         _searchResultsState.update {
             it.copy(isLoading = false)
         }
