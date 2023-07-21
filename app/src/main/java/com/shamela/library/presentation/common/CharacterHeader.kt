@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shamela.apptheme.presentation.theme.AppFonts
-import com.shamela.apptheme.presentation.theme.AppTheme
+
 @Composable
 fun CharacterHeader(modifier: Modifier, char: Char) {
     Box(

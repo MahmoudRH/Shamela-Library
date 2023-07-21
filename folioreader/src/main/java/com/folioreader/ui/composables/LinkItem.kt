@@ -30,11 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
-import com.shamela.apptheme.presentation.common.DefaultTopBar
-import com.shamela.apptheme.presentation.common.EmptyListScreen
-import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
-import com.shamela.apptheme.presentation.theme.AppTheme
 import org.readium.r2.shared.Link
 
 @Composable

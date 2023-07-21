@@ -31,9 +31,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.folioreader.ui.activity.folioActivity.FolioActivity
-import com.shamela.apptheme.presentation.common.DefaultTopBar
 import com.shamela.apptheme.presentation.common.EmptyListScreen
-import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.common.SearchTopBar
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme

@@ -4,7 +4,6 @@ package com.shamela.apptheme.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.shamela.apptheme.data.sharedPrefs.SharedPreferencesData
 import com.shamela.apptheme.domain.usecases.userPreferences.GetAvailableColorSchemes

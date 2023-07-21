@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
-import com.shamela.library.domain.model.Quote
 import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.domain.usecases.quotes.QuotesUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel

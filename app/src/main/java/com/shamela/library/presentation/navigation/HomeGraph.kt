@@ -19,13 +19,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.shamela.apptheme.presentation.settings.SettingsScreen
 import com.shamela.library.presentation.screens.download.DownloadScreen
 import com.shamela.library.presentation.screens.favorite.FavoriteScreen
 import com.shamela.library.presentation.screens.library.LibraryScreen
 import com.shamela.library.presentation.screens.search.SearchScreen
 import com.shamela.library.presentation.screens.searchResults.SearchResultsScreen
 import com.shamela.library.presentation.screens.sectionBooks.SectionBooksScreen
-import com.shamela.apptheme.presentation.settings.SettingsScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

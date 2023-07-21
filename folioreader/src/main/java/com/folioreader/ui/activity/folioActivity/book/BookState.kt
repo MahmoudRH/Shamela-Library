@@ -1,7 +1,5 @@
 package com.folioreader.ui.activity.folioActivity.book
 
-import org.readium.r2.shared.Publication
-
 
 data class BookState(
     val isLoading: Boolean = true,

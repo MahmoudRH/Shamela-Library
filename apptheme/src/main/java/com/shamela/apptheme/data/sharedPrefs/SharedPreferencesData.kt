@@ -1,8 +1,8 @@
 package com.shamela.apptheme.data.sharedPrefs
 
 import android.content.Context
-import com.shamela.apptheme.domain.model.UserPrefs
 import com.shamela.apptheme.domain.datasource.UserPrefsDataSource
+import com.shamela.apptheme.domain.model.UserPrefs
 
 class SharedPreferencesData(private val context: Context) : UserPrefsDataSource {
     override fun getUserPrefs(): UserPrefs {

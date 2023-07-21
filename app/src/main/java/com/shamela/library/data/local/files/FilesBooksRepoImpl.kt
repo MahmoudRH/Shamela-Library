@@ -1,9 +1,9 @@
 package com.shamela.library.data.local.files
 
 import android.net.Uri
-import com.shamela.library.ShamelaApp
 import android.util.Log
 import com.folioreader.FolioReader
+import com.shamela.library.ShamelaApp
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
 import com.shamela.library.domain.model.Quote

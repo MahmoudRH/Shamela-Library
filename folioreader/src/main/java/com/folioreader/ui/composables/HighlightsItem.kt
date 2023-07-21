@@ -24,9 +24,6 @@ import com.folioreader.R
 import com.folioreader.model.HighlightImpl
 import com.folioreader.ui.view.UnderlinedTextView
 import com.folioreader.util.UiUtil
-import com.shamela.apptheme.presentation.common.DefaultTopBar
-import com.shamela.apptheme.presentation.common.EmptyListScreen
-import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import java.text.SimpleDateFormat

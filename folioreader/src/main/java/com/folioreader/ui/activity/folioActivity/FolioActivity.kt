@@ -16,7 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
@@ -31,7 +30,6 @@ import com.folioreader.model.locators.SearchLocator
 import com.folioreader.ui.activity.ContentHighlightActivity
 import com.folioreader.ui.activity.folioActivity.book.BookScreen
 import com.folioreader.ui.activity.searchActivity.SearchActivity
-import com.folioreader.util.AppUtil
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.flow.emptyFlow

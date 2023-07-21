@@ -29,7 +29,6 @@ import com.shamela.apptheme.presentation.common.SearchTopBar
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.SectionItem
-import com.shamela.library.presentation.screens.favorite.FavoriteEvent
 
 @Composable
 fun SearchResultsScreen(

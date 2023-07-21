@@ -3,7 +3,6 @@ package com.shamela.library.domain.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.Relation
 
 @Entity(
     tableName = "DownloadedBooks",
