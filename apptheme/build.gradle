@@ -48,13 +48,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions.lifecycle_runtime_ktx"
     implementation "androidx.activity:activity-compose:$versions.compose_activity"
 
-//    //-> Compose dependencies
-//    implementation platform("androidx.compose:compose-bom:$versions.compose_bom")
-//    implementation 'androidx.compose.ui:ui'
-//    implementation 'androidx.compose.ui:ui-graphics'
-//    implementation 'androidx.compose.ui:ui-tooling-preview'
-//    implementation 'androidx.compose.material3:material3'
-//    implementation "androidx.compose.material:material-icons-extended"
     def compose_version = "1.4.3"
     implementation("androidx.compose.animation:animation-core:$compose_version")
     implementation("androidx.compose.animation:animation:$compose_version")
@@ -75,7 +68,18 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling:$compose_version")
 
 
-
+    //-> WorkManager
+    implementation "androidx.work:work-runtime-ktx:$versions.workmanager"
+    //-> Jsoup Parser
+    implementation 'org.jsoup:jsoup:1.15.3'
+    // R2 modules
+    implementation("com.github.codetoart:r2-shared-kotlin:$versions.r2SharedKotlin") {
+        changing = true
+    }
+    implementation("com.github.codetoart:r2-streamer-kotlin:$versions.r2StreamerKotlin") {
+        exclude group: "org.slf4j", module: "slf4j-api"
+        changing = true
+    }
 
     //-> Compose Navigation
     implementation "androidx.navigation:navigation-compose:$versions.navigation_compose"

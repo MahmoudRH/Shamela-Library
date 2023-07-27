@@ -43,6 +43,12 @@ class BooksDownloadManager(private val context: Context) {
 
             }
         }
+
+        fun getBookPath(book: Book): String {
+            val downloadsFolder = ShamelaApp.externalMediaDir
+            val bookFileSubPath = "ShamelaDownloads/${book.categoryName}/${book.title}.epub"
+           return File(downloadsFolder,bookFileSubPath).absolutePath
+        }
     }
 
     private val downManager =

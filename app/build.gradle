@@ -76,6 +76,9 @@ dependencies {
     //-> Compose Navigation
     implementation "androidx.navigation:navigation-compose:$versions.navigation_compose"
 
+    //-> WorkManager
+    implementation "androidx.work:work-runtime-ktx:$versions.workmanager"
+
     //-> FolioReader
     implementation project(':folioreader')
     //-> AppTheme
