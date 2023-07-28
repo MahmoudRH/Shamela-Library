@@ -11,6 +11,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.shamela.apptheme.R
+import com.shamela.apptheme.data.db.DatabaseHelper
+import com.shamela.apptheme.domain.model.BookPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -18,11 +20,15 @@ import org.jsoup.nodes.Document
 import org.jsoup.parser.Parser.xmlParser
 import org.readium.r2.streamer.parser.EpubParser
 import java.io.File
+import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 
-class BookPreparationWorker(private val appContext: Context, private val params: WorkerParameters) :
+class BookPreparationWorker(
+    private val appContext: Context,
+    private val params: WorkerParameters,
+) :
     CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
@@ -37,11 +43,26 @@ class BookPreparationWorker(private val appContext: Context, private val params:
         return withContext(Dispatchers.IO) {
             val bookFilePath = params.inputData.getString(EPUB_FILE_PATH)
                 ?: return@withContext Result.failure()
-
+            val database = DatabaseHelper(appContext)
             getPages(bookFilePath).forEach { (href, pageData) ->
-                Log.e(TAG, "doWork: pageParsed: $href, $pageData")
-            }
+                val tokens = bookFilePath.split("/")
+                val bookTitle = tokens[tokens.lastIndex].removeSuffix(".epub")
+                val category = tokens[tokens.lastIndex - 1]
+                val uuidName = bookTitle + category
+                val bookID = UUID.nameUUIDFromBytes(uuidName.toByteArray()).toString()
+                val page = BookPage(
+                    href = href,
+                    content = pageData,
+                    bookId = bookID,
+                    category = category
+                )
+                Log.e(TAG, "doWork: pageParsed: $page")
 
+               val isSuccess = database.insertBookPage(page)
+                Log.e(TAG, "doWork: pageInserted $isSuccess")
+
+            }
+            database.close()
             return@withContext Result.success()
         }
     }

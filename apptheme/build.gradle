@@ -72,6 +72,8 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:$versions.workmanager"
     //-> Jsoup Parser
     implementation 'org.jsoup:jsoup:1.15.3'
+    //-> SQLite support library
+    api 'com.github.requery:sqlite-android:3.42.0'
     // R2 modules
     implementation("com.github.codetoart:r2-shared-kotlin:$versions.r2SharedKotlin") {
         changing = true
