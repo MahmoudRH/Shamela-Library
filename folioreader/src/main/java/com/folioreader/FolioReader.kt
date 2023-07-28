@@ -16,6 +16,7 @@ import com.folioreader.model.sqlite.DbAdapter
 import com.folioreader.network.QualifiedTypeConverterFactory
 import com.folioreader.network.R2StreamerApi
 import com.folioreader.ui.activity.folioActivity.FolioActivity
+import com.folioreader.ui.activity.searchActivity.SearchActivity
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
 import com.google.gson.GsonBuilder
@@ -136,11 +137,13 @@ class FolioReader private constructor(private var context: Context) {
     fun openBook(
         assetOrSdcardPath: String,
         startPageHref:String? = null,
+        bookId:String,
         onAddQuoteToFavorite: (pageIndex: Int, pageHref: String, text: String) -> Unit,
     ): FolioReader? {
         quote = MutableStateFlow(Triple(0, "", ""))
         val intent = getIntentFromUrl(assetOrSdcardPath)
         intent.putExtra(START_PAGE_HREF,startPageHref)
+        intent.putExtra(SearchActivity.Book_ID,bookId)
         context.startActivity(intent)
 
         val scope = CoroutineScope(Dispatchers.Main)

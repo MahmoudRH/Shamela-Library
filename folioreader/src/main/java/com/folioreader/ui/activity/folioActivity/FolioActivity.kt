@@ -56,6 +56,7 @@ class FolioActivity : ComponentActivity() {
         Log.e(LOG_TAG, "-> onCreate")
         val epubFilePath = intent.getStringExtra(INTENT_EPUB_SOURCE_PATH) ?: ""
         val startPageHref = intent.getStringExtra(FolioReader.START_PAGE_HREF) ?:""
+        val bookId = intent.getStringExtra(SearchActivity.Book_ID) ?:""
         viewModel.onEvent(FolioActivityEvent.InitializeBook(epubFilePath))
         LocalBroadcastManager.getInstance(this).registerReceiver(
             closeBroadcastReceiver,
@@ -91,7 +92,7 @@ class FolioActivity : ComponentActivity() {
                                 )
                             },
                             navigateToSearchScreen = {
-                                onSearchButtonClick(publication.readingOrder.size)
+                                onSearchButtonClick(bookId,epubFilePath)
                             },
                             publication = publication,
                             navigateBack = { finish() },
@@ -110,9 +111,10 @@ class FolioActivity : ComponentActivity() {
     }
 
 
-    private fun onSearchButtonClick(spineSize: Int?) {
+    private fun onSearchButtonClick(bookId:String,epubFilePath: String) {
         val intent = Intent(this@FolioActivity, SearchActivity::class.java)
-        intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, spineSize ?: 0)
+        intent.putExtra(EPUB_FILE_PATH, epubFilePath)
+        intent.putExtra(SearchActivity.Book_ID, bookId)
         searchLauncher.launch(intent)
     }
 

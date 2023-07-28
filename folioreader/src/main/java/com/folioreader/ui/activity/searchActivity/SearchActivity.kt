@@ -30,6 +30,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.folioreader.Constants
 import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.common.SearchTopBar
@@ -44,14 +45,15 @@ class SearchActivity : ComponentActivity() {
 
     companion object {
         val LOG_TAG: String = SearchActivity::class.java.simpleName
-        const val BUNDLE_SPINE_SIZE = "BUNDLE_SPINE_SIZE"
+        const val Book_ID = "Book_ID"
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val spineSize = intent.getIntExtra(BUNDLE_SPINE_SIZE, 0)
-        viewModel.spineSize = spineSize
+        val epubFilePath = intent.getStringExtra(Constants.EPUB_FILE_PATH)?:""
+        val bookId = intent.getStringExtra(Book_ID)?:""
+        viewModel.onEven(SearchEvent.InitEpub(epubFilePath))
         setContent {
             val state = viewModel.state.collectAsState().value
 
@@ -66,7 +68,7 @@ class SearchActivity : ComponentActivity() {
                             value = state.searchQuery,
                             onValueChanged = { viewModel.onEven(SearchEvent.OnSearchQueryChanged(it)) },
                             onClickClear = { viewModel.onEven(SearchEvent.ClearSearchQuery) },
-                            onClickSearch = { query -> viewModel.onEven(SearchEvent.Search(query)) },
+                            onClickSearch = { query -> viewModel.onEven(SearchEvent.Search(bookId,query, this@SearchActivity)) },
                         )
                         AnimatedVisibility(visible = state.isLoading) {
                             LinearProgressIndicator(

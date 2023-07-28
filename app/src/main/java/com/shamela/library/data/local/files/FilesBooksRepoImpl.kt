@@ -41,6 +41,7 @@ object FilesBooksRepoImpl : BooksRepository {
             FolioReader.get().openBook(
                 assetOrSdcardPath = bookFile.path,
                 startPageHref= startPageHref,
+                bookId = book.id,
                 onAddQuoteToFavorite = { pageIndex: Int, pageHref: String, text: String ->
                     Log.e(TAG, "openEpub: onAddQuoteToFavorite title: ${book.title}", )
                     onAddQuoteToFavorite(
