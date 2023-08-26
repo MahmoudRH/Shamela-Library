@@ -54,7 +54,8 @@ class BookPreparationWorker(
                     href = href,
                     content = pageData,
                     bookId = bookID,
-                    category = category
+                    category = category,
+                    bookTitle = bookTitle
                 )
                 Log.e(TAG, "doWork: pageParsed: $page")
 

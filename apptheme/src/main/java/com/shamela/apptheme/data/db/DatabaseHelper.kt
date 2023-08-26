@@ -33,6 +33,7 @@ class DatabaseHelper(context: Context) :
             val contentValues = ContentValues().apply {
                 put(BookPage.COL_ID, page.id)
                 put(BookPage.COL_BOOK_ID, page.bookId)
+                put(BookPage.COL_BOOK_TITLE, page.bookTitle)
                 put(BookPage.COL_HREF, page.href)
                 put(BookPage.COL_CATEGORY, page.category)
                 put(BookPage.COL_CONTENT, page.content)
@@ -56,7 +57,8 @@ class DatabaseHelper(context: Context) :
                     href = cursor.getString(cursor.getColumnIndex(BookPage.COL_HREF)),
                     content = cursor.getString(cursor.getColumnIndex(BookPage.COL_CONTENT)),
                     bookId = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_ID)),
-                    category = cursor.getString(cursor.getColumnIndex(BookPage.COL_CATEGORY))
+                    category = cursor.getString(cursor.getColumnIndex(BookPage.COL_CATEGORY)),
+                    bookTitle = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_TITLE))
                 )
                 results.add(page)
                 cursor.moveToNext()
@@ -82,7 +84,8 @@ class DatabaseHelper(context: Context) :
                     href = cursor.getString(cursor.getColumnIndex(BookPage.COL_HREF)),
                     content = cursor.getString(cursor.getColumnIndex(BookPage.COL_CONTENT)),
                     bookId = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_ID)),
-                    category = cursor.getString(cursor.getColumnIndex(BookPage.COL_CATEGORY))
+                    category = cursor.getString(cursor.getColumnIndex(BookPage.COL_CATEGORY)),
+                    bookTitle = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_TITLE))
                 )
                 results.add(page)
                 cursor.moveToNext()
@@ -106,7 +109,8 @@ class DatabaseHelper(context: Context) :
                     href = cursor.getString(cursor.getColumnIndex(BookPage.COL_HREF)),
                     content = cursor.getString(cursor.getColumnIndex(BookPage.COL_CONTENT)),
                     bookId = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_ID)),
-                    category = cursor.getString(cursor.getColumnIndex(BookPage.COL_CATEGORY))
+                    category = cursor.getString(cursor.getColumnIndex(BookPage.COL_CATEGORY)),
+                    bookTitle = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_TITLE))
                 )
                 results.add(page)
                 cursor.moveToNext()
