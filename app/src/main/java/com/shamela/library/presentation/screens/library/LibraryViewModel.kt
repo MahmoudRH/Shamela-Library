@@ -24,7 +24,7 @@ import javax.inject.Inject
 class LibraryViewModel @Inject constructor(
     @FilesRepoImpl private val booksUseCases: BooksUseCases,
     private val quotesUseCases: QuotesUseCases,
-    private val application: Application
+    private val application: Application,
 ) : ViewModel(), BooksDownloadManager.Subscriber {
     private val _libraryState = MutableStateFlow<LibraryState>(LibraryState())
     val libraryState = _libraryState.asStateFlow()
@@ -97,13 +97,37 @@ class LibraryViewModel @Inject constructor(
             is LibraryEvent.DeleteBook -> {
                 viewModelScope.launch {
                     val book = event.book
-                    booksUseCases.deleteBook(book).let{isDeleteSuccess->
-                        if (isDeleteSuccess){
+                    booksUseCases.deleteBook(book).let { isDeleteSuccess ->
+                        if (isDeleteSuccess) {
                             _libraryState.update { it.copy(books = it.books - book.id) }
                         }
                     }
 
                 }
+            }
+
+            is LibraryEvent.SelectBook -> {
+                val isBookSelected = libraryState.value.selectedBooks.contains(event.book)
+                _libraryState.update {
+                    it.copy(
+                        selectedBooks =
+                        if (isBookSelected)
+                            it.selectedBooks - event.book
+                        else
+                            it.selectedBooks + event.book
+                    )
+                }
+            }
+
+            LibraryEvent.CancelSelection -> {
+                _libraryState.update { it.copy(selectedBooks = emptyList()) }
+            }
+
+            LibraryEvent.DeleteSelectedBooks -> {
+                libraryState.value.selectedBooks.forEach {
+                    onEvent(LibraryEvent.DeleteBook(it))
+                }
+                _libraryState.update { it.copy(selectedBooks = emptyList()) }
             }
         }
     }
@@ -114,7 +138,7 @@ class LibraryViewModel @Inject constructor(
         BooksDownloadManager.unsubscribe(this)
     }
 
-    override fun onBookDownloaded(book: Book, isLastBook:Boolean) {
+    override fun onBookDownloaded(book: Book, isLastBook: Boolean) {
         _libraryState.update {
             it.copy(
                 books = it.books + (book.id to book),

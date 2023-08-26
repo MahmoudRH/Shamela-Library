@@ -2,10 +2,15 @@ package com.shamela.library.presentation.screens.library
 
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -18,9 +23,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -84,21 +96,70 @@ fun LibraryScreen(
             }
 
             BooksViewType.Books -> {
+                item {
+                    AnimatedVisibility(visible = libraryState.selectedBooks.isNotEmpty(), enter = expandVertically(), exit = shrinkVertically()) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    viewModel.onEvent(LibraryEvent.DeleteSelectedBooks)
+                                },
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Icon(
+                                    modifier = Modifier.align(Alignment.CenterVertically),
+                                    imageVector = Icons.Default.DeleteOutline,
+                                    contentDescription = "delete"
+                                )
+                                Text(
+                                    modifier = Modifier.align(Alignment.CenterVertically),
+                                    text = "حذف الكتب المحددة",
+                                    style = AppFonts.textNormal,
+                                )
+                            }
+                            Button(onClick = {
+                                viewModel.onEvent(LibraryEvent.CancelSelection)
+                            }) {
+                                Text(text = "إلغاء", style = AppFonts.textNormal, color = MaterialTheme.colorScheme.onBackground)
+                            }
+                        }
+                    }
+                }
+
                 items(libraryState.books.values.toList(), key = { it.id }) {
                     LibraryBookItem(modifier = Modifier
-                        .clickable {
-                            FilesBooksRepoImpl.openEpub(
-                                it,
-                                onAddQuoteToFavorite = { quote ->
-                                    viewModel.onEvent(LibraryEvent.AddQuoteToFavorite(quote))
-                                })
+                        .pointerInput(Unit) {
+                            detectTapGestures(onTap = { _ ->
+                                if (viewModel.libraryState.value.selectedBooks.isEmpty()) {
+                                    FilesBooksRepoImpl.openEpub(
+                                        it,
+                                        onAddQuoteToFavorite = { quote ->
+                                            viewModel.onEvent(
+                                                LibraryEvent.AddQuoteToFavorite(
+                                                    quote
+                                                )
+                                            )
+                                        })
+                                } else {
+                                    viewModel.onEvent(LibraryEvent.SelectBook(it))
+                                }
+                            }, onLongPress = { _ ->
+                                viewModel.onEvent(LibraryEvent.SelectBook(it))
+                            })
                         }
-                        .padding(horizontal = 16.dp, vertical = 8.dp).animateItemPlacement(),
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .animateItemPlacement(),
                         item = it,
                         onFavoriteIconClicked = { viewModel.onEvent(LibraryEvent.ToggleFavorite(it)) },
                         onSwipeOut = {
                             viewModel.onEvent(LibraryEvent.DeleteBook(it))
-                        })
+                        },
+                        isSelected = libraryState.selectedBooks.contains(it)
+                    )
                     Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }
@@ -107,7 +168,11 @@ fun LibraryScreen(
 }
 
 @Composable
-fun ViewTypeSection(modifier: Modifier, selectedBooksViewType: BooksViewType, onClick: (BooksViewType) -> Unit) {
+fun ViewTypeSection(
+    modifier: Modifier,
+    selectedBooksViewType: BooksViewType,
+    onClick: (BooksViewType) -> Unit,
+) {
     Row(
         modifier
             .fillMaxWidth(0.8f)

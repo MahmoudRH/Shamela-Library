@@ -10,5 +10,8 @@ sealed class LibraryEvent {
     class AddQuoteToFavorite(val quote: Quote) : LibraryEvent()
     class DeleteBook(val book: Book) : LibraryEvent()
     object LoadUserBooksAndSections : LibraryEvent()
+    class SelectBook(val book: Book) : LibraryEvent()
+    object DeleteSelectedBooks:LibraryEvent()
+    object CancelSelection:LibraryEvent()
 
 }

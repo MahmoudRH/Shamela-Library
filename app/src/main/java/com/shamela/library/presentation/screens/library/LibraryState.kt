@@ -9,4 +9,5 @@ data class LibraryState(
     val isLoading: Boolean = true,
     val books: Map<String, Book> = emptyMap(),
     val sections: Map<String,Category> = emptyMap(),
+    val selectedBooks : List<Book> = emptyList()
 )
