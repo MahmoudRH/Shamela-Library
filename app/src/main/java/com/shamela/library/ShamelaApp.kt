@@ -11,7 +11,11 @@ import java.io.File
 @HiltAndroidApp
 class ShamelaApp : Application() {
     companion object {
+        const val EXTERNAL_BOOKS_CATEGORY = "كتب خارجية"
         lateinit var externalMediaDir: File
+            private set
+
+        lateinit var externalBooksDirectory: File
             private set
     }
 
@@ -20,6 +24,9 @@ class ShamelaApp : Application() {
         externalMediaDir = externalMediaDirs.firstOrNull() ?: run {
             File(applicationContext.filesDir, "fallback_directory")
         }
+        externalBooksDirectory =
+            File(externalMediaDir, "ShamelaDownloads/${EXTERNAL_BOOKS_CATEGORY}")
+
         val availableFontFamilies = AppFonts.getAvailableFontFamilies()
         val availableFontSizes = AppFonts.getAvailableFontSizes()
         val availableThemes = AppTheme.getAvailableThemes()

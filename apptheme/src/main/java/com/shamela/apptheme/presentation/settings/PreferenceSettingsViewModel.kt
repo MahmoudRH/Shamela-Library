@@ -20,9 +20,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 
-class SettingsViewModel(private val userPreferencesUseCases: UserPreferencesUseCases) :
+class PreferenceSettingsViewModel(private val userPreferencesUseCases: UserPreferencesUseCases) :
     ViewModel() {
-    private val _settingsState = MutableStateFlow<SettingsState>(SettingsState())
+    private val _settingsState = MutableStateFlow<PreferenceSettingsState>(PreferenceSettingsState())
     val settingsState = _settingsState.asStateFlow()
 
     init {
@@ -50,27 +50,27 @@ class SettingsViewModel(private val userPreferencesUseCases: UserPreferencesUseC
     }
 
 
-    fun onEvent(event: SettingsEvent) {
+    fun onEvent(event: PreferenceSettingsEvent) {
         when (event) {
-            is SettingsEvent.OnChangeAppFont -> {
+            is PreferenceSettingsEvent.OnChangeAppFont -> {
                 _settingsState.update { it.copy(userPrefs = event.newPrefs) }
                 userPreferencesUseCases.updateUserPreferences(event.newPrefs)
                 AppFonts.changeFontFamily(AppFonts.fontFamilyOf(event.newPrefs.fontFamily))
             }
 
-            is SettingsEvent.OnChangeAppTheme -> {
+            is PreferenceSettingsEvent.OnChangeAppTheme -> {
                 _settingsState.update { it.copy(userPrefs = event.userPrefs) }
                 userPreferencesUseCases.updateUserPreferences(event.userPrefs)
                 AppTheme.changeColorScheme(event.colorScheme, event.userPrefs.theme)
             }
 
-            is SettingsEvent.OnChangeAppFontSize -> {
+            is PreferenceSettingsEvent.OnChangeAppFontSize -> {
                 _settingsState.update { it.copy(userPrefs = event.newPrefs) }
                 userPreferencesUseCases.updateUserPreferences(event.newPrefs)
                 AppFonts.changeFontSize(event.newPrefs.fontSize)
             }
 
-            is SettingsEvent.OnChangeSliderPosition -> {
+            is PreferenceSettingsEvent.OnChangeSliderPosition -> {
                 _settingsState.update { it.copy(sliderPosition = event.newPosition) }
             }
         }
@@ -87,7 +87,7 @@ class SettingsViewModel(private val userPreferencesUseCases: UserPreferencesUseC
             ): T {
                 val application = checkNotNull(extras[APPLICATION_KEY])
                 val dataSource = SharedPreferencesData(application.applicationContext)
-                return SettingsViewModel(
+                return PreferenceSettingsViewModel(
                     UserPreferencesUseCases(
                         readUserPreferences = ReadUserPreferences(datasource = dataSource),
                         updateUserPreferences = UpdateUserPreferences(datasource = dataSource),

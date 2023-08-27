@@ -1,5 +1,6 @@
 package com.shamela.library.data.local.files
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.folioreader.FolioReader
@@ -14,7 +15,9 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileFilter
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.util.UUID
 import javax.inject.Qualifier
 
@@ -40,10 +43,10 @@ object FilesBooksRepoImpl : BooksRepository {
         return if (bookFile.isFile) {
             FolioReader.get().openBook(
                 assetOrSdcardPath = bookFile.path,
-                startPageHref= startPageHref,
+                startPageHref = startPageHref,
                 bookId = book.id,
                 onAddQuoteToFavorite = { pageIndex: Int, pageHref: String, text: String ->
-                    Log.e(TAG, "openEpub: onAddQuoteToFavorite title: ${book.title}", )
+                    Log.e(TAG, "openEpub: onAddQuoteToFavorite title: ${book.title}")
                     onAddQuoteToFavorite(
                         Quote(
                             text = text,
@@ -172,20 +175,20 @@ object FilesBooksRepoImpl : BooksRepository {
         }
     }
 
-    suspend fun deleteBookFile(book: Book):Boolean{
+    suspend fun deleteBookFile(book: Book): Boolean {
         val baseFolder = shamelaBooks
         val bookFilePath = "${book.categoryName}/${book.title}.epub"
-        val fileToBeDeleted = File(baseFolder,bookFilePath)
-        Log.e(TAG, "deleteBookFile: ${fileToBeDeleted.absoluteFile}", )
+        val fileToBeDeleted = File(baseFolder, bookFilePath)
+        Log.e(TAG, "deleteBookFile: ${fileToBeDeleted.absoluteFile}")
 
-        return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             val delete = fileToBeDeleted.delete()
-            if (delete){
-                Log.e(TAG, "deleteBookFile: Book Deleted Successfully", )
-            }else {
-                Log.e(TAG, "deleteBookFile: Book Deletion Failed", )
+            if (delete) {
+                Log.e(TAG, "deleteBookFile: Book Deleted Successfully")
+            } else {
+                Log.e(TAG, "deleteBookFile: Book Deletion Failed")
             }
-             delete
+            delete
         }
     }
 
@@ -193,7 +196,7 @@ object FilesBooksRepoImpl : BooksRepository {
         return null
     }
 
-    private suspend fun parseBook(file: File, categoryName: String): Book? {
+    suspend fun parseBook(file: File, categoryName: String): Book? {
         Log.e("Mah ", "parseBook: parsing Book: ${file.name} at $categoryName")
 
         return withContext(Dispatchers.IO) {
@@ -210,5 +213,6 @@ object FilesBooksRepoImpl : BooksRepository {
             }
         }
     }
+
 
 }

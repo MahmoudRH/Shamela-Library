@@ -42,9 +42,9 @@ import kotlin.math.ceil
 
 
 @Composable
-fun SettingsScreen(
+fun PreferenceSettingsScreen(
     modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
+    viewModel: PreferenceSettingsViewModel = viewModel(factory = PreferenceSettingsViewModel.Factory),
     onSettingsChanged:(Int)->Unit = {}
 ) {
     val settingsState = viewModel.settingsState.collectAsState().value
@@ -65,7 +65,7 @@ fun SettingsScreen(
             selectedOption = settingsState.userPrefs.theme,
         ) {
             viewModel.onEvent(
-                SettingsEvent.OnChangeAppTheme(
+                PreferenceSettingsEvent.OnChangeAppTheme(
                     colorScheme = AppTheme.themeOf(
                         theme = it,
                         colorScheme = settingsState.userPrefs.colorScheme,
@@ -83,7 +83,7 @@ fun SettingsScreen(
             selectedOption = settingsState.userPrefs.colorScheme,
         ) {
             viewModel.onEvent(
-                SettingsEvent.OnChangeAppTheme(
+                PreferenceSettingsEvent.OnChangeAppTheme(
                     colorScheme = AppTheme.themeOf(
                         theme = settingsState.userPrefs.theme,
                         colorScheme = it,
@@ -99,7 +99,7 @@ fun SettingsScreen(
             title = "حجم الخط",
             sliderPosition = settingsState.sliderPosition,
             onSliderPositionChanged = {
-                viewModel.onEvent(SettingsEvent.OnChangeSliderPosition(it))
+                viewModel.onEvent(PreferenceSettingsEvent.OnChangeSliderPosition(it))
                 onSettingsChanged(settingsState.userPrefs.hashCode())
             },
             list = settingsState.availableFontSizes,
@@ -108,7 +108,7 @@ fun SettingsScreen(
                 Log.e("Mah", "sliderPosition: $sliderPosition")
 
                 viewModel.onEvent(
-                    SettingsEvent.OnChangeAppFontSize(
+                    PreferenceSettingsEvent.OnChangeAppFontSize(
                         settingsState.userPrefs.copy(fontSize = settingsState.availableFontSizes[sliderPosition])
                     )
                 )
@@ -122,7 +122,7 @@ fun SettingsScreen(
             selectedOption = settingsState.userPrefs.fontFamily,
         ) {
             viewModel.onEvent(
-                SettingsEvent.OnChangeAppFont(
+                PreferenceSettingsEvent.OnChangeAppFont(
                     settingsState.userPrefs.copy(
                         fontFamily = it
                     )
