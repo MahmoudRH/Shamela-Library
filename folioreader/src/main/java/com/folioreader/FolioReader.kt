@@ -12,6 +12,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.model.HighLight.HighLightAction
 import com.folioreader.model.HighlightImpl
 import com.folioreader.model.locators.ReadLocator
+import com.folioreader.model.locators.SearchLocator
 import com.folioreader.model.sqlite.DbAdapter
 import com.folioreader.network.QualifiedTypeConverterFactory
 import com.folioreader.network.R2StreamerApi
@@ -138,12 +139,19 @@ class FolioReader private constructor(private var context: Context) {
         assetOrSdcardPath: String,
         startPageHref:String? = null,
         bookId:String,
+        searchLocator:SearchLocator? = null,
         onAddQuoteToFavorite: (pageIndex: Int, pageHref: String, text: String) -> Unit,
     ): FolioReader? {
         quote = MutableStateFlow(Triple(0, "", ""))
         val intent = getIntentFromUrl(assetOrSdcardPath)
         intent.putExtra(START_PAGE_HREF,startPageHref)
         intent.putExtra(SearchActivity.Book_ID,bookId)
+        searchLocator?.let{
+            intent.putExtra(
+                FolioActivity.EXTRA_SEARCH_ITEM,
+                it as Parcelable
+            )
+        }
         context.startActivity(intent)
 
         val scope = CoroutineScope(Dispatchers.Main)

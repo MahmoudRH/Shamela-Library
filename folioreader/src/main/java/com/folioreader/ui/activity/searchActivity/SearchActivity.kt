@@ -120,8 +120,9 @@ class SearchActivity : ComponentActivity() {
                                     assetOrSdcardPath = bookFile.path,
                                     startPageHref= searchLocator.href,
                                     bookId = bookID,
+                                    searchLocator = searchLocator,
                                     onAddQuoteToFavorite = { pageIndex: Int, pageHref: String, text: String ->
-                                      /*  onAddQuoteToFavorite(
+                                        /*onAddQuoteToFavorite(
                                             Quote(
                                                 text = text,
                                                 pageIndex = pageIndex,
@@ -322,7 +323,9 @@ class SearchActivity : ComponentActivity() {
                                     SearchResult(
                                         Modifier.animateItemPlacement(),
                                         locatorText
-                                    ) { onSearchItemClicked(bookTitle,searchLocator) }
+                                    ) {
+                                        onSearchItemClicked(bookTitle,searchLocator)
+                                    }
                                 }
                             }
                         }

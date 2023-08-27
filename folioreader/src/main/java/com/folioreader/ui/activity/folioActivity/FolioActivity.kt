@@ -62,7 +62,19 @@ class FolioActivity : ComponentActivity() {
             closeBroadcastReceiver,
             IntentFilter(FolioReader.ACTION_CLOSE_FOLIOREADER)
         )
-
+        val searchLocator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_SEARCH_ITEM, SearchLocator::class.java)
+        } else {
+            intent.getParcelableExtra(EXTRA_SEARCH_ITEM)
+        }
+        Log.e(LOG_TAG, "intent data of searchLocator: ${searchLocator.toString()}")
+        lifecycleScope.launch {
+            searchLocator?.let {
+                searchResultsFlow = flow<Pair<String, String>> {
+                    emit(searchLocator.href to highlightSearchLocator(searchLocator))
+                }
+            }
+        }
 
 
         setContent {
@@ -115,6 +127,7 @@ class FolioActivity : ComponentActivity() {
         val intent = Intent(this@FolioActivity, SearchActivity::class.java)
         intent.putExtra(EPUB_FILE_PATH, epubFilePath)
         intent.putExtra(SearchActivity.Book_ID, bookId)
+        intent.putExtra(SearchActivity.Search_Type, SearchActivity.Search_Type_SingleBookSearch)
         searchLauncher.launch(intent)
     }
 
@@ -168,7 +181,7 @@ class FolioActivity : ComponentActivity() {
         }
 
     private fun highlightSearchLocator(searchLocator: SearchLocator): String {
-        return "javascript:highlightSearchLocator('${searchLocator.locations.cfi}')"
+        return "javascript:highlightSearchLocator('${searchLocator.text?.hightlight}')"
     }
 
     private val contentHighlightLauncher =

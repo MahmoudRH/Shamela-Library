@@ -750,22 +750,38 @@ function scrollToNodeOrRange(nodeOrRange) {
     return nodeOrRange;
 }
 
-function highlightSearchLocator(rangeCfi) {
+function highlightSearchLocator(text) {
+      console.log(`-> highlightSearchLocator: ${text}`)
 
-    try {
-        const $obj = EPUBcfi.Interpreter.getRangeTargetElements(rangeCfi, document);
+       try {
+               const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+               let node;
 
-        const range = document.createRange();
-        range.setStart($obj.startElement, $obj.startOffset);
-        range.setEnd($obj.endElement, $obj.endOffset);
+               while ((node = walker.nextNode())) {
+                   const textContent = node.textContent;
+                   const startIdx = textContent.indexOf(text);
+                    console.log(`-> startIdx: ${startIdx}`)
+                   if (startIdx !== -1) {
+                       const endIdx = startIdx + text.length;
+                        console.log(`-> endIdx: ${endIdx}`)
 
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(range);
+                       if (endIdx <= textContent.length) {
+                           const range = document.createRange();
+                           range.setStart(node, startIdx);
+                           range.setEnd(node, endIdx);
+                           console.log(`-> range: ${range}`)
 
-        highlightSelectedText();
-    } catch (e) {
-        console.error("-> " + e);
-    }
+                           window.getSelection().removeAllRanges();
+                           window.getSelection().addRange(range);
+
+                           highlightSelectedText();
+                           break;
+                       }
+                   }
+               }
+           } catch (e) {
+               console.error("-> " + e);
+           }
 
     LoadingView.hide();
 }
