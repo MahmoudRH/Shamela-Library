@@ -48,11 +48,11 @@ fun SearchResultsScreen(
             onClickClear = { viewModel.onEvent(SearchResultsEvent.ClearSearchQuery) },
             onClickSearch = { query -> viewModel.onEvent(SearchResultsEvent.Search(query)) },
         )
-        LoadingScreen(visibility = state.isLoading)
         EmptyListScreen(
             visibility = state.isListEmpty,
             text = "لم يتم العثور على أي نتائج..",
         )
+        LoadingScreen(visibility = state.isLoading)
         Box(
             Modifier
                 .fillMaxSize()
