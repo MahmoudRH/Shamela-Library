@@ -88,4 +88,8 @@ dependencies {
 
     //->Kotlin Reflection
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.8.22"
+
+    //-> Testing
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 }

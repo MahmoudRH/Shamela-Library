@@ -3,29 +3,44 @@ package com.shamela.apptheme.data.db
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
+import android.util.Log
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import io.requery.android.database.sqlite.SQLiteDatabase
 import io.requery.android.database.sqlite.SQLiteOpenHelper
 import com.shamela.apptheme.domain.model.BookPage
+import com.shamela.apptheme.presentation.worker.BookMigrationWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class DatabaseHelper(context: Context) :
+class DatabaseHelper(val context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     private val db: SQLiteDatabase = this.writableDatabase
 
     companion object {
         const val DATABASE_NAME = "AppDatabase"
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
     }
 
     override fun onCreate(database: SQLiteDatabase) {
+        Log.e("DatabaseHelper", "onCreate: isCalled")
         database.execSQL(BookPage.CREATE_TABLE)
     }
 
-    override fun onUpgrade(database: SQLiteDatabase, p1: Int, p2: Int) {
-        database.execSQL("DROP TABLE IF EXISTS ${BookPage.TABLE_NAME} ;")
-        onCreate(database)
+
+    override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        Log.e("DatabaseHelper", "onUpgrade: isCalled")
+        if (oldVersion == 1 && newVersion == 2) {
+            // Perform the migration from v1 to v2
+            val migrationWorkRequest = OneTimeWorkRequestBuilder<BookMigrationWorker>().build()
+            WorkManager.getInstance(context).enqueue(migrationWorkRequest)
+            Log.e("DatabaseHelper", "onUpgrade: migration enqueued")
+        } else {
+            database.execSQL("DROP TABLE IF EXISTS ${BookPage.TABLE_NAME} ;")
+            onCreate(database)
+            Log.e("DatabaseHelper", "onUpgrade: database dropped")
+        }
     }
 
     suspend fun insertBookPage(page: BookPage): Boolean {
@@ -47,9 +62,14 @@ class DatabaseHelper(context: Context) :
     suspend fun searchBook(bookId: String, query: String): List<BookPage> {
         return withContext(Dispatchers.IO) {
             val results = mutableListOf<BookPage>()
-            val cursor = db.rawQuery(
-                "SELECT * FROM ${BookPage.TABLE_NAME} WHERE ${BookPage.COL_BOOK_ID} = ? AND ${BookPage.COL_CONTENT} MATCH ? ORDER BY rank;",
-                arrayOf(bookId, query)
+            val cursor = db.query(
+                BookPage.TABLE_NAME,
+                arrayOf("*"),
+                "${BookPage.COL_BOOK_ID} = ? AND ${BookPage.COL_CONTENT} MATCH ?",
+                arrayOf(bookId, "\"${query}\""),
+                null,
+                null,
+                "rank"
             )
             cursor.moveToFirst()
             while (!cursor.isAfterLast) {
@@ -73,10 +93,14 @@ class DatabaseHelper(context: Context) :
     suspend fun searchCategory(category: String, query: String): List<BookPage> {
         return withContext(Dispatchers.IO) {
             val results = mutableListOf<BookPage>()
-
-            val cursor = db.rawQuery(
-                "SELECT * FROM ${BookPage.TABLE_NAME} WHERE ${BookPage.COL_CATEGORY} = ? AND ${BookPage.COL_CONTENT} MATCH ? ORDER BY rank;",
-                arrayOf(category, query)
+            val cursor = db.query(
+                BookPage.TABLE_NAME,
+                arrayOf("*"),
+                "${BookPage.COL_CATEGORY} = ? AND ${BookPage.COL_CONTENT} MATCH ?",
+                arrayOf(category, "\"${query}\""),
+                null,
+                null,
+                "rank"
             )
             cursor.moveToFirst()
             while (!cursor.isAfterLast) {
@@ -99,9 +123,14 @@ class DatabaseHelper(context: Context) :
     suspend fun searchLibrary(query: String): List<BookPage> {
         return withContext(Dispatchers.IO) {
             val results = mutableListOf<BookPage>()
-            val cursor = db.rawQuery(
-                "SELECT * FROM ${BookPage.TABLE_NAME} WHERE ${BookPage.COL_CONTENT} MATCH ? ORDER BY rank;",
-                arrayOf(query)
+            val cursor = db.query(
+                BookPage.TABLE_NAME,
+                arrayOf("*"),
+                "${BookPage.COL_CONTENT} MATCH ?",
+                arrayOf("\"${query}\""),
+                null,
+                null,
+                "rank"
             )
             cursor.moveToFirst()
             while (!cursor.isAfterLast) {
@@ -118,9 +147,5 @@ class DatabaseHelper(context: Context) :
             cursor.close()
             return@withContext results
         }
-    }
-
-    fun closeConnection(){
-        this.close()
     }
 }

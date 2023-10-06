@@ -1,18 +1,15 @@
 package com.shamela.apptheme.presentation.worker
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.shamela.apptheme.R
 import com.shamela.apptheme.data.db.DatabaseHelper
+import com.shamela.apptheme.data.util.ArabicNormalizer
 import com.shamela.apptheme.domain.model.BookPage
+import com.shamela.apptheme.presentation.util.ChannelType
+import com.shamela.apptheme.presentation.util.startNotification
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -33,7 +30,8 @@ class BookPreparationWorker(
 
     override suspend fun doWork(): Result {
         val notification = startNotification(
-            title = "تحضير الكتب للبحث",
+            context = appContext, title = "تحضير الكتب للبحث",
+            type = ChannelType.BookPreparation,
             content = "يتم تحضير الكتب للبحث"
         )
         val notificationId = this.id.hashCode()
@@ -57,9 +55,8 @@ class BookPreparationWorker(
                     category = category,
                     bookTitle = bookTitle
                 )
-                Log.e(TAG, "doWork: pageParsed: $page")
 
-               val isSuccess = database.insertBookPage(page)
+                val isSuccess = database.insertBookPage(page)
                 Log.e(TAG, "doWork: pageInserted $isSuccess")
 
             }
@@ -69,6 +66,7 @@ class BookPreparationWorker(
     }
 
     private suspend fun getPages(bookFilePath: String): Map<String, String> {
+        val normalizer = ArabicNormalizer()
         return withContext(Dispatchers.IO) {
             val hrefs =
                 EpubParser().parse(bookFilePath)?.publication?.readingOrder?.mapNotNull { it.href }
@@ -83,8 +81,8 @@ class BookPreparationWorker(
                             zipFile.getInputStream(entry).use { inputStream ->
                                 val document: Document =
                                     Jsoup.parse(inputStream, "UTF-8", "", xmlParser())
-                                val text = document.text()
-                                pagesMap.put(href, text)
+                                val pageTextNormalized = normalizer.normalize( document.text())
+                                pagesMap.put(href, pageTextNormalized)
                             }
                         }
                     }
@@ -97,30 +95,8 @@ class BookPreparationWorker(
         }
     }
 
-    private fun startNotification(title: String, content: String): Notification {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Books Processing Channel",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = CHANNEL_DESCRIPTION
-            }
-            (appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
-                channel
-            )
-        }
-        return NotificationCompat.Builder(appContext, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText(content)
-            .setSmallIcon(R.mipmap.ic_launcher_round)
-            .build()
-    }
-
     companion object {
         const val TAG = "PrepareBookForSearchService"
         const val EPUB_FILE_PATH = "EPUB_FILE_PATH"
-        const val CHANNEL_ID = "books processing notification"
-        const val CHANNEL_DESCRIPTION = "أشعارات تحضير الكتب للبحث"
     }
 }
