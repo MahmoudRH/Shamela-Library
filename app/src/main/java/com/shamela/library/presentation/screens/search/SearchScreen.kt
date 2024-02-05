@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.folioreader.ui.activity.searchActivity.SearchActivity
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
@@ -53,7 +54,7 @@ import com.shamela.library.domain.model.Category
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
 ) {
-    val searchState = viewModel.searchState.collectAsState().value
+    val searchState = viewModel.searchState.collectAsStateWithLifecycle().value
     val context = LocalContext.current
     LaunchedEffect(key1 = Unit, block = {
 //        if (searchState.allCategories.isEmpty())

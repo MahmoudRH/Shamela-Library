@@ -1,6 +1,7 @@
 package com.shamela.library.presentation.screens.searchResults
 
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -78,6 +79,7 @@ fun SearchResultsScreen(
                             "local"->{
                                 BookItem(modifier = Modifier
                                     .clickable {
+                                        Log.e("SearchResultsScreen", "Item Clicked: ${currentBook.title} ", )
                                         FilesBooksRepoImpl.openEpub(
                                             currentBook,
                                             onAddQuoteToFavorite = { quote ->
