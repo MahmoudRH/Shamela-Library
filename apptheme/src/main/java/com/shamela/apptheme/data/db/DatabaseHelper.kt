@@ -6,6 +6,7 @@ import android.content.Context
 import android.util.Log
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.shamela.apptheme.data.util.ArabicNormalizer
 import io.requery.android.database.sqlite.SQLiteDatabase
 import io.requery.android.database.sqlite.SQLiteOpenHelper
 import com.shamela.apptheme.domain.model.BookPage
@@ -62,11 +63,12 @@ class DatabaseHelper(val context: Context) :
     suspend fun searchBook(bookId: String, query: String): List<BookPage> {
         return withContext(Dispatchers.IO) {
             val results = mutableListOf<BookPage>()
+            val queryNormalized = ArabicNormalizer().normalize(query)
             val cursor = db.query(
                 BookPage.TABLE_NAME,
                 arrayOf("*"),
                 "${BookPage.COL_BOOK_ID} = ? AND ${BookPage.COL_CONTENT} MATCH ?",
-                arrayOf(bookId, "\"${query}\""),
+                arrayOf(bookId, "\"${queryNormalized}\""),
                 null,
                 null,
                 "rank"
