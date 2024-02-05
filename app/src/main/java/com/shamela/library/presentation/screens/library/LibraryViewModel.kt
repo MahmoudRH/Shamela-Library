@@ -100,6 +100,15 @@ class LibraryViewModel @Inject constructor(
                     booksUseCases.deleteBook(book).let { isDeleteSuccess ->
                         if (isDeleteSuccess) {
                             _libraryState.update { it.copy(books = it.books - book.id) }
+                            launch {
+                                // Reload library sections, to update books count and exclude empty sections
+                                _libraryState.update { it.copy(sections = emptyMap()) }
+                                booksUseCases.getAllCategories().collect { category ->
+                                    _libraryState.update {
+                                        it.copy(sections = it.sections + mapOf(category.id to category), isLoading = false)
+                                    }
+                                }
+                            }
                         }
                     }
 

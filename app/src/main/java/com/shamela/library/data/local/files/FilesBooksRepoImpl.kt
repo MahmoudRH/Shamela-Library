@@ -73,7 +73,9 @@ object FilesBooksRepoImpl : BooksRepository {
             if (shamelaBooks.exists() && shamelaBooks.isDirectory) {
                 val categories = shamelaBooks.listFiles(FileFilter { it.isDirectory })
                 categories?.forEachIndexed { index, category ->
-                    send(Category("$index", category.name, category.listFiles()?.size ?: 0))
+                    val bookCount = category.listFiles()?.size?:0
+                    if (bookCount>0)
+                    send(Category("$index", category.name, bookCount))
                 }
             } else {
                 Log.w(TAG, "getCategories: shamelaBooks doesn't exist")
