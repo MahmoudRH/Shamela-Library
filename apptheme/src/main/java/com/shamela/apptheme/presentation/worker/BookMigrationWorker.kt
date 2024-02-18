@@ -3,6 +3,8 @@ package com.shamela.apptheme.presentation.worker
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
@@ -34,8 +36,12 @@ class BookMigrationWorker(
             content = "يتم تحديث قاعدة البيانات.."
         )
         val notificationId = this.id.hashCode()
-        val foreground = ForegroundInfo(notificationId, notification)
-        setForeground(foreground)
+        val foreground = if (Build.VERSION.SDK_INT >= 34) {
+            ForegroundInfo(notificationId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(notificationId, notification)
+        }
+        setForegroundAsync(foreground)
 
         return withContext(Dispatchers.IO) {
             Log.e("BookMigrationWorker", "doWork: isRunning", )

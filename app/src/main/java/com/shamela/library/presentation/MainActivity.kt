@@ -56,7 +56,11 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        registerReceiver(downloadCompleteReceiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(downloadCompleteReceiver, filter, RECEIVER_EXPORTED)
+        }else{
+            registerReceiver(downloadCompleteReceiver, filter)
+        }
     }
 
     override fun onStop() {
