@@ -1,5 +1,9 @@
 package com.shamela.library.presentation.screens
 
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -9,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -19,45 +24,64 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.shamela.library.presentation.common.DefaultTopBar
-import com.shamela.library.presentation.navigation.HomeHostDestination
+import com.shamela.apptheme.presentation.common.DefaultTopBar
+import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.library.presentation.navigation.Download
+import com.shamela.library.presentation.navigation.Favorite
+import com.shamela.library.presentation.navigation.Library
 import com.shamela.library.presentation.navigation.NavigationGraphs
+import com.shamela.library.presentation.navigation.Search
+import com.shamela.library.presentation.navigation.SearchResults
+import com.shamela.library.presentation.navigation.SectionBooks
+import com.shamela.library.presentation.navigation.Settings
 import com.shamela.library.presentation.navigation.homeGraph
-import com.shamela.library.presentation.theme.AppFonts
 import com.shamela.library.presentation.utils.NavigationUtils
 
 private val destination = listOf(
-    HomeHostDestination.Library,
-    HomeHostDestination.Download,
-    HomeHostDestination.Favorite,
-    HomeHostDestination.Search,
-    HomeHostDestination.Settings,
+    Library,
+    Download,
+    Favorite,
+    Search,
+    Settings,
 )
 
 @Composable
 fun HomeHostScreen() {
     val navController = rememberNavController()
-    val bottomBarVisibility = remember { mutableStateOf(false) }
-    bottomBarVisibility.value  =
-        if (NavigationUtils.parentGraphRoute(navController) == NavigationGraphs.HOME_GRAPH_ROUTE)
-            NavigationUtils.currentRoute(navController) != HomeHostDestination.SectionBooks.route
+    val screenBarsVisibility = remember { mutableStateOf(true) }
+    screenBarsVisibility.value =
+        if (NavigationUtils.parentGraphRoute(navController) == NavigationGraphs.HOME_GRAPH_ROUTE) {
+            val currentRoute =  NavigationUtils.currentRoute(navController)
+            val categoryName = navController.currentBackStackEntry?.arguments?.getString("categoryName")
+            Log.e("Mah", "HomeHostScreen: currentRout = $currentRoute")
+            Log.e("Mah", "HomeHostScreen: categoryName = $categoryName")
+            if (currentRoute == SearchResults.route){
+                categoryName == "all"
+            }else{
+                currentRoute != SectionBooks.route
+            }
+        }
         else
             false
 
-    var selectedScreenTitle by remember {
-        mutableStateOf(destination[0].label)
-    }
+    var selectedScreen by remember { mutableIntStateOf(0) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            if (bottomBarVisibility.value) {
+            AnimatedVisibility(
+                visible = screenBarsVisibility.value,
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it }),
+            ) {
                 NavigationBar() {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentDestination = navBackStackEntry?.destination
-                    destination.forEach { screen ->
+                    destination.forEachIndexed { index, screen ->
                         val isSelected =
                             currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                        if (isSelected){ selectedScreenTitle = screen.label}
+                        if (isSelected) {
+                            selectedScreen = index
+                        }
 
                         NavigationBarItem(
                             selected = isSelected,
@@ -90,9 +114,17 @@ fun HomeHostScreen() {
             }
         },
         topBar = {
-//            if (bottomBarVisibility.value) {
-                DefaultTopBar(selectedScreenTitle)
-//            }
+            AnimatedVisibility(
+                visible = screenBarsVisibility.value,
+                enter = slideInVertically(initialOffsetY = { -it }),
+                exit = slideOutVertically(targetOffsetY = { -it }),
+            ) {
+                DefaultTopBar(
+                    title = destination[selectedScreen].label,
+                    actionIcon = destination[selectedScreen].actionIcon,
+                    onActionClick = { destination[selectedScreen].onActionClick() }
+                )
+            }
         }
     ) {
         NavHost(

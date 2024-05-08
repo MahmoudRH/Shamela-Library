@@ -1,252 +1,167 @@
 package com.shamela.library.presentation.screens.settings
 
 
+import android.content.Context
+import android.database.Cursor
+import android.net.Uri
+import android.provider.DocumentsContract
+import android.provider.OpenableColumns
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.shamela.library.presentation.theme.AppFonts
-import com.shamela.library.presentation.theme.AppTheme
-import kotlin.math.ceil
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.shamela.apptheme.presentation.common.LoadingScreen
+import com.shamela.apptheme.presentation.settings.PreferenceSettingsScreen
+import com.shamela.apptheme.presentation.theme.AppFonts
+
 
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settingsState = viewModel.settingsState.collectAsState().value
-    val isSystemDark = isSystemInDarkTheme()
     val context = LocalContext.current
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        SettingsSection(
-            title = "تغيير الثيم",
-            options = settingsState.availableThemes,
-            selectedOption = settingsState.userPrefs.theme,
-        ) {
-            viewModel.onEvent(
-                SettingsEvent.OnChangeAppTheme(
-                    colorScheme = AppTheme.themeOf(
-                        theme = it,
-                        colorScheme = settingsState.userPrefs.colorScheme,
-                        isSystemInDarkTheme = isSystemDark,
-                        context = context
-                    ),
-                    settingsState.userPrefs.copy(theme = it)
-                )
-            )
-        }
-        SettingsSection(
-            title = "تغيير اللون",
-            options = settingsState.availableColorSchemes,
-            selectedOption = settingsState.userPrefs.colorScheme,
-        ) {
-            viewModel.onEvent(
-                SettingsEvent.OnChangeAppTheme(
-                    colorScheme = AppTheme.themeOf(
-                        theme = settingsState.userPrefs.theme,
-                        colorScheme = it,
-                        isSystemInDarkTheme = isSystemDark,
-                        context = context
-                    ),
-                    settingsState.userPrefs.copy(colorScheme = it)
-                )
-            )
-        }
-        FontSizeSelector(
-            title = "حجم الخط",
-            sliderPosition = settingsState.sliderPosition,
-            onSliderPositionChanged = {
-                viewModel.onEvent(SettingsEvent.OnChangeSliderPosition(it))
-            },
-            list = settingsState.availableFontSizes,
-            onValueChangeFinished = {
-                val sliderPosition = ceil(settingsState.sliderPosition).toInt()
-                Log.e("Mah", "sliderPosition: $sliderPosition")
-
-                viewModel.onEvent(
-                    SettingsEvent.OnChangeAppFontSize(
-                        settingsState.userPrefs.copy(fontSize = settingsState.availableFontSizes[sliderPosition])
-                    )
-                )
+    val getContentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            if (uri != null) {
+                Log.e("SettingsScreen", "new uri selected: $uri")
+                viewModel.onEvent(SettingsEvent.NewFileSelected(uri))
             }
-        )
+        })
 
-
-        FontsSection(
-            title = "نوع الخط",
-            options = settingsState.availableFontFamilies,
-            selectedOption = settingsState.userPrefs.fontFamily,
-        ) {
-            viewModel.onEvent(
-                SettingsEvent.OnChangeAppFont(
-                    settingsState.userPrefs.copy(
-                        fontFamily = it
-                    )
+    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+        ViewTypeSection(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            selectedViewType = settingsState.selectedViewType
+        ) { viewModel.onEvent(SettingsEvent.OnChangeViewType(it)) }
+        LoadingScreen(visibility = settingsState.isLoading)
+        when (settingsState.selectedViewType) {
+            SettingsViewType.Preferences -> PreferenceSettingsScreen()
+            SettingsViewType.ExternalBooks -> {
+                Text(
+                    text = "إضافة كتاب خارجي", modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, bottom = 4.dp), style = AppFonts.textNormalBold
                 )
-            )
+                Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                        .clickable {
+                            getContentLauncher.launch("application/epub+zip")
+                        }
+                        .padding(vertical = 16.dp, horizontal = 16.dp)
+                    ,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        modifier = Modifier,
+                        text = settingsState.fileName,
+                        style = AppFonts.textNormal
+                    )
+                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
+
+                }
+
+                AnimatedVisibility(visible = settingsState.fileUri != null) {
+                    Button(onClick = {
+                        settingsState.fileUri?.let { uri ->
+                            viewModel.onEvent(
+                                SettingsEvent.AddExternalBookToLibrary(uri, settingsState.fileName)
+                            )
+                        }
+                    }) {
+                        Text(
+                            text = "إضافة إلى المكتبة",
+                            style = AppFonts.textNormal
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SettingsSection(
-    title: String,
-    options: List<String>,
-    selectedOption: String,
-    onOptionClicked: (String) -> Unit,
+private fun ViewTypeSection(
+    modifier: Modifier,
+    selectedViewType: SettingsViewType,
+    onClick: (SettingsViewType) -> Unit,
 ) {
-    Text(
-        text = title, modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 4.dp), style = AppFonts.textNormalBold
-    )
-    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
-    FlowRow(modifier = Modifier.padding(top = 12.dp)) {
-        options.forEach {
-            val isSelected = (it == selectedOption)
+    Row(
+        modifier
+            .fillMaxWidth(0.8f)
+            .padding(vertical = 16.dp)
+            .clip(CircleShape)
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), CircleShape)
+            .height(IntrinsicSize.Min)
+    ) {
+        SettingsViewType.values().forEach {
             Text(
                 modifier = Modifier
-                    .padding(vertical = 4.dp)
-                    .padding(end = 8.dp)
-                    .clip(CircleShape)
-                    .clickable { onOptionClicked(it) }
-                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(0.6f), CircleShape)
-                    .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                text = it,
-                style = AppFonts.textNormal
-            )
-        }
-    }
-}
-
-@Composable
-private fun FontsSection(
-    title: String,
-    options: List<String>,
-    selectedOption: String,
-    onOptionClicked: (String) -> Unit,
-) {
-    Text(
-        text = title, modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 4.dp), style = AppFonts.textNormalBold
-    )
-    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
-    Column(modifier = Modifier.padding(top = 12.dp)) {
-        options.forEach {
-            val isSelected = (it == selectedOption)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(70.dp)
-                    .padding(vertical = 4.dp)
-                    .padding(end = 8.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .clickable { onOptionClicked(it) }
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.primary.copy(0.6f),
-                        RoundedCornerShape(20.dp)
+                    .weight(1f)
+                    .background(
+                        if (selectedViewType == it) MaterialTheme.colorScheme.primary.copy(
+                            alpha = 0.4f
+                        ) else Color.Transparent
                     )
-                    .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    text = it,
-                    style = AppFonts.textNormal.copy(fontFamily =  AppFonts.fontFamilyOf(it)),
+                    .clickable { onClick(it) }
+                    .padding(vertical = 12.dp),
+                text = it.label,
+                style = AppFonts.textNormalBold,
+                textAlign = TextAlign.Center
+            )
+            if (it != SettingsViewType.values().last()) {
+                Box(
+                    Modifier
+                        .width(2.dp)
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                 )
             }
         }
     }
 }
 
-
-@Composable
-fun FontSizeSelector(
-    title: String,
-    sliderPosition: Float,
-    list: List<Int>,
-    onSliderPositionChanged: (Float) -> Unit,
-    onValueChangeFinished: () -> Unit,
-) {
-    Text(
-        text = title, modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 4.dp), style = AppFonts.textNormalBold
-    )
-    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp)
-    ) {
-        Slider(
-            value = sliderPosition,
-            onValueChange = onSliderPositionChanged,
-            valueRange = 0f..list.lastIndex.toFloat(),
-            steps = ceil(list.size / 2f).toInt(),
-            colors = SliderDefaults.colors(
-                activeTrackColor = MaterialTheme.colorScheme.secondary.copy(0.7f),
-                inactiveTickColor = MaterialTheme.colorScheme.tertiary,
-                activeTickColor = MaterialTheme.colorScheme.secondary
-            ),
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            val wordsList = listOf("أصغر", "صغير", "عادي", "كبير", "أكبر")
-            list.forEachIndexed { index, it ->
-                val color =
-                    if (sliderPosition.toInt() == index) MaterialTheme.colorScheme.primary else Color.Unspecified
-                Text(
-                    text = wordsList[index],
-                    style = AppFonts.textNormal.copy(fontSize = (16 + it).sp, color = color)
-                )
-            }
-        }
-    }
-    LaunchedEffect(sliderPosition) {
-        onValueChangeFinished()
-    }
-}

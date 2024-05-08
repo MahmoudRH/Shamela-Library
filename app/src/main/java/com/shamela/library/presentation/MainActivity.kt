@@ -1,52 +1,57 @@
 package com.shamela.library.presentation
 
-import android.content.Context
-import android.content.res.Configuration
+import android.app.DownloadManager
+import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
-import com.shamela.library.data.local.sharedPrefs.SharedPreferencesData
-import com.shamela.library.domain.usecases.userPreferences.ReadUserPreferences
+import com.shamela.apptheme.data.sharedPrefs.SharedPreferencesData
+import com.shamela.apptheme.domain.usecases.userPreferences.ReadUserPreferences
+import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.library.presentation.reciever.DownloadCompleteReceiver
 import com.shamela.library.presentation.screens.HomeHostScreen
-import com.shamela.library.presentation.theme.AppFonts
-import com.shamela.library.presentation.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
+    private val downloadCompleteReceiver = DownloadCompleteReceiver()
+    private val userPreferences = SharedPreferencesData(this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        ReadUserPreferences(SharedPreferencesData(this)).invoke().apply {
+        ReadUserPreferences(userPreferences).invoke().apply {
             AppFonts.changeFontFamily(AppFonts.fontFamilyOf(fontFamily))
             AppFonts.changeFontSize(fontSize)
             AppTheme.changeColorScheme(
                 AppTheme.themeOf(
                     theme,
                     colorScheme,
-                    isNightMode(this@MainActivity),
+                    AppTheme.isDarkTheme(this@MainActivity),
                     this@MainActivity
-                ), theme
+                ),
+                theme
             )
-
         }
         setContent {
             AppTheme.ShamelaLibraryTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    HomeHostScreen()
+                       HomeHostScreen()
                 }
             }
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        registerReceiver(downloadCompleteReceiver, filter)
+    }
 
-    private fun isNightMode(context: Context): Boolean {
-        val nightModeFlags =
-            context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(downloadCompleteReceiver)
     }
 }

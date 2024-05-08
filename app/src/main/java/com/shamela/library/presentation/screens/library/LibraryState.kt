@@ -5,8 +5,9 @@ import com.shamela.library.domain.model.Category
 
 
 data class LibraryState(
-    val viewType: ViewType = ViewType.Books,
-    val isLoading:Boolean = true,
-    val books:List<Book> = emptyList(),
-    val sections:List<Category> = emptyList(),
+    val booksViewType: BooksViewType = BooksViewType.Books,
+    val isLoading: Boolean = true,
+    val books: Map<String, Book> = emptyMap(),
+    val sections: Map<String,Category> = emptyMap(),
+    val selectedBooks : List<Book> = emptyList()
 )
