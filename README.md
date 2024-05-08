@@ -1,7 +1,17 @@
-# Shamela Library
+# Shamela Library 
  Shamela Library is a simple app for Android phones. It helps you read Arabic books easily. You can find lots of books in the app, and you can also add your own books.
 The app is built entirely using Jetpack Compose, the app boasts a simple and customizable user interface.
- 
+<div align="center">
+
+
+[<img src="https://raw.githubusercontent.com/deckerst/common/main/assets/get-it-on-github.png"
+      alt='Get it on GitHub'
+      height="80">](https://github.com/MahmoudRH/Shamela-Library/releases/latest) 
+
+[![Latest Release](https://img.shields.io/github/v/release/MahmoudRH/Shamela-Library.svg?logo=github&style=for-the-badge)](https://github.com/MahmoudRH/Shamela-Library/releases/latest)
+      
+</div>
+
  ## Features:
  - Simple & Highly Customizable UI:
    - Choose from a variety of color palettes to suit your preferences.
