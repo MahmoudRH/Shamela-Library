@@ -1,21 +1,12 @@
 buildscript {
+    apply from: 'versions.gradle'
     ext {
-        hilt_version = '2.46.1'
-        compose_bom = '2023.06.00'
-        compose_activity = '1.7.2'
-        compose_compiler = '1.4.7'
-        core_ktx = '1.10.1'
-        kotlin_bom = '1.8.0'
-        lifecycle_runtime_ktx = '2.6.1'
-        readium_version = '2.3.0'
         firebase_bom = '32.1.0'
         google_services = '4.3.15'
         crashlytics = '2.9.5'
-        navigation_compose = '2.6.0'
-        gson_version = "2.10.1"
     }
     dependencies {
-        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$versions.hilt_version"
         classpath "com.google.gms:google-services:$google_services"
         classpath "com.google.firebase:firebase-crashlytics-gradle:$crashlytics"
     }
@@ -23,7 +14,7 @@ buildscript {
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
-    id 'com.android.application' version '8.0.2' apply false
-    id 'com.android.library' version '8.0.2' apply false
-    id 'org.jetbrains.kotlin.android' version '1.8.21' apply false
+    id 'com.android.application' version '8.1.0-rc01' apply false
+    id 'com.android.library' version '8.1.0-rc01' apply false
+    id 'org.jetbrains.kotlin.android' version '1.8.22' apply false
 }

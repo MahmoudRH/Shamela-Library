@@ -1,0 +1,152 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
+}
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'folioreader'
+
+    publishedGroupId = 'com.folioreader'
+    libraryName = 'FolioReader'
+    artifact = 'folioreader'
+
+    libraryDescription = 'An epub reader for Android'
+
+    siteUrl = 'https://github.com/FolioReader/FolioReader-Android'
+    gitUrl = 'https://github.com/FolioReader/FolioReader-Android.git'
+
+    libraryVersion = versions.folioreaderSdk
+
+    developerId = 'mobisystech'
+    developerName = 'Folio Reader'
+    developerEmail = 'mahavir@codetoart.com'
+
+    licenseName = 'FreeBSD License'
+    licenseUrl = 'https://en.wikipedia.org/wiki/FreeBSD_Documentation_License#License'
+    allLicenses = ["FreeBSD"]
+}
+
+android {
+    useLibrary 'org.apache.http.legacy'
+    compileSdkVersion versions.androidCompileSdk
+    namespace 'com.folioreader'
+
+    buildFeatures {
+        viewBinding true
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion "$versions.compose_compiler"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    defaultConfig {
+        minSdkVersion versions.androidMinSdk
+        targetSdkVersion versions.androidTargetSdk
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src/main/java']
+            res.srcDirs = ['res']
+        }
+        test {
+            java.srcDirs = ['src/test/java']
+        }
+    }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/ASL2.0', 'META-INF/DEPENDENCIES.txt', 'META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/NOTICE', 'META-INF/LICENSE', 'META-INF/DEPENDENCIES', 'META-INF/notice.txt', 'META-INF/license.txt', 'META-INF/dependencies.txt', 'META-INF/LGPL2.1', 'META-INF/services/javax.annotation.processing.Processor']
+        }
+    }
+
+    lint {
+        abortOnError false
+        lintConfig file('lint.xml')
+    }
+
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation "androidx.appcompat:appcompat:$versions.appcompat"
+    implementation "androidx.constraintlayout:constraintlayout:$versions.constraintLayout"
+    implementation "androidx.recyclerview:recyclerview:$versions.recyclerview"
+    implementation "com.google.android.material:material:$versions.material"
+    testImplementation 'junit:junit:4.12'
+
+    implementation 'org.slf4j:slf4j-android:1.7.25'
+    implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
+
+    //Kotlin
+    implementation platform("org.jetbrains.kotlin:kotlin-bom:$versions.kotlin_bom")
+
+    //-> Compose dependencies
+    implementation platform("androidx.compose:compose-bom:$versions.compose_bom")
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation "androidx.compose.material:material-icons-extended"
+
+    //-> Compose Navigation
+    implementation "androidx.navigation:navigation-compose:$versions.navigation_compose"
+
+    //-> Accompanist WebView Wrapper
+    implementation "com.google.accompanist:accompanist-webview:$versions.accompanist"
+
+
+    //-> AppTheme
+    implementation project(path: ':apptheme')
+
+    //-> Hilt DI
+    implementation "com.google.dagger:hilt-android:$versions.hilt_version"
+    kapt "com.google.dagger:hilt-compiler:$versions.hilt_version"
+    kapt "androidx.hilt:hilt-compiler:1.0.0"
+    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
+
+    implementation 'org.greenrobot:eventbus:3.1.1'
+
+    implementation "com.fasterxml.jackson.core:jackson-core:$versions.jackson"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$versions.jackson"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$versions.jackson"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$versions.jackson"
+    implementation "com.google.code.gson:gson:$versions.gson"
+
+    implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
+    implementation "com.squareup.retrofit2:converter-jackson:$versions.retrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$versions.retrofit"
+
+    // R2 modules
+    implementation("com.github.codetoart:r2-shared-kotlin:$versions.r2SharedKotlin") {
+        changing = true
+    }
+    implementation("com.github.codetoart:r2-streamer-kotlin:$versions.r2StreamerKotlin") {
+        exclude group: "org.slf4j", module: "slf4j-api"
+        changing = true
+    }
+
+    // Only ReflectionUtils in Spring framework is used
+    implementation 'org.springframework:spring-core:4.3.19.RELEASE'
+
+    // Lifecycle
+    implementation "androidx.lifecycle:lifecycle-extensions:$versions.lifecycle"
+}

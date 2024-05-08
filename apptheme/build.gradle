@@ -1,0 +1,91 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.shamela.apptheme'
+    compileSdk versions.androidCompileSdk
+
+    defaultConfig {
+        minSdk versions.androidMinSdk
+        targetSdk versions.androidTargetSdk
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion "$versions.compose_compiler"
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+}
+dependencies {
+    implementation "androidx.core:core-ktx:$versions.core_ktx"
+    implementation platform("org.jetbrains.kotlin:kotlin-bom:$versions.kotlin_bom")
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions.lifecycle_runtime_ktx"
+    implementation "androidx.activity:activity-compose:$versions.compose_activity"
+
+    def compose_version = "1.4.3"
+    implementation("androidx.compose.animation:animation-core:$compose_version")
+    implementation("androidx.compose.animation:animation:$compose_version")
+    implementation("androidx.compose.ui:ui:$compose_version")
+    implementation("androidx.compose.foundation:foundation:$compose_version")
+    implementation("androidx.compose.ui:ui-geometry:$compose_version")
+    implementation("androidx.compose.ui:ui-graphics:$compose_version")
+    implementation("androidx.compose.foundation:foundation-layout:$compose_version")
+    implementation("androidx.compose.runtime:runtime-livedata:$compose_version")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha03")
+    implementation("androidx.compose.material:material:$compose_version")
+    implementation("androidx.compose.material:material-icons-core:$compose_version")
+    implementation("androidx.compose.material:material-icons-extended:$compose_version")
+    implementation("androidx.compose.runtime:runtime-rxjava2:$compose_version")
+    implementation("androidx.compose.ui:ui-text:$compose_version")
+    implementation("androidx.compose.ui:ui-util:$compose_version")
+    implementation("androidx.compose.ui:ui-viewbinding:$compose_version")
+    implementation("androidx.compose.ui:ui-tooling:$compose_version")
+
+
+    //-> WorkManager
+    implementation "androidx.work:work-runtime-ktx:$versions.workmanager"
+    //-> Jsoup Parser
+    implementation 'org.jsoup:jsoup:1.15.3'
+    //-> SQLite support library
+    api 'com.github.requery:sqlite-android:3.42.0'
+    // R2 modules
+    implementation("com.github.codetoart:r2-shared-kotlin:$versions.r2SharedKotlin") {
+        changing = true
+    }
+    implementation("com.github.codetoart:r2-streamer-kotlin:$versions.r2StreamerKotlin") {
+        exclude group: "org.slf4j", module: "slf4j-api"
+        changing = true
+    }
+
+    //-> Compose Navigation
+    implementation "androidx.navigation:navigation-compose:$versions.navigation_compose"
+
+    //->Kotlin Reflection
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.8.22"
+}

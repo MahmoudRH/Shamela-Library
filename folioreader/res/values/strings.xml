@@ -1,0 +1,120 @@
+<resources>
+
+    <string name="app_name">الشاملة</string>
+
+    <string name="andada">Andada</string>
+    <string name="lato">Lato</string>
+    <string name="lora">Lora</string>
+    <string name="raleway">Raleway</string>
+
+    <string name="andada_font">fonts/andada/Andada-Regular.otf</string>
+    <string name="lato_font">fonts/lato/Lato-Regular.ttf</string>
+    <string name="lora_font">fonts/lora/Lora-Regular.ttf</string>
+    <string name="raleway_font">fonts/raleway/Raleway-Regular.ttf</string>
+
+    <string name="minutes_left">%1$d دقائق ·&#160;</string>
+    <string name="minute_left">%1$d دقيقة ·&#160;</string>
+    <string name="less_than_minute"> أقل  من دقيقة.&#160;</string>
+
+    <string name="copied">تم النسخ</string>
+    <string name="send_to">إرسال إلى</string>
+
+    <string name="copy">نسخ</string>
+    <string name="share">مشاركة</string>
+    <string name="addToFavorite">إضافة للمفضلة</string>
+    <string name="define">تعريف</string>
+    <string name="highlight">تظليل</string>
+
+    <string name="pages_left">%1$d صفحات متبقية</string>
+    <string name="page_left">%1$d صفحة متبقية</string>
+    <string name="highlights">التظليلات</string>
+    <string name="half_speed">1/2x</string>
+    <string name="onex">1x</string>
+    <string name="one_and_half">1&#160;1/2x</string>
+    <string name="two_x">2x</string>
+    <string name="style">Style</string>
+    <string name="style_underline"><![CDATA[<u style=\" border-bottom: 1px dashed #bcbcbc;   text-decoration: none;\">Style</u>]]></string>
+    <string name="full_path">full-path</string>
+    <string name="error_goToPage">goToPage error:</string>
+    <string name="zip">.zip</string>
+    <string name="htmlBodyTableOpen">&lt;html&gt;&lt;body&gt;&lt;table&gt;</string>
+    <string name="titlesMeta">&lt;tr&gt;&lt;td&gt;العنوان:&lt;/td&gt;</string>
+    <string name="authorsMeta">&lt;tr&gt;&lt;td&gt;المؤلف(ين):&lt;/td&gt;</string>
+    <string name="contributorsMeta">&lt;tr&gt;&lt;td&gt;المساهمون:&lt;/td&gt;</string>
+    <string name="languageMeta">&lt;tr&gt;&lt;td&gt;اللغة:&lt;/td&gt;&lt;td&gt;</string>
+    <string name="publishersMeta">&lt;tr&gt;&lt;td&gt;الناشرين:&lt;/td&gt;</string>
+    <string name="typesMeta">&lt;tr&gt;&lt;td&gt;الأنواع:&lt;/td&gt;</string>
+    <string name="descriptionsMeta">&lt;tr&gt;&lt;td&gt;الوصف:&lt;/td&gt;</string>
+    <string name="rightsMeta">&lt;tr&gt;&lt;td&gt;الحقوق:&lt;/td&gt;</string>
+    <string name="tablebodyhtmlClose">&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string name="tocReference">&lt;tr&gt;&lt;td&gt;جدول المحتويات&lt;/td&gt;</string>
+    <string name="change_Font">تغيير الخط</string>
+    <string name="change_Font_Color">لون الخط</string>
+    <string name="changeStyle">تغير الشكل</string>
+    <string name="blue_rgb">#0000ff</string>
+    <string name="red_rgb">#ff0000</string>
+    <string name="green_rgb">#00ff00</string>
+    <string name="black_rgb">#000000</string>
+    <string name="white_rgb">#ffffff</string>
+    <string name="error_CannotChangeStyle">تعذر تغير الشكل</string>
+    <string name="OK">موافق</string>
+    <string name="Cancel">إلغاء</string>
+    <string name="SetSizeTitle">Upper Panel Size:</string>
+    <string name="LanguageChooserTitle">Choose two languages:</string>
+    <string name="parallelTextBool">parallelTextBool</string>
+    <string name="loading">جارِ التحميل</string>
+    <string name="please_wait">يرجى الإنتظار</string>
+    <string name="one_and_half_speed"><![CDATA[1<sup>1</sup>/<sub>2</sub>x]]></string>
+    <string name="half_speed_text"><![CDATA[<sup>1</sup>/<sub>2</sub>x]]></string>
+    <string name="please_wait_till_audio_is_parsed">please wait till audio is been parsed, Retry after some time</string>
+    <string name="audio_mark_id">javascript:alert(audioMarkID(\'epub-media-overlay-playing\',\'%s\'))</string>
+    <string name="setmediaoverlaystyle">javascript:setMediaOverlayStyle(\'%s\')</string>
+    <string name="go_to_anchor" translatable="false">javascript:goToAnchor(\'%s\')</string>
+    <string name="go_to_highlight" translatable="false">javascript:goToHighlight(\'%s\')</string>
+    <string name="sethighlightstyle">javascript:setHighlightStyle(\'%s\');</string>
+    <string name="css_tag"><![CDATA[<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\" />]]></string>
+    <string name="script_tag"><![CDATA[<script type=\"text/javascript\" src=\"%s\"></script>]]></string>
+    <string name="td_tag"><![CDATA[<td>%s</td></tr>]]></string>
+    <string name="tr_tag"><![CDATA[<tr><td></td><td>%s</td></tr>]]></string>
+    <string name="script_tag_method_call"><![CDATA[<script type=\"text/javascript\">%s</script>]]></string>
+    <string name="underline_highlights">
+        <span style="border-bottom: 1px solid #ff0000;">%s</span>
+    </string>
+    <string name="edit_notes">تعديل الملاحظة</string>
+    <string name="save_note">حفظ الملاحظة</string>
+    <string name="please_enter_note">أدخل ملاحظة</string>
+    <string name="contents">المحتويات</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="debug_start_drag">Starting drag!</string>
+    <string name="debug_start_unable_drag">Starting unable to drag!</string>
+    <string name="dictionary">قاموس</string>
+    <string name="wikipedia">ويكيبيديا</string>
+    <string name="cannot_access_epub_message">تعذر فتح الكتاب، إذن التخزين مطلوب</string>
+    <string name="direction_horizontal">افقي</string>
+    <string name="direction_vertical">عامودي</string>
+
+    <string name="xhtml_mime_type" translatable="false">application/xhtml+xml</string>
+    <string name="html_mime_type" translatable="false">text/html</string>
+
+    <string name="menu_item_search">بحث</string>
+    <string name="menu_item_config">خصائص</string>
+    <string name="menu_item_tts">Text To Speech</string>
+
+    <string name="search_hint">البحث في الكتاب</string>
+    <string name="search_empty_text">لم يتم العثور على نتائج</string>
+    <string name="search_failure_text">فشل البحث</string>
+
+    <plurals name="numberOfSearchResults">
+        <item quantity="one">نتيجة واحدة</item>
+        <item quantity="other">%d نتائج</item>
+    </plurals>
+
+    <!-- JS Calls -->
+    <string name="callComputeLastReadCfi" translatable="false">javascript:computeLastReadCfi()</string>
+    <string name="callScrollToCfi" translatable="false">javascript:scrollToCfi(\"%s\")</string>
+    <string name="callHighlightSearchLocator" translatable="false">javascript:highlightSearchLocator(\"%s\")</string>
+    <string name="callClearSelection" translatable="false">javascript:clearSelection()</string>
+
+</resources>
