@@ -12,9 +12,11 @@ import com.shamela.library.domain.repo.BooksRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -94,12 +96,29 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
     }
 
     override fun searchBooksByName(categoryName: String, query: String): Flow<Book> {
-        return if (categoryName == "all") getAllBooks()
-            .filter { it.title.contains(query) }
-        else {
-            getBooksByCategory(categoryName).filter { it.title.contains(query) }
-        }
+        return if (categoryName == "all")  searchAllBooks(query)
+        else getBooksByCategory(categoryName).filter { it.title.contains(query) }
+
     }
+
+    private fun searchAllBooks(query: String) = channelFlow<Book> {
+        val categoryNames = context.assets.list("categories") ?: emptyArray()
+
+        val jobs = categoryNames.map { category ->
+            // Launch a coroutine for each category
+            launch(Dispatchers.IO) {
+                val results = getBooksByCategory(category).filter { it.title.contains(query) }
+                results.collect { send(it) } // Use send() to emit items in channelFlow
+            }
+        }
+
+        // Wait for all jobs to complete
+        jobs.forEach { it.join() }
+
+        // Close the channel to signal the end of emission
+        close()
+    }
+
 
     override fun getAllBooks(): Flow<Book> = flow {
         try {
