@@ -1,6 +1,7 @@
 package com.shamela.library.presentation.screens.searchResults
 
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -48,11 +49,11 @@ fun SearchResultsScreen(
             onClickClear = { viewModel.onEvent(SearchResultsEvent.ClearSearchQuery) },
             onClickSearch = { query -> viewModel.onEvent(SearchResultsEvent.Search(query)) },
         )
-        LoadingScreen(visibility = state.isLoading)
         EmptyListScreen(
             visibility = state.isListEmpty,
             text = "لم يتم العثور على أي نتائج..",
         )
+        LoadingScreen(visibility = state.isLoading)
         Box(
             Modifier
                 .fillMaxSize()
@@ -78,6 +79,7 @@ fun SearchResultsScreen(
                             "local"->{
                                 BookItem(modifier = Modifier
                                     .clickable {
+                                        Log.e("SearchResultsScreen", "Item Clicked: ${currentBook.title} ", )
                                         FilesBooksRepoImpl.openEpub(
                                             currentBook,
                                             onAddQuoteToFavorite = { quote ->

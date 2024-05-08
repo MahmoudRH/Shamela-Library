@@ -44,7 +44,7 @@ fun DownloadScreen(
     LaunchedEffect(key1 = Unit, block = {
         Download.buttons.onEach {
             if (it) {
-                if (downloadState.booksViewType == BooksViewType.Books){
+                if (viewModel.downloadState.value.booksViewType == BooksViewType.Books){
                     Log.e("Mah ", "DownloadScreen: Search Books is clicked")
                     navigateToSearchResultsScreen("all", "remote")
                 }else{
@@ -55,7 +55,7 @@ fun DownloadScreen(
         }.launchIn(this)
     })
     LaunchedEffect(key1 = Unit, block ={
-        when ( downloadState.booksViewType){
+        when (viewModel.downloadState.value.booksViewType){
             BooksViewType.Sections -> viewModel.onEvent(DownloadEvent.LoadUserSections)
             BooksViewType.Books -> viewModel.onEvent(DownloadEvent.LoadUserBooks)
         }
