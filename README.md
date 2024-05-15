@@ -23,8 +23,8 @@ The app is built entirely using Jetpack Compose, the app boasts a simple and cus
    - Instantly find results within large books.
    - Find results within seconds, whether searching within a single book, a section, or multiple sections simultaneously.
  - Favorites Section:
-  - Save books to your favorites for quick retrieval.
-  - Bookmark memorable quotes from your readings.
+   - Save books to your favorites for quick retrieval.
+   - Bookmark memorable quotes from your readings.
 - Extensive Book Collection:
   - Access over 5000 Arabic books directly within the app.
   - Add your own books to the library for a personalized reading experience.
