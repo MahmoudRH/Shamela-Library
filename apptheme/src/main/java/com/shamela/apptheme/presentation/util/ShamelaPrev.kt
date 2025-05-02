@@ -1,4 +1,4 @@
-package com.shamela.library.presentation.utils
+package com.shamela.apptheme.presentation.util
 
 import androidx.compose.ui.tooling.preview.Preview
 
