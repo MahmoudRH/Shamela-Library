@@ -1,20 +1,12 @@
 package com.shamela.library.presentation.screens.settings
 
 
-import android.content.Context
-import android.database.Cursor
-import android.net.Uri
-import android.provider.DocumentsContract
-import android.provider.OpenableColumns
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -26,46 +18,37 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.settings.PreferenceSettingsScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.presentation.screens.LocalPaddingValues
+import com.shamela.library.presentation.screens.settings.components.ExternalBooksScreen
 
 
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
-    val settingsState = viewModel.settingsState.collectAsState().value
+    val uiState = viewModel.settingsState.collectAsStateWithLifecycle().value
     val context = LocalContext.current
-    val localPadding = LocalPaddingValues.current
     val getContentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
             if (uri != null) {
-                Log.e("SettingsScreen", "new uri selected: $uri")
                 viewModel.onEvent(SettingsEvent.NewFileSelected(uri))
             }
         })
@@ -75,58 +58,48 @@ fun SettingsScreen(
         }
     }
 
-    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp).padding(localPadding)) {
+    SettingsScreenUI(uiState, {
+        getContentLauncher.launch("application/epub+zip")
+    }, { viewModel.onEvent(SettingsEvent.OnChangeViewType(it)) }) {
+        uiState.fileUri?.let { uri ->
+            uiState.fileName?.let {
+                viewModel.onEvent(
+                    SettingsEvent.AddExternalBookToLibrary(uri, uiState.fileName)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsScreenUI(
+    uiState: SettingsState,
+    onClickSelectBook: () -> Unit,
+    onChangeViewType: (SettingsViewType) -> Unit,
+    onClickAddBookToLibrary: () -> Unit
+) {
+    val localPadding = LocalPaddingValues.current
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .padding(localPadding)
+    ) {
         ViewTypeSection(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            selectedViewType = settingsState.selectedViewType
-        ) { viewModel.onEvent(SettingsEvent.OnChangeViewType(it)) }
-        LoadingScreen(visibility = settingsState.isLoading)
-        when (settingsState.selectedViewType) {
+            selectedViewType = uiState.selectedViewType,
+            onClick = onChangeViewType
+        )
+        LoadingScreen(visibility = uiState.isLoading)
+        when (uiState.selectedViewType) {
             SettingsViewType.Preferences -> PreferenceSettingsScreen()
-            SettingsViewType.ExternalBooks -> {
-                Text(
-                    text = "إضافة كتاب خارجي", modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp, bottom = 4.dp), style = AppFonts.textNormalBold
-                )
-                Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                        .clickable {
-                            getContentLauncher.launch("application/epub+zip")
-                        }
-                        .padding(vertical = 16.dp, horizontal = 16.dp)
-                    ,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        modifier = Modifier,
-                        text = settingsState.fileName,
-                        style = AppFonts.textNormal
-                    )
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            SettingsViewType.ExternalBooks -> ExternalBooksScreen(
+                onClickSelectBook = onClickSelectBook,
+                onClickAddBookToLibrary = onClickAddBookToLibrary,
+                selectedFileName = uiState.fileName,
+                selectedFileUri = uiState.fileUri
+            )
 
-                }
-
-                AnimatedVisibility(visible = settingsState.fileUri != null) {
-                    Button(onClick = {
-                        settingsState.fileUri?.let { uri ->
-                            viewModel.onEvent(
-                                SettingsEvent.AddExternalBookToLibrary(uri, settingsState.fileName)
-                            )
-                        }
-                    }) {
-                        Text(
-                            text = "إضافة إلى المكتبة",
-                            style = AppFonts.textNormal
-                        )
-                    }
-                }
-            }
         }
     }
 }
