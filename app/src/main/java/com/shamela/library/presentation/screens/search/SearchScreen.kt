@@ -50,6 +50,7 @@ import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.domain.model.Category
+import com.shamela.library.presentation.screens.LocalPaddingValues
 
 @Composable
 fun SearchScreen(
@@ -57,11 +58,12 @@ fun SearchScreen(
 ) {
     val searchState = viewModel.searchState.collectAsStateWithLifecycle().value
     val context = LocalContext.current
+    val localPadding = LocalPaddingValues.current
     LaunchedEffect(key1 = Unit, block = {
 //        if (searchState.allCategories.isEmpty())
             viewModel.onEvent(SearchEvent.GetAllCategories)
     })
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = Modifier.fillMaxSize().padding(localPadding), horizontalAlignment = Alignment.CenterHorizontally) {
 
         SearchTextField(
             value = searchState.searchQuery,

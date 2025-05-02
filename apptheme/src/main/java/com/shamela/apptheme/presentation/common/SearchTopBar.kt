@@ -3,6 +3,7 @@ package com.shamela.apptheme.presentation.common
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -45,6 +46,7 @@ fun SearchTopBar(
     focusRequester: FocusRequester,
 ) {
     TopAppBar(
+        windowInsets = WindowInsets(0),
         title = {
             SearchTextField(
                 value,

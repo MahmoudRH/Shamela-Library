@@ -10,6 +10,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -22,8 +24,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -47,7 +51,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -135,161 +138,112 @@ fun BookScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            AnimatedVisibility(
-                visible = state.isAppBarsVisible,
-                enter = slideInVertically(initialOffsetY = { -it }),
-                exit = slideOutVertically(
-                    targetOffsetY = { -it },
-                    animationSpec = tween(250)
-                )
-            ) {
-                TopAppBar(
-                    modifier = Modifier,
-                    title = {
-                        var titleTextStyle by remember{ mutableStateOf(AppFonts.textLargeBold)}
-                        var readyToDraw by remember { mutableStateOf(false) }
-                        Text(
-                            text = publication.metadata.title,
-                            style = titleTextStyle,
-                            maxLines = 2,
-                            modifier = Modifier.drawWithContent {
-                                if (readyToDraw) drawContent()
-                            },
-                            onTextLayout = {textLayoutResult->
-                                if (textLayoutResult.didOverflowHeight) {
-                                    titleTextStyle = titleTextStyle.copy(fontSize = titleTextStyle.fontSize * 0.9)
-                                }else{
-                                    readyToDraw = true
-                                }
+    Column(modifier = Modifier.background(Color(backgroundColor))) {
+        AnimatedVisibility(
+            visible = state.isAppBarsVisible,
+            enter = expandVertically(),
+            exit = shrinkVertically()
+        ) {
+            TopAppBar(
+                modifier = Modifier,
+                title = {
+                    var titleTextStyle by remember{ mutableStateOf(AppFonts.textLargeBold)}
+                    var readyToDraw by remember { mutableStateOf(false) }
+                    Text(
+                        text = publication.metadata.title,
+                        style = titleTextStyle,
+                        maxLines = 2,
+                        modifier = Modifier.drawWithContent {
+                            if (readyToDraw) drawContent()
+                        },
+                        onTextLayout = {textLayoutResult->
+                            if (textLayoutResult.didOverflowHeight) {
+                                titleTextStyle = titleTextStyle.copy(fontSize = titleTextStyle.fontSize * 0.9)
+                            }else{
+                                readyToDraw = true
                             }
-                        )
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            15.dp
-                        ),
-                    ),
-                    actions = {
-
-                        IconButton(onClick = {
-                            navigateToSearchScreen()
-                        }) {
-                            Icon(
-                                Icons.Outlined.Search,
-                                contentDescription = null
-                            )
                         }
-
-                        Spacer(modifier = Modifier.size(4.dp))
-
-                        IconButton(onClick = {
-                            viewModel.onEvent(BookEvent.ToggleMenuVisibility)
-                        }) {
-                            Icon(
-                                Icons.Outlined.MoreVert,
-                                contentDescription = null
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = state.isMenuVisible,
-                            onDismissRequest = {
-                                viewModel.onEvent(BookEvent.DismissMenu)
-                            }
-                        ) {
-                            DropdownMenuItem(
-                                onClick = {
-                                    viewModel.onEvent(BookEvent.DismissMenu)
-                                    navigateToSettings(pagerState.currentPage)
-                                },
-                                leadingIcon = {
-                                    Icon(Icons.Outlined.Settings, null)
-                                },
-                                text = {
-                                    Text(
-                                        text = "الإعدادات",
-                                        style = AppFonts.textNormal
-                                    )
-                                })
-                            DropdownMenuItem(
-                                onClick = {
-                                    viewModel.onEvent(BookEvent.DismissMenu)
-                                    navigateToTableOfContent(pagerState.currentPage)
-                                },
-                                text = {
-                                    Text(
-                                        text = "الفهرس",
-                                        style = AppFonts.textNormal
-                                    )
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Outlined.FormatListBulleted,
-                                        null
-                                    )
-                                })
-                        }
-
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-//                            viewModel.onEvent(BookEvent.StopStreamerServer)
-                            navigateBack()
-                        }) {
-                            Icon(
-                                Icons.Default.ArrowForwardIos,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                )
-            }
-        },
-        containerColor = Color(backgroundColor),
-        bottomBar = {
-            BottomBar(
-                visibility = state.isAppBarsVisible,
-                currentPage = state.currentPageText,
-                onCurrentPageChange = {
-                    viewModel.onEvent(
-                        BookEvent.OnCurrentPageTextChanged(
-                            it
-                        )
                     )
                 },
-                onDone = {
-                    scope.launch {
-                        state.currentPageText.toIntOrNull()?.let {
-                            val page = it.coerceIn(
-                                0,
-                                publication.readingOrder.size - 1
-                            )
-                            pagerState.scrollToPage(page)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                        15.dp
+                    ),
+                ),
+                actions = {
+
+                    IconButton(onClick = {
+                        navigateToSearchScreen()
+                    }) {
+                        Icon(
+                            Icons.Outlined.Search,
+                            contentDescription = null
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.size(4.dp))
+
+                    IconButton(onClick = {
+                        viewModel.onEvent(BookEvent.ToggleMenuVisibility)
+                    }) {
+                        Icon(
+                            Icons.Outlined.MoreVert,
+                            contentDescription = null
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = state.isMenuVisible,
+                        onDismissRequest = {
+                            viewModel.onEvent(BookEvent.DismissMenu)
                         }
+                    ) {
+                        DropdownMenuItem(
+                            onClick = {
+                                viewModel.onEvent(BookEvent.DismissMenu)
+                                navigateToSettings(pagerState.currentPage)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.Settings, null)
+                            },
+                            text = {
+                                Text(
+                                    text = "الإعدادات",
+                                    style = AppFonts.textNormal
+                                )
+                            })
+                        DropdownMenuItem(
+                            onClick = {
+                                viewModel.onEvent(BookEvent.DismissMenu)
+                                navigateToTableOfContent(pagerState.currentPage)
+                            },
+                            text = {
+                                Text(
+                                    text = "الفهرس",
+                                    style = AppFonts.textNormal
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Outlined.FormatListBulleted,
+                                    null
+                                )
+                            })
                     }
+
                 },
-                isPrevButtonEnabled = pagerState.currentPage != 0,
-                isNextButtonEnabled = pagerState.currentPage != publication.readingOrder.size - 1,
-                onPrevButtonClick = {
-                    pagerState.apply {
-                        val previousPage = max(0, currentPage - 1)
-                        scope.launch { animateScrollToPage(previousPage) }
-                    }
-                },
-                onNextButtonClick = {
-                    pagerState.apply {
-                        val nextPage =
-                            min(
-                                currentPage + 1,
-                                publication.readingOrder.size - 1
-                            )
-                        scope.launch { animateScrollToPage(nextPage) }
+                navigationIcon = {
+                    IconButton(onClick = {
+//                            viewModel.onEvent(BookEvent.StopStreamerServer)
+                        navigateBack()
+                    }) {
+                        Icon(
+                            Icons.Default.ArrowForwardIos,
+                            contentDescription = null
+                        )
                     }
                 }
             )
         }
-    ) { paddingValues ->
 
         LaunchedEffect(pagerState.currentPage) {
             webViews.keys.forEach { key ->
@@ -337,7 +291,6 @@ fun BookScreen(
                 Log.e("BooksScreen", "pagerState.currentPage! : $temp")
                 webViews.clear()
                 viewModel.onEvent(BookEvent.ClearCachedPages)
-//                delay(200)
                 viewModel.onEvent(
                     BookEvent.OnChangeSelectedPage(
                         pageIndex = temp,
@@ -355,9 +308,8 @@ fun BookScreen(
         }
         HorizontalPager(
             state = pagerState,
-            contentPadding = paddingValues,
             modifier = Modifier
-                .fillMaxSize()
+                .weight(1f)
                 .pointerInput(true) {
                     detectTapGestures(
                         onTap = {
@@ -373,6 +325,7 @@ fun BookScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .systemBarsPadding()
                     .verticalScroll(rememberScrollState())
             ) {
                 AndroidView(factory = { context ->
@@ -432,6 +385,48 @@ fun BookScreen(
             }
 
         }
+
+        BottomBar(
+            visibility = state.isAppBarsVisible,
+            currentPage = state.currentPageText,
+            onCurrentPageChange = {
+                viewModel.onEvent(
+                    BookEvent.OnCurrentPageTextChanged(
+                        it
+                    )
+                )
+            },
+            onDone = {
+                scope.launch {
+                    state.currentPageText.toIntOrNull()?.let {
+                        val page = it.coerceIn(
+                            0,
+                            publication.readingOrder.size - 1
+                        )
+                        pagerState.scrollToPage(page)
+                    }
+                }
+            },
+            isPrevButtonEnabled = pagerState.currentPage != 0,
+            isNextButtonEnabled = pagerState.currentPage != publication.readingOrder.size - 1,
+            onPrevButtonClick = {
+                pagerState.apply {
+                    val previousPage = max(0, currentPage - 1)
+                    scope.launch { animateScrollToPage(previousPage) }
+                }
+            },
+            onNextButtonClick = {
+                pagerState.apply {
+                    val nextPage =
+                        min(
+                            currentPage + 1,
+                            publication.readingOrder.size - 1
+                        )
+                    scope.launch { animateScrollToPage(nextPage) }
+                }
+            }
+        )
+
     }
     LoadingScreen(state.isLoading)
 
@@ -484,11 +479,8 @@ private fun BottomBar(
         Row(
             Modifier
                 .fillMaxWidth()
-                .background(
-                    MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        15.dp
-                    )
-                ),
+                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(15.dp))
+                .navigationBarsPadding(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val interactionSource = remember { MutableInteractionSource() }
