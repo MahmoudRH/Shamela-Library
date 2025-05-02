@@ -202,7 +202,6 @@ fun LibraryBookItem(
     highlightText: String = "",
     isSelected:Boolean = false
 ) {
-    val scope = rememberCoroutineScope()
     val swipeState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
             if (it == SwipeToDismissBoxValue.EndToStart)
@@ -257,11 +256,11 @@ fun LibraryBookItem(
                 )
             }
         },
-        enableDismissFromStartToEnd = true,
-        enableDismissFromEndToStart = false,
+        enableDismissFromStartToEnd = false,
+        enableDismissFromEndToStart = true,
         content = {
             val cardElevation by animateDpAsState(
-                targetValue = if (swipeState.dismissDirection != null) 4.dp else 0.dp,
+                targetValue = if (swipeState.dismissDirection != SwipeToDismissBoxValue.Settled) 4.dp else 0.dp,
                 label = "swipe to dismiss card elevation"
             )
             Card(
