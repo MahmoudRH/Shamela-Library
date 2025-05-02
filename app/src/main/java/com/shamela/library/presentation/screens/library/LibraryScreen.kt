@@ -152,7 +152,7 @@ fun LibraryScreen(
                             })
                         }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .animateItemPlacement(),
+                        .animateItem(),
                         item = it,
                         onFavoriteIconClicked = { viewModel.onEvent(LibraryEvent.ToggleFavorite(it)) },
                         onSwipeOut = {
