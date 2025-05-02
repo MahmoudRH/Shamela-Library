@@ -48,7 +48,8 @@ import com.folioreader.Constants.SETTINGS_CHANGED
 import com.folioreader.ui.composables.LinkItem
 import com.shamela.apptheme.presentation.common.DefaultTopBar
 import com.shamela.apptheme.presentation.common.LoadingScreen
-import com.shamela.apptheme.presentation.settings.PreferenceSettingsScreen
+import com.shamela.apptheme.presentation.settings.PreferenceSettingsState
+import com.shamela.apptheme.presentation.settings.PreferenceSettingsUI
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
@@ -126,9 +127,11 @@ class ContentHighlightActivity : ComponentActivity() {
                             }
 
                             ViewType.Settings -> {
-                                PreferenceSettingsScreen(
+                                PreferenceSettingsUI(
                                     modifier = Modifier.padding(it),
-                                    onSettingsChanged = { hash-> onSettingsChanged(hash) })
+                                    onEvent = {},
+                                    uiState = PreferenceSettingsState())
+//                                    onSettingsChanged = { hash-> onSettingsChanged(hash) })
                             }
                         }
                     }

@@ -1,7 +1,6 @@
 package com.shamela.apptheme.presentation.settings
 
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,34 +19,35 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.shamela.apptheme.R
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlin.math.ceil
+import kotlin.math.max
 
 
 @Composable
-fun PreferenceSettingsScreen(
+fun PreferenceSettingsUI(
     modifier: Modifier = Modifier,
-    viewModel: PreferenceSettingsViewModel = viewModel(factory = PreferenceSettingsViewModel.Factory),
-    onSettingsChanged:(Int)->Unit = {}
+    uiState: PreferenceSettingsState,
+    onEvent: (PreferenceSettingsEvent) -> Unit,
 ) {
-    val settingsState = viewModel.settingsState.collectAsState().value
     val isSystemDark = isSystemInDarkTheme()
     val context = LocalContext.current
 
@@ -60,56 +60,52 @@ fun PreferenceSettingsScreen(
     ) {
 
         SettingsSection(
-            title = "تغيير الثيم",
-            options = settingsState.availableThemes,
-            selectedOption = settingsState.userPrefs.theme,
+            title = stringResource(R.string.change_theme),
+            options = uiState.availableThemes,
+            selectedOption = uiState.userPrefs.theme,
         ) {
-            viewModel.onEvent(
+            onEvent(
                 PreferenceSettingsEvent.OnChangeAppTheme(
                     colorScheme = AppTheme.themeOf(
                         theme = it,
-                        colorScheme = settingsState.userPrefs.colorScheme,
+                        colorScheme = uiState.userPrefs.colorScheme,
                         isSystemInDarkTheme = isSystemDark,
                         context = context
                     ),
-                    settingsState.userPrefs.copy(theme = it)
+                    uiState.userPrefs.copy(theme = it)
                 )
             )
-            onSettingsChanged(settingsState.userPrefs.hashCode())
         }
         SettingsSection(
-            title = "تغيير اللون",
-            options = settingsState.availableColorSchemes,
-            selectedOption = settingsState.userPrefs.colorScheme,
+            title = stringResource(R.string.change_color),
+            options = uiState.availableColorSchemes,
+            selectedOption = uiState.userPrefs.colorScheme,
         ) {
-            viewModel.onEvent(
+            onEvent(
                 PreferenceSettingsEvent.OnChangeAppTheme(
                     colorScheme = AppTheme.themeOf(
-                        theme = settingsState.userPrefs.theme,
+                        theme = uiState.userPrefs.theme,
                         colorScheme = it,
                         isSystemInDarkTheme = isSystemDark,
                         context = context
                     ),
-                    settingsState.userPrefs.copy(colorScheme = it)
+                    userPrefs = uiState.userPrefs.copy(colorScheme = it)
                 )
             )
-            onSettingsChanged(settingsState.userPrefs.hashCode())
         }
         FontSizeSelector(
-            title = "حجم الخط",
-            sliderPosition = settingsState.sliderPosition,
+            title = stringResource(R.string.font_size),
+            sliderPosition = uiState.sliderPosition,
             onSliderPositionChanged = {
-                viewModel.onEvent(PreferenceSettingsEvent.OnChangeSliderPosition(it))
-                onSettingsChanged(settingsState.userPrefs.hashCode())
+                onEvent(PreferenceSettingsEvent.OnChangeSliderPosition(it))
             },
-            list = settingsState.availableFontSizes,
+            list = uiState.availableFontSizes,
             onValueChangeFinished = {
-                val sliderPosition = ceil(settingsState.sliderPosition).toInt()
-                Log.e("Mah", "sliderPosition: $sliderPosition")
+                val sliderPosition = ceil(uiState.sliderPosition).toInt()
 
-                viewModel.onEvent(
+                onEvent(
                     PreferenceSettingsEvent.OnChangeAppFontSize(
-                        settingsState.userPrefs.copy(fontSize = settingsState.availableFontSizes[sliderPosition])
+                        uiState.userPrefs.copy(fontSize = uiState.availableFontSizes[sliderPosition])
                     )
                 )
             }
@@ -117,18 +113,13 @@ fun PreferenceSettingsScreen(
 
 
         FontsSection(
-            title = "نوع الخط",
-            options = settingsState.availableFontFamilies,
-            selectedOption = settingsState.userPrefs.fontFamily,
+            title = stringResource(R.string.font_family),
+            options = uiState.availableFontFamilies,
+            selectedOption = uiState.userPrefs.fontFamily,
         ) {
-            viewModel.onEvent(
-                PreferenceSettingsEvent.OnChangeAppFont(
-                    settingsState.userPrefs.copy(
-                        fontFamily = it
-                    )
-                )
+            onEvent(
+                PreferenceSettingsEvent.OnChangeAppFont(uiState.userPrefs.copy(fontFamily = it))
             )
-            onSettingsChanged(settingsState.userPrefs.hashCode())
         }
     }
 }
@@ -146,7 +137,7 @@ private fun SettingsSection(
             .fillMaxWidth()
             .padding(top = 16.dp, bottom = 4.dp), style = AppFonts.textNormalBold
     )
-    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+    HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
     FlowRow(modifier = Modifier.padding(top = 12.dp)) {
         options.forEach {
             val isSelected = (it == selectedOption)
@@ -178,7 +169,7 @@ private fun FontsSection(
             .fillMaxWidth()
             .padding(top = 16.dp, bottom = 4.dp), style = AppFonts.textNormalBold
     )
-    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+    HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
     Column(modifier = Modifier.padding(top = 12.dp)) {
         options.forEach {
             val isSelected = (it == selectedOption)
@@ -201,7 +192,7 @@ private fun FontsSection(
                 Text(
                     modifier = Modifier.padding(vertical = 8.dp),
                     text = it,
-                    style = AppFonts.textNormal.copy(fontFamily =  AppFonts.fontFamilyOf(it)),
+                    style = AppFonts.textNormal.copy(fontFamily = AppFonts.fontFamilyOf(it)),
                 )
             }
         }
@@ -210,7 +201,7 @@ private fun FontsSection(
 
 
 @Composable
-fun FontSizeSelector(
+private fun FontSizeSelector(
     title: String,
     sliderPosition: Float,
     list: List<Int>,
@@ -218,18 +209,19 @@ fun FontSizeSelector(
     onValueChangeFinished: () -> Unit,
 ) {
     Text(
-        text = title, modifier = Modifier
+        text = title,
+        modifier = Modifier
             .fillMaxWidth()
             .padding(top = 16.dp, bottom = 4.dp), style = AppFonts.textNormalBold
     )
-    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+    HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         Slider(
             value = sliderPosition,
             onValueChange = onSliderPositionChanged,
-            valueRange = 0f..list.lastIndex.toFloat(),
+            valueRange = 0f..max(list.lastIndex.toFloat(),0f),
             steps = ceil(list.size / 2f).toInt(),
             colors = SliderDefaults.colors(
                 activeTrackColor = MaterialTheme.colorScheme.secondary.copy(0.7f),
@@ -242,7 +234,13 @@ fun FontSizeSelector(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val wordsList = listOf("أصغر", "صغير", "عادي", "كبير", "أكبر")
+            val wordsList = listOf(
+                stringResource(R.string.xSmall),
+                stringResource(R.string.small),
+                stringResource(R.string.normal),
+                stringResource(R.string.large),
+                stringResource(R.string.xLarge),
+            )
             list.forEachIndexed { index, it ->
                 val color =
                     if (sliderPosition.toInt() == index) MaterialTheme.colorScheme.primary else Color.Unspecified
@@ -256,4 +254,12 @@ fun FontSizeSelector(
     LaunchedEffect(sliderPosition) {
         onValueChangeFinished()
     }
+}
+
+@Preview
+@Composable
+private fun PreferenceScreenPrev() {
+    PreferenceSettingsUI(
+        uiState = PreferenceSettingsState(), onEvent = {}
+    )
 }
