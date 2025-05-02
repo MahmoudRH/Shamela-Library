@@ -8,23 +8,23 @@ versions.projectVersionCode = 1
 versions.projectVersionName = "1.0"
 
 versions.androidMinSdk = 26
-versions.androidCompileSdk = 34
-versions.androidTargetSdk = 34
+versions.androidCompileSdk = 35
+versions.androidTargetSdk = 35
 
 versions.androidGradlePlugin = '8.0.2'
-versions.kotlin = '1.8.22'
-versions.core_ktx = '1.10.1'
+versions.kotlin = '2.1.20'
+versions.core_ktx = '1.16.0'
 
-versions.compose_bom = '2023.06.01'
-versions.compose_activity = '1.7.2'
-versions.kotlin_bom = '1.8.22'
-versions.lifecycle_runtime_ktx = '2.6.1'
-versions.navigation_compose = '2.6.0'
+versions.compose_bom = '2025.04.01'
+versions.compose_activity = '1.10.1'
+versions.kotlin_bom = '2.1.20'
+versions.lifecycle_runtime_ktx = '2.8.7'
+versions.navigation_compose = '2.8.9'
 versions.compose_compiler = '1.4.8'
 versions.accompanist = '0.31.4-beta'
 
-versions.hilt_version = '2.46.1'
-versions.room_version = '2.5.2'
+versions.hilt_version = '2.56.2'
+versions.room_version = '2.7.1'
 versions.workmanager = '2.8.1'
 
 versions.appcompat = "1.6.1"
