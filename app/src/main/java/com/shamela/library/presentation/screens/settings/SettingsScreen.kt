@@ -33,7 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.LoadingScreen
-import com.shamela.apptheme.presentation.settings.PreferenceSettingsScreen
+import com.shamela.apptheme.presentation.settings.PreferenceSettingsEvent
+import com.shamela.apptheme.presentation.settings.PreferenceSettingsState
+import com.shamela.apptheme.presentation.settings.PreferenceSettingsUI
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import com.shamela.apptheme.presentation.theme.colors.Green
@@ -47,6 +49,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.settingsState.collectAsStateWithLifecycle().value
+    val preferenceUiState = viewModel.preferenceSettings.collectAsStateWithLifecycle().value
     val context = LocalContext.current
     val getContentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -61,25 +64,30 @@ fun SettingsScreen(
         }
     }
 
-    SettingsScreenUI(uiState, {
-        getContentLauncher.launch("application/epub+zip")
-    }, { viewModel.onEvent(SettingsEvent.OnChangeViewType(it)) }) {
-        uiState.fileUri?.let { uri ->
-            uiState.fileName?.let {
-                viewModel.onEvent(
-                    SettingsEvent.AddExternalBookToLibrary(uri, uiState.fileName)
-                )
+    SettingsScreenUI(
+        uiState = uiState,
+        preferenceUiState = preferenceUiState,
+        onClickSelectBook = { getContentLauncher.launch("application/epub+zip") },
+        onChangeViewType = { viewModel.onEvent(SettingsEvent.OnChangeViewType(it)) },
+        onClickAddBookToLibrary = {
+            uiState.fileUri?.let { uri ->
+                uiState.fileName?.let {
+                    viewModel.onEvent(SettingsEvent.AddExternalBookToLibrary(uri, uiState.fileName))
+                }
             }
-        }
-    }
+        },
+        onPreferenceEvent = { viewModel.onPrefsEvent(it)}
+    )
 }
 
 @Composable
 private fun SettingsScreenUI(
     uiState: SettingsState,
+    preferenceUiState: PreferenceSettingsState,
     onClickSelectBook: () -> Unit,
     onChangeViewType: (SettingsViewType) -> Unit,
-    onClickAddBookToLibrary: () -> Unit
+    onClickAddBookToLibrary: () -> Unit,
+    onPreferenceEvent: (PreferenceSettingsEvent) -> Unit,
 ) {
     val localPadding = LocalPaddingValues.current
     Column(
@@ -95,7 +103,11 @@ private fun SettingsScreenUI(
         )
         LoadingScreen(visibility = uiState.isLoading)
         when (uiState.selectedViewType) {
-            SettingsViewType.Preferences -> PreferenceSettingsScreen()
+            SettingsViewType.Preferences -> PreferenceSettingsUI(
+                uiState = preferenceUiState,
+                onEvent = onPreferenceEvent
+            )
+
             SettingsViewType.ExternalBooks -> ExternalBooksScreen(
                 onClickSelectBook = onClickSelectBook,
                 onClickAddBookToLibrary = onClickAddBookToLibrary,
@@ -150,15 +162,36 @@ private fun ViewTypeSection(
 
 @ShamelaPrev
 @Composable
-private fun SettingScreenPrev() {
+private fun SettingScreenPrev_Preferences() {
+    AppTheme.ShamelaLibraryTheme {
+        AppTheme.changeColorScheme(Green.lightColorScheme, Green.name)
+        SettingsScreenUI(
+            uiState = SettingsState(selectedViewType = SettingsViewType.Preferences),
+            onClickSelectBook = { },
+            onChangeViewType = { },
+            onClickAddBookToLibrary = {},
+            onPreferenceEvent = {},
+            preferenceUiState = PreferenceSettingsState(
+                availableFontFamilies = listOf("font1", "font2", "font3"),
+                availableFontSizes = listOf(12, 14, 16, 18, 20),
+                availableThemes = listOf("theme1", "theme2", "theme3"),
+            )
+        )
+    }
+}
+
+@ShamelaPrev
+@Composable
+private fun SettingScreenPrev_ExternalBooks() {
     AppTheme.ShamelaLibraryTheme {
         AppTheme.changeColorScheme(Green.lightColorScheme, Green.name)
         SettingsScreenUI(
             uiState = SettingsState(selectedViewType = SettingsViewType.ExternalBooks),
             onClickSelectBook = { },
             onChangeViewType = { },
-            onClickAddBookToLibrary = {}
+            onClickAddBookToLibrary = {},
+            onPreferenceEvent = {},
+            preferenceUiState = PreferenceSettingsState()
         )
     }
 }
-

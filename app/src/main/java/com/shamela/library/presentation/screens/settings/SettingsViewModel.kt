@@ -12,6 +12,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.shamela.apptheme.domain.usecases.userPreferences.UserPreferencesUseCases
+import com.shamela.apptheme.presentation.settings.PreferenceSettingsEvent
+import com.shamela.apptheme.presentation.settings.PreferenceSettingsState
+import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppTheme
 import com.shamela.apptheme.presentation.worker.BookPreparationWorker
 import com.shamela.library.R
 import com.shamela.library.ShamelaApp
@@ -36,6 +41,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @FilesRepoImpl private val booksUseCases: BooksUseCases,
+    private val userPreferencesUseCases: UserPreferencesUseCases,
     private val app: Application,
 ) : ViewModel() {
     private val _settingsState = MutableStateFlow<SettingsState>(SettingsState())
@@ -43,6 +49,41 @@ class SettingsViewModel @Inject constructor(
 
     private val _toastsChannel = Channel<Int>()
     val toastsChannel = _toastsChannel.receiveAsFlow()
+
+    private val _preferenceSettings = MutableStateFlow<PreferenceSettingsState>(PreferenceSettingsState())
+    val preferenceSettings = _preferenceSettings.asStateFlow()
+
+    init {
+        initializeSettingsOptions()
+        initializeSelection()
+    }
+
+    private fun initializeSelection() {
+        userPreferencesUseCases.readUserPreferences().let { userPrefs ->
+            _preferenceSettings.update { it.copy(userPrefs = userPrefs) }
+            val selectedThemePosition =
+                preferenceSettings.value.availableFontSizes.indexOf(userPrefs.fontSize)
+            _preferenceSettings.update { it.copy(sliderPosition = selectedThemePosition.toFloat()) }
+        }
+    }
+
+    private fun initializeSettingsOptions() {
+        userPreferencesUseCases.getAvailableFontFamilies().let { fonts ->
+            _preferenceSettings.update { it.copy(availableFontFamilies = fonts) }
+        }
+        userPreferencesUseCases.getAvailableFontSizes().let { sizes ->
+            _preferenceSettings.update {
+                it.copy(availableFontSizes = sizes.map { v -> v.toInt() }.sorted())
+            }
+        }
+        userPreferencesUseCases.getAvailableThemes().let { themes ->
+            _preferenceSettings.update { it.copy(availableThemes = themes) }
+        }
+        userPreferencesUseCases.getAvailableColorSchemes().let { colors ->
+            _preferenceSettings.update { it.copy(availableColorSchemes = colors) }
+        }
+    }
+
 
     private suspend fun copyFileToAppFolder(uri: Uri, bookTitle: String): File? {
         return withContext(Dispatchers.IO) {
@@ -141,4 +182,31 @@ class SettingsViewModel @Inject constructor(
         cursor?.close()
         return fileName
     }
+
+    fun onPrefsEvent(event: PreferenceSettingsEvent) {
+        when (event) {
+            is PreferenceSettingsEvent.OnChangeAppFont -> {
+                _preferenceSettings.update { it.copy(userPrefs = event.newPrefs) }
+                userPreferencesUseCases.updateUserPreferences(event.newPrefs)
+                AppFonts.changeFontFamily(AppFonts.fontFamilyOf(event.newPrefs.fontFamily))
+            }
+
+            is PreferenceSettingsEvent.OnChangeAppTheme -> {
+                _preferenceSettings.update { it.copy(userPrefs = event.userPrefs) }
+                userPreferencesUseCases.updateUserPreferences(event.userPrefs)
+                AppTheme.changeColorScheme(event.colorScheme, event.userPrefs.theme)
+            }
+
+            is PreferenceSettingsEvent.OnChangeAppFontSize -> {
+                _preferenceSettings.update { it.copy(userPrefs = event.newPrefs) }
+                userPreferencesUseCases.updateUserPreferences(event.newPrefs)
+                AppFonts.changeFontSize(event.newPrefs.fontSize)
+            }
+
+            is PreferenceSettingsEvent.OnChangeSliderPosition -> {
+                _preferenceSettings.update { it.copy(sliderPosition = event.newPosition) }
+            }
+        }
+    }
+
 }
