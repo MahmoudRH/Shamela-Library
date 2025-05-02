@@ -39,9 +39,9 @@ import com.shamela.apptheme.presentation.settings.PreferenceSettingsUI
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import com.shamela.apptheme.presentation.theme.colors.Green
+import com.shamela.apptheme.presentation.util.ShamelaPrev
 import com.shamela.library.presentation.screens.LocalPaddingValues
 import com.shamela.library.presentation.screens.settings.components.ExternalBooksScreen
-import com.shamela.library.presentation.utils.ShamelaPrev
 
 
 @Composable

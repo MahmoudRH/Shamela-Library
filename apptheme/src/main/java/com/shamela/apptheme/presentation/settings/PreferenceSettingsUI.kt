@@ -32,12 +32,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shamela.apptheme.R
+import com.shamela.apptheme.domain.model.UserPrefs
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.apptheme.presentation.util.ShamelaPrev
 import kotlin.math.ceil
 import kotlin.math.max
 
@@ -256,10 +257,18 @@ private fun FontSizeSelector(
     }
 }
 
-@Preview
+@ShamelaPrev
 @Composable
 private fun PreferenceScreenPrev() {
-    PreferenceSettingsUI(
-        uiState = PreferenceSettingsState(), onEvent = {}
-    )
+    AppTheme.ShamelaLibraryTheme {
+        PreferenceSettingsUI(
+            uiState = PreferenceSettingsState(
+                userPrefs = UserPrefs(),
+                availableFontSizes = listOf(-4, -2, 0, 2, 4),
+                availableFontFamilies = listOf("Font 1", "Font 2"),
+                availableColorSchemes = listOf("Color 1", "Color 2"),
+                availableThemes = listOf("Theme 1", "Theme 2")
+            ), onEvent = {}
+        )
+    }
 }
