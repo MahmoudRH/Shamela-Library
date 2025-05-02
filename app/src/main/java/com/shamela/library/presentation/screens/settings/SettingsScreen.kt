@@ -69,6 +69,11 @@ fun SettingsScreen(
                 viewModel.onEvent(SettingsEvent.NewFileSelected(uri))
             }
         })
+    LaunchedEffect(key1 = Unit) {
+        viewModel.toastsChannel.collect { stringRes ->
+            Toast.makeText(context, context.getString(stringRes), Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp).padding(localPadding)) {
         ViewTypeSection(

@@ -7,13 +7,13 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.shamela.apptheme.presentation.worker.BookPreparationWorker
+import com.shamela.library.R
 import com.shamela.library.ShamelaApp
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
@@ -21,9 +21,10 @@ import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,6 +41,8 @@ class SettingsViewModel @Inject constructor(
     private val _settingsState = MutableStateFlow<SettingsState>(SettingsState())
     val settingsState = _settingsState.asStateFlow()
 
+    private val _toastsChannel = Channel<Int>()
+    val toastsChannel = _toastsChannel.receiveAsFlow()
 
     private suspend fun copyFileToAppFolder(uri: Uri, bookTitle: String): File? {
         return withContext(Dispatchers.IO) {
@@ -49,13 +52,7 @@ class SettingsViewModel @Inject constructor(
             val bookFileName = "${bookTitle.removeSuffix(".epub")}.epub"
             val destinationFile = File(ShamelaApp.externalBooksDirectory, bookFileName)
             if (destinationFile.exists()) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        app.applicationContext,
-                        "الكتاب موجود بالفعل",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                _toastsChannel.send(R.string.the_book_already_exists)
                 return@withContext null // File already exists, return null
             }
             try {
@@ -71,11 +68,7 @@ class SettingsViewModel @Inject constructor(
                 destinationFile
             } catch (e: Exception) {
                 Log.e("SettingsViewModel", "onEvent: Error: ${e.message}")
-                Toast.makeText(
-                    app.applicationContext,
-                    "تعذر إضافة الكتاب للمكتبة",
-                    Toast.LENGTH_SHORT
-                ).show()
+                _toastsChannel.send(R.string.could_not_add_book_to_library)
                 null
             }
         }
@@ -104,22 +97,16 @@ class SettingsViewModel @Inject constructor(
                                     .setInputData(workDataOf(BookPreparationWorker.EPUB_FILE_PATH to bookFilePath))
                                     .build()
                                 workManager.enqueue(request)
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        app.applicationContext,
-                                        "تمت اضافة الكتاب بنجاح",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            } ?: {
-                                Toast.makeText(app.applicationContext, "الكتاب غير متوافق مع المكتبة", Toast.LENGTH_SHORT).show()
+                                _toastsChannel.send(R.string.book_added_successfully)
+                            } ?: run {
+                                _toastsChannel.send(R.string.book_is_not_compatible)
                             }
                         }
                         _settingsState.update {
                             it.copy(
                                 isLoading = false,
                                 fileUri = null,
-                                fileName = "اختر كتابا",
+                                fileName = null,
                             )
                         }
                     }
@@ -132,7 +119,6 @@ class SettingsViewModel @Inject constructor(
                     it.copy(
                         fileUri = event.fileUri,
                         fileName = getFileNameFromUri(app.applicationContext, event.fileUri),
-//                        addStatus = null
                     )
                 }
             }
