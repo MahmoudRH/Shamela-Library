@@ -30,6 +30,7 @@ import com.shamela.apptheme.presentation.common.SearchTopBar
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.SectionItem
+import com.shamela.library.presentation.screens.LocalPaddingValues
 
 @Composable
 fun SearchResultsScreen(
@@ -38,8 +39,9 @@ fun SearchResultsScreen(
     navigateBack: () -> Unit,
 ) {
     val state = viewModel.searchResultsState.collectAsState().value
+    val localPadding = LocalPaddingValues.current
     val focusRequester = FocusRequester()
-    Column(Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize().padding(localPadding)) {
         SearchTopBar(
             onNavigateBack = navigateBack,
             hint = "بحث..",
