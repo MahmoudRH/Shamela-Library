@@ -35,8 +35,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.settings.PreferenceSettingsScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.apptheme.presentation.theme.colors.Green
 import com.shamela.library.presentation.screens.LocalPaddingValues
 import com.shamela.library.presentation.screens.settings.components.ExternalBooksScreen
+import com.shamela.library.presentation.utils.ShamelaPrev
 
 
 @Composable
@@ -142,6 +145,20 @@ private fun ViewTypeSection(
                 )
             }
         }
+    }
+}
+
+@ShamelaPrev
+@Composable
+private fun SettingScreenPrev() {
+    AppTheme.ShamelaLibraryTheme {
+        AppTheme.changeColorScheme(Green.lightColorScheme, Green.name)
+        SettingsScreenUI(
+            uiState = SettingsState(selectedViewType = SettingsViewType.ExternalBooks),
+            onClickSelectBook = { },
+            onChangeViewType = { },
+            onClickAddBookToLibrary = {}
+        )
     }
 }
 
