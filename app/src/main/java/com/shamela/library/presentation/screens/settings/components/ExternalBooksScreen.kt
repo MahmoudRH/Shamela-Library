@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.dp
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import com.shamela.apptheme.presentation.theme.colors.Green
+import com.shamela.apptheme.presentation.util.ShamelaPrev
 import com.shamela.library.R
-import com.shamela.library.presentation.utils.ShamelaPrev
 
 @Composable
 fun ColumnScope.ExternalBooksScreen(
