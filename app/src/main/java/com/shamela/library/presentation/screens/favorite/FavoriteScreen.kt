@@ -72,7 +72,7 @@ fun FavoriteScreen(
                                 .clickable {
                                     viewModel.onEvent(FavoriteEvent.OpenBookForQuote(currentQuote))
                                 }.padding(horizontal = 16.dp, vertical = 8.dp)
-                                .animateItemPlacement(),
+                                .animateItem(),
                             item = currentQuote)
                         Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                     }
@@ -98,7 +98,7 @@ fun FavoriteScreen(
                                     })
                             }
                             .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .animateItemPlacement(),
+                            .animateItem(),
                         onFavoriteIconClicked = {
                             viewModel.onEvent(FavoriteEvent.ToggleFavorite(currentBook))
                         },
