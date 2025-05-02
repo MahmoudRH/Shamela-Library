@@ -218,7 +218,7 @@ class SearchActivity : ComponentActivity() {
                     items(searchResults) {
                         it.text?.let { locatorText ->
                             SearchResult(
-                                modifier = Modifier.animateItemPlacement(),
+                                modifier = Modifier.animateItem(),
                                 locatorText
                             ) {
                                 val intent = Intent()
@@ -321,7 +321,7 @@ class SearchActivity : ComponentActivity() {
                             items(searchLocators) { (bookTitle, searchLocator) ->
                                 searchLocator.text?.let { locatorText ->
                                     SearchResult(
-                                        Modifier.animateItemPlacement(),
+                                        Modifier.animateItem(),
                                         locatorText
                                     ) {
                                         onSearchItemClicked(bookTitle,searchLocator)

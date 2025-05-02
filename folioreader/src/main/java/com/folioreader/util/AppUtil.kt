@@ -26,7 +26,7 @@ object AppUtil {
         for (_value in values) {
             val value = _value.trim { it <= ' ' }
 
-            if (value.toLowerCase().startsWith("charset=")) {
+            if (value.lowercase().startsWith("charset=")) {
                 charset = value.substring("charset=".length)
                 break
             }
