@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.folioreader.Constants
 import com.folioreader.Constants.CHAPTER_SELECTED
@@ -48,7 +50,6 @@ import com.folioreader.Constants.SETTINGS_CHANGED
 import com.folioreader.ui.composables.LinkItem
 import com.shamela.apptheme.presentation.common.DefaultTopBar
 import com.shamela.apptheme.presentation.common.LoadingScreen
-import com.shamela.apptheme.presentation.settings.PreferenceSettingsState
 import com.shamela.apptheme.presentation.settings.PreferenceSettingsUI
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
@@ -59,6 +60,7 @@ import org.readium.r2.shared.Link
 import org.readium.r2.streamer.parser.EpubParser
 
 class ContentHighlightActivity : ComponentActivity() {
+    val viewmodel : ContentHighlightViewModel by viewModels(factoryProducer = { ContentHighlightViewModel.Factory })
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -95,6 +97,7 @@ class ContentHighlightActivity : ComponentActivity() {
 
         setContent {
             AppTheme.ShamelaLibraryTheme {
+                val uiState = viewmodel.preferenceSettings.collectAsStateWithLifecycle()
                 val currentViewType = rememberSaveable { mutableStateOf(selectedViewType) }
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Scaffold(
@@ -129,9 +132,8 @@ class ContentHighlightActivity : ComponentActivity() {
                             ViewType.Settings -> {
                                 PreferenceSettingsUI(
                                     modifier = Modifier.padding(it),
-                                    onEvent = {},
-                                    uiState = PreferenceSettingsState())
-//                                    onSettingsChanged = { hash-> onSettingsChanged(hash) })
+                                    onEvent = {viewmodel.onPrefsEvent(it)},
+                                    uiState = uiState.value)
                             }
                         }
                     }
