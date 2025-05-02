@@ -151,7 +151,7 @@ private fun ViewTypeSection(
                     )
                     .clickable { onClick(it) }
                     .padding(vertical = 12.dp),
-                text = it.label,
+                text = stringResource(it.label),
                 style = AppFonts.textNormalBold,
                 textAlign = TextAlign.Center
             )
