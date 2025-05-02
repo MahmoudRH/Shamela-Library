@@ -8,29 +8,29 @@ import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 
 class DbAdapter {
-    fun deleteAll(table: String?): Boolean {
+    fun deleteAll(table: String): Boolean {
         return mDatabase!!.delete(table, null, null) > 0
     }
 
-    fun deleteAll(table: String?, whereClause: String, whereArgs: Array<String?>?): Boolean {
+    fun deleteAll(table: String, whereClause: String, whereArgs: Array<String?>?): Boolean {
         return mDatabase!!.delete(table, "$whereClause=?", whereArgs) > 0
     }
 
     fun getAll(
-        table: String?, projection: Array<String?>?, selection: String?,
+        table: String, projection: Array<String?>?, selection: String?,
         selectionArgs: Array<String?>?, orderBy: String?
     ): Cursor {
         return mDatabase!!.query(table, projection, selection, selectionArgs, null, null, orderBy)
     }
 
-    fun getAll(table: String?): Cursor {
+    fun getAll(table: String): Cursor {
         return getAll(table, null, null, null, null)
     }
 
     @JvmOverloads
     @Throws(SQLException::class)
     operator fun get(
-        table: String?,
+        table: String,
         id: Long,
         projection: Array<String?>? = null,
         key: String = FolioDatabaseHelper.Companion.KEY_ID
@@ -56,12 +56,12 @@ class DbAdapter {
             FolioDatabaseHelper.Companion.clearInstance()
         }
 
-        fun insert(table: String?, contentValues: ContentValues?): Boolean {
+        fun insert(table: String, contentValues: ContentValues?): Boolean {
             return mDatabase!!.insert(table, null, contentValues) > 0
         }
 
         fun update(
-            table: String?,
+            table: String,
             key: String,
             value: String,
             contentValues: ContentValues?
@@ -78,7 +78,7 @@ class DbAdapter {
 
         @Throws(SQLException::class)
         fun getAllByKey(
-            table: String?,
+            table: String,
             projection: Array<String?>?,
             key: String,
             value: String
@@ -89,7 +89,7 @@ class DbAdapter {
             )
         }
 
-        fun deleteById(table: String?, key: String, value: String): Boolean {
+        fun deleteById(table: String, key: String, value: String): Boolean {
             return mDatabase!!.delete(table, "$key=?", arrayOf(value)) > 0
         }
 
@@ -106,12 +106,12 @@ class DbAdapter {
             ) > 0
         }
 
-        fun getHighlightsForPageId(query: String?, pageId: String?): Cursor {
+        fun getHighlightsForPageId(query: String, pageId: String?): Cursor {
             return mDatabase!!.rawQuery(query, null)
         }
 
         @SuppressLint("Range")
-        fun getIdForQuery(query: String?): Int {
+        fun getIdForQuery(query: String): Int {
             val c = mDatabase!!.rawQuery(query, null)
             var id = -1
             while (c.moveToNext()) {
