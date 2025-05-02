@@ -137,12 +137,19 @@ dependencies {
 
     // R2 modules
     implementation("com.github.codetoart:r2-shared-kotlin:$versions.r2SharedKotlin") {
+        exclude group: 'com.github.kittinunf.fuel', module: 'fuel'
+        exclude group: 'com.github.kittinunf.fuel', module: 'fuel-android'
         changing = true
     }
     implementation("com.github.codetoart:r2-streamer-kotlin:$versions.r2StreamerKotlin") {
         exclude group: "org.slf4j", module: "slf4j-api"
+        exclude group: 'com.github.kittinunf.fuel', module: 'fuel'
+        exclude group: 'com.github.kittinunf.fuel', module: 'fuel-android'
         changing = true
     }
+
+    implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
+    implementation 'com.github.kittinunf.fuel:fuel-android:2.3.1'
 
     // Only ReflectionUtils in Spring framework is used
     implementation 'org.springframework:spring-core:4.3.19.RELEASE'
