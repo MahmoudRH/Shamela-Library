@@ -3,16 +3,15 @@ package com.shamela.library.presentation
 import android.Manifest
 import android.app.DownloadManager
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.view.WindowInsetsControllerCompat
 import com.shamela.apptheme.data.sharedPrefs.SharedPreferencesData
 import com.shamela.apptheme.domain.usecases.userPreferences.ReadUserPreferences
 import com.shamela.apptheme.presentation.theme.AppFonts
@@ -28,6 +27,14 @@ class MainActivity : ComponentActivity() {
     private val userPreferences = SharedPreferencesData(this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.isAppearanceLightStatusBars = false
+
         ReadUserPreferences(userPreferences).invoke().apply {
             AppFonts.changeFontFamily(AppFonts.fontFamilyOf(fontFamily))
             AppFonts.changeFontSize(fontSize)

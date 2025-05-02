@@ -2,9 +2,11 @@ package com.folioreader.ui.activity
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +39,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.folioreader.Constants
 import com.folioreader.Constants.CHAPTER_SELECTED
@@ -56,6 +59,12 @@ import org.readium.r2.streamer.parser.EpubParser
 class ContentHighlightActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.isAppearanceLightStatusBars = false
         val bookPath = intent.getStringExtra(Constants.EPUB_FILE_PATH)
         val bookTitle = intent.getStringExtra(Constants.BOOK_TITLE)
         val selectedViewType = when (intent.getStringExtra(SELECTED_VIEW_TYPE)) {

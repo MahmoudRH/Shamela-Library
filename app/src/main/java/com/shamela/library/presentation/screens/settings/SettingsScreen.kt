@@ -51,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.settings.PreferenceSettingsScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.library.presentation.screens.LocalPaddingValues
 
 
 @Composable
@@ -59,6 +60,7 @@ fun SettingsScreen(
 ) {
     val settingsState = viewModel.settingsState.collectAsState().value
     val context = LocalContext.current
+    val localPadding = LocalPaddingValues.current
     val getContentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
@@ -68,7 +70,7 @@ fun SettingsScreen(
             }
         })
 
-    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp).padding(localPadding)) {
         ViewTypeSection(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             selectedViewType = settingsState.selectedViewType
