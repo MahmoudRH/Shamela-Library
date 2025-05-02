@@ -140,7 +140,7 @@ private fun ViewTypeSection(
             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), CircleShape)
             .height(IntrinsicSize.Min)
     ) {
-        SettingsViewType.values().forEach {
+        SettingsViewType.entries.forEach {
             Text(
                 modifier = Modifier
                     .weight(1f)
@@ -155,7 +155,7 @@ private fun ViewTypeSection(
                 style = AppFonts.textNormalBold,
                 textAlign = TextAlign.Center
             )
-            if (it != SettingsViewType.values().last()) {
+            if (it != SettingsViewType.entries.last()) {
                 Box(
                     Modifier
                         .width(2.dp)
