@@ -3,12 +3,14 @@ package com.shamela.library.presentation.screens
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -17,6 +19,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,7 +54,7 @@ private val destination = listOf(
     Search,
     Settings,
 )
-
+val LocalPaddingValues = compositionLocalOf { PaddingValues() }
 @Composable
 fun HomeHostScreen() {
     val navController = rememberNavController()
@@ -124,8 +128,8 @@ fun HomeHostScreen() {
         topBar = {
             AnimatedVisibility(
                 visible = screenBarsVisibility.value,
-                enter = slideInVertically(initialOffsetY = { -it }),
-                exit = slideOutVertically(targetOffsetY = { -it }),
+                enter = expandVertically(),
+                exit = shrinkVertically(),
             ) {
                 DefaultTopBar(
                     title = destination[selectedScreen].label,
@@ -134,17 +138,19 @@ fun HomeHostScreen() {
                 )
             }
         }
-    ) {
-        NavHost(
-            navController = navController,
-            startDestination = NavigationGraphs.HOME_GRAPH_ROUTE,
-            modifier = Modifier.padding(it),
-            enterTransition = { fadeIn(tween(350)) },
-            exitTransition = { fadeOut(tween(350)) },
-            popEnterTransition = { fadeIn(tween(350)) },
-            popExitTransition = { fadeOut(tween(350)) }
-        ) {
-            homeGraph(navController)
+    ) {paddingValues ->
+        CompositionLocalProvider(LocalPaddingValues provides paddingValues) {
+
+            NavHost(
+                navController = navController,
+                startDestination = NavigationGraphs.HOME_GRAPH_ROUTE,
+                enterTransition = { fadeIn(tween(350)) },
+                exitTransition = { fadeOut(tween(350)) },
+                popEnterTransition = { fadeIn(tween(350)) },
+                popExitTransition = { fadeOut(tween(350)) }
+            ) {
+                homeGraph(navController)
+            }
         }
     }
 }

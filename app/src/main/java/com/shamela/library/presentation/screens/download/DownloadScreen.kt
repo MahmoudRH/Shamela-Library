@@ -26,6 +26,7 @@ import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.navigation.Download
+import com.shamela.library.presentation.screens.LocalPaddingValues
 import com.shamela.library.presentation.screens.library.BooksViewType
 import com.shamela.library.presentation.screens.library.ViewTypeSection
 import kotlinx.coroutines.flow.launchIn
@@ -40,7 +41,7 @@ fun DownloadScreen(
 
     ) {
     val downloadState = viewModel.downloadState.collectAsState().value
-
+    val localPadding = LocalPaddingValues.current
     LaunchedEffect(key1 = Unit, block = {
         Download.buttons.onEach {
             if (it) {
@@ -61,7 +62,7 @@ fun DownloadScreen(
         }
     } )
     LazyColumn(
-        Modifier.fillMaxSize(),
+        Modifier.fillMaxSize().padding(localPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
