@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -76,13 +77,17 @@ class ContentHighlightActivity : ComponentActivity() {
         val isLoading = mutableStateOf(true)
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
-                bookPath?.let { filepath ->
-                    EpubParser().parse(filepath, "")?.let { pubBox ->
-                        val list =
-                            pubBox.publication.tableOfContents.ifEmpty { pubBox.publication.readingOrder }
-                        linkItems.addAll(list)
-                        isLoading.value = false
+                try {
+                    bookPath?.let { filepath ->
+                        EpubParser().parse(filepath, "")?.let { pubBox ->
+                            val list =
+                                pubBox.publication.tableOfContents.ifEmpty { pubBox.publication.readingOrder }
+                            linkItems.addAll(list)
+                            isLoading.value = false
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e("ContentHighlightActivity", "parseEpub: ${e.message}")
                 }
             }
         }

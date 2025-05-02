@@ -74,9 +74,13 @@ class BookPreparationWorker(
     private suspend fun getPages(bookFilePath: String): Map<String, String> {
         val normalizer = ArabicNormalizer()
         return withContext(Dispatchers.IO) {
-            val hrefs =
+            val hrefs = try {
                 EpubParser().parse(bookFilePath)?.publication?.readingOrder?.mapNotNull { it.href }
                     ?: emptyList()
+            }catch (e: Exception){
+                Log.e("BookPreparationWorker", "parseEpub: ${e.message}")
+                emptyList()
+            }
             try {
                 val pagesMap = mutableMapOf<String, String>()
                 ZipFile(File(bookFilePath)).use { zipFile ->
