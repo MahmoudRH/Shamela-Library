@@ -36,6 +36,7 @@ import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.FavoriteBookItem
 import com.shamela.library.presentation.common.QuoteItem
 import com.shamela.library.presentation.common.StringHeader
+import com.shamela.library.presentation.screens.LocalPaddingValues
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -43,11 +44,12 @@ fun FavoriteScreen(
     viewModel: FavoriteViewModel = hiltViewModel(),
 ) {
     val state = viewModel.favoriteState.collectAsState().value
+    val localPadding = LocalPaddingValues.current
 
     LaunchedEffect(Unit){
         viewModel.onEvent(FavoriteEvent.LoadFavoriteQuotes)
     }
-    LazyColumn(modifier = Modifier.fillMaxSize(),
+    LazyColumn(modifier = Modifier.fillMaxSize().padding(localPadding),
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
