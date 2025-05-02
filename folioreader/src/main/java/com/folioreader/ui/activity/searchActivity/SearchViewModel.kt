@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.folioreader.FolioReader
 import com.folioreader.model.locators.toSearchLocator
-import com.folioreader.util.AppUtil
 import com.shamela.apptheme.data.db.DatabaseHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -123,7 +122,12 @@ class SearchViewModel : ViewModel() {
                 viewModelScope.launch {
                     withContext(Dispatchers.IO) {
                         event.epubFilePath?.let {
-                            publication = EpubParser().parse(it)?.publication
+                            publication = try {
+                                EpubParser().parse(it)?.publication
+                            }catch (e: Exception){
+                                Log.e("SearchViewModel", "parseEpub: ${e.message}")
+                                null
+                            }
                         }
                     }
                 }
