@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
 }
 
 android {
@@ -33,9 +34,6 @@ android {
     buildFeatures {
         compose true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion "$versions.compose_compiler"
-    }
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
@@ -48,24 +46,24 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions.lifecycle_runtime_ktx"
     implementation "androidx.activity:activity-compose:$versions.compose_activity"
 
-    def compose_version = "1.4.3"
-    implementation("androidx.compose.animation:animation-core:$compose_version")
-    implementation("androidx.compose.animation:animation:$compose_version")
-    implementation("androidx.compose.ui:ui:$compose_version")
-    implementation("androidx.compose.foundation:foundation:$compose_version")
-    implementation("androidx.compose.ui:ui-geometry:$compose_version")
-    implementation("androidx.compose.ui:ui-graphics:$compose_version")
-    implementation("androidx.compose.foundation:foundation-layout:$compose_version")
-    implementation("androidx.compose.runtime:runtime-livedata:$compose_version")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha03")
-    implementation("androidx.compose.material:material:$compose_version")
-    implementation("androidx.compose.material:material-icons-core:$compose_version")
-    implementation("androidx.compose.material:material-icons-extended:$compose_version")
-    implementation("androidx.compose.runtime:runtime-rxjava2:$compose_version")
-    implementation("androidx.compose.ui:ui-text:$compose_version")
-    implementation("androidx.compose.ui:ui-util:$compose_version")
-    implementation("androidx.compose.ui:ui-viewbinding:$compose_version")
-    implementation("androidx.compose.ui:ui-tooling:$compose_version")
+    implementation platform("androidx.compose:compose-bom:$versions.compose_bom")
+    implementation("androidx.compose.animation:animation-core")
+    implementation("androidx.compose.animation:animation")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.ui:ui-geometry")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.foundation:foundation-layout")
+    implementation("androidx.compose.runtime:runtime-livedata")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material")
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.runtime:runtime-rxjava2")
+    implementation("androidx.compose.ui:ui-text")
+    implementation("androidx.compose.ui:ui-util")
+    implementation("androidx.compose.ui:ui-viewbinding")
+    implementation("androidx.compose.ui:ui-tooling")
 
 
     //-> WorkManager
@@ -76,18 +74,25 @@ dependencies {
     api 'com.github.requery:sqlite-android:3.42.0'
     // R2 modules
     implementation("com.github.codetoart:r2-shared-kotlin:$versions.r2SharedKotlin") {
+        exclude group: 'com.github.kittinunf.fuel', module: 'fuel'
+        exclude group: 'com.github.kittinunf.fuel', module: 'fuel-android'
         changing = true
     }
     implementation("com.github.codetoart:r2-streamer-kotlin:$versions.r2StreamerKotlin") {
         exclude group: "org.slf4j", module: "slf4j-api"
+        exclude group: 'com.github.kittinunf.fuel', module: 'fuel'
+        exclude group: 'com.github.kittinunf.fuel', module: 'fuel-android'
         changing = true
     }
+
+    implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
+    implementation 'com.github.kittinunf.fuel:fuel-android:2.3.1'
 
     //-> Compose Navigation
     implementation "androidx.navigation:navigation-compose:$versions.navigation_compose"
 
     //->Kotlin Reflection
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.8.22"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:2.1.0"
 
     //-> Testing
     testImplementation 'junit:junit:4.13.2'
