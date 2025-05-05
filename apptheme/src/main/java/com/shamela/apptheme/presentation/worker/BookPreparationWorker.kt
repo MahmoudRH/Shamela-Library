@@ -10,8 +10,8 @@ import androidx.work.WorkerParameters
 import com.shamela.apptheme.data.db.DatabaseHelper
 import com.shamela.apptheme.data.util.ArabicNormalizer
 import com.shamela.apptheme.domain.model.BookPage
-import com.shamela.apptheme.presentation.util.ChannelType
-import com.shamela.apptheme.presentation.util.startNotification
+import com.shamela.apptheme.presentation.util.notifications.ChannelType
+import com.shamela.apptheme.presentation.util.notifications.NotificationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -31,7 +31,7 @@ class BookPreparationWorker(
     CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
-        val notification = startNotification(
+        val notification = NotificationHelper.startNotification(
             context = appContext, title = "تحضير الكتب للبحث",
             type = ChannelType.BookPreparation,
             content = "يتم تحضير الكتب للبحث"
