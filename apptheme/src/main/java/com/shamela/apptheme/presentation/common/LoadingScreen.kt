@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -18,7 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.shamela.apptheme.presentation.theme.AppTheme
 
 @Composable
 fun LoadingScreen(visibility: Boolean) {
@@ -40,10 +43,19 @@ fun LoadingScreen(visibility: Boolean) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(MaterialTheme.colorScheme.background)
+                .clickable(enabled = false) {},
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(color = color, modifier = Modifier.size(80.dp), strokeWidth = 4.dp)
         }
+    }
+}
+
+@Preview
+@Composable
+private fun LoadingScreenPrev() {
+    AppTheme.ShamelaLibraryTheme {
+        LoadingScreen(true)
     }
 }
