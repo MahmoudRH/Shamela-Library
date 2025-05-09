@@ -11,4 +11,6 @@
     <string name="xLarge">أكبر</string>
     <string name="clear">مسح</string>
     <string name="prepering_books">تحضير الكتب</string>
+    <string name="book_preparation_notification_content">يتم تحضير الكتب للبحث</string>
+    <string name="book_preparation_notification_title">تحضير الكتب للبحث</string>
 </resources>

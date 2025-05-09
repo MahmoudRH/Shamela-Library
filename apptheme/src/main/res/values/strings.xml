@@ -16,4 +16,6 @@
     <string name="updating_database">تحديث قاعدة البيانات</string>
     <string name="database_update_notifications">اشعارات تحديث فاعدة البيانات</string>
     <string name="database_update_notifications_description">مسؤولة عن اشعارات تحديث قاعدة البيانات</string>
+    <string name="book_preparation_notification_content">يتم تحضير الكتب للبحث</string>
+    <string name="book_preparation_notification_title">تحضير الكتب للبحث</string>
 </resources>
