@@ -92,7 +92,7 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:$versions.navigation_compose"
 
     //->Kotlin Reflection
-    implementation "org.jetbrains.kotlin:kotlin-reflect:2.1.0"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:2.1.20"
 
     //-> Testing
     testImplementation 'junit:junit:4.13.2'
