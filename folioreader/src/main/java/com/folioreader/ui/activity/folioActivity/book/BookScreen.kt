@@ -14,7 +14,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -90,12 +89,11 @@ import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.readium.r2.shared.Publication
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BookScreen(
     viewModel: BookViewModel = viewModel(),
@@ -246,11 +244,51 @@ fun BookScreen(
         }
 
         LaunchedEffect(pagerState.currentPage) {
-            webViews.keys.forEach { key ->
-                val maxCacheDistance = 5
-                if (abs(key - pagerState.currentPage) >= maxCacheDistance) {
-                    webViews.remove(key)
-                    println("webView $key deinited")
+            val cacheRange = (maxOf(0, pagerState.currentPage - 5))..(minOf(
+                pagerState.currentPage + 5,
+                publication.readingOrder.lastIndex
+            ))
+            cacheRange.filter { webViews[it] == null }.forEach { key ->
+                val webView = CustomWebView(
+                    context,
+                    isNightMode = AppTheme.isDarkTheme(context),
+                    currentPageIndex = key,
+                    currentPageHref = publication.readingOrder[key].href
+                ).apply {
+                    setBackgroundColor(backgroundColor.toInt())
+                    settings.javaScriptEnabled = true
+                    settings.defaultTextEncodingName = "UTF-8"
+                    settings.allowFileAccess = true
+                    webViewClient = mMebViewClient
+                    addJavascriptInterface(object {
+                        @JavascriptInterface
+                        fun isTapped() {
+                            Log.e(
+                                "CustomWebView",
+                                "onClickHtml: isTapped"
+                            )
+                            viewModel.onEvent(BookEvent.ToggleAppBarsVisibility)
+                        }
+
+                        @JavascriptInterface
+                        fun textSelected(text: String) {
+                            Log.e("CustomWebView", "textSelected: $text")
+                        }
+                    }, "CustomWebView")
+                    addJavascriptInterface(this, "FolioWebView")
+                }
+
+                val (url, htmlData) = state.pagesMap[key]
+                    ?: ("" to "")
+                if (url.isNotBlank()) {
+                    webView.loadDataWithBaseURL(
+                        url,
+                        htmlData,
+                        state.mimeType,
+                        "UTF-8",
+                        null
+                    )
+                    webViews[key] = webView
                 }
             }
         }
