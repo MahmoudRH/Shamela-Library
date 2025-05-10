@@ -7,10 +7,10 @@ import android.util.Log
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.shamela.apptheme.data.util.ArabicNormalizer
-import io.requery.android.database.sqlite.SQLiteDatabase
-import io.requery.android.database.sqlite.SQLiteOpenHelper
 import com.shamela.apptheme.domain.model.BookPage
 import com.shamela.apptheme.presentation.worker.BookMigrationWorker
+import io.requery.android.database.sqlite.SQLiteDatabase
+import io.requery.android.database.sqlite.SQLiteOpenHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -56,6 +56,31 @@ class DatabaseHelper(val context: Context) :
             }
 
             return@withContext db.insert(BookPage.TABLE_NAME, null, contentValues) > 0
+        }
+    }
+    suspend fun insertBookPages(pages: List<BookPage>): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                db.beginTransaction()
+                for (page in pages) {
+                    val contentValues = ContentValues().apply {
+                        put(BookPage.COL_ID, page.id)
+                        put(BookPage.COL_BOOK_ID, page.bookId)
+                        put(BookPage.COL_BOOK_TITLE, page.bookTitle)
+                        put(BookPage.COL_HREF, page.href)
+                        put(BookPage.COL_CATEGORY, page.category)
+                        put(BookPage.COL_CONTENT, page.content)
+                    }
+                    db.insert(BookPage.TABLE_NAME, null, contentValues)
+                }
+                db.setTransactionSuccessful()
+                true
+            } catch (e: Exception) {
+                Log.e("DatabaseHelper", "Bulk insert failed", e)
+                false
+            } finally {
+                db.endTransaction()
+            }
         }
     }
 

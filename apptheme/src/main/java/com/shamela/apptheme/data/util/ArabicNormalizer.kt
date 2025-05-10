@@ -11,7 +11,7 @@ class ArabicNormalizer {
             '\u0625' to '\u0627', // ALEF_HAMZA_BELOW to ALEF
             '\u0629' to '\u0647', // TEH_MARBUTA to HEH
         )
-        private val tashkeel = listOf(
+        private val tashkeel = setOf(
             '\u064B',            // FATHATAN
             '\u064C',            // DAMMATAN
             '\u064D',            // KASRATAN
@@ -29,13 +29,13 @@ class ArabicNormalizer {
      * @param input The input string containing Arabic text.
      * @return The normalized string.
      */
-    fun normalize(input: String): String {
-        val normalizedText = StringBuilder()
+     fun normalize(input: String): String {
+        val result = StringBuilder(input.length)
         for (char in input) {
-            if (char in tashkeel) continue
-            val normalizedChar = normalizationMap[char] ?: char
-            normalizedText.append(normalizedChar)
+            if (char !in tashkeel) {
+                result.append(normalizationMap[char] ?: char)
+            }
         }
-        return normalizedText.toString()
+        return result.toString()
     }
 }

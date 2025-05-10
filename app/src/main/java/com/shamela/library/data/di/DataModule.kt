@@ -2,6 +2,14 @@ package com.shamela.library.data.di
 
 import android.app.Application
 import androidx.room.Room
+import com.shamela.apptheme.data.sharedPrefs.SharedPreferencesData
+import com.shamela.apptheme.domain.usecases.userPreferences.GetAvailableColorSchemes
+import com.shamela.apptheme.domain.usecases.userPreferences.GetAvailableFontFamilies
+import com.shamela.apptheme.domain.usecases.userPreferences.GetAvailableFontSizes
+import com.shamela.apptheme.domain.usecases.userPreferences.GetAvailableThemes
+import com.shamela.apptheme.domain.usecases.userPreferences.ReadUserPreferences
+import com.shamela.apptheme.domain.usecases.userPreferences.UpdateUserPreferences
+import com.shamela.apptheme.domain.usecases.userPreferences.UserPreferencesUseCases
 import com.shamela.library.data.local.assets.AssetsBooksRepoImpl
 import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.data.local.db.BooksDao
@@ -75,6 +83,26 @@ object DataModule {
         return BooksUseCases(
             repository = repo,
             booksDao = dao
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferencesData(app: Application): SharedPreferencesData {
+        return SharedPreferencesData(app.applicationContext)
+    }
+
+
+    @Provides
+    @Singleton
+    fun providePrefsUseCase(dataSource: SharedPreferencesData): UserPreferencesUseCases {
+        return UserPreferencesUseCases(
+            readUserPreferences = ReadUserPreferences(datasource = dataSource),
+            updateUserPreferences = UpdateUserPreferences(datasource = dataSource),
+            getAvailableFontFamilies = GetAvailableFontFamilies(datasource = dataSource),
+            getAvailableFontSizes = GetAvailableFontSizes(datasource = dataSource),
+            getAvailableThemes = GetAvailableThemes(datasource = dataSource),
+            getAvailableColorSchemes = GetAvailableColorSchemes(datasource = dataSource)
         )
     }
 }

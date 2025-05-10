@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string name="select_book">اختر كتابا</string>
+    <string name="add_to_library">إضافة إلى المكتبة</string>
+    <string name="add_external_book">إضافة كتاب خارجي</string>
+    <string name="prefernces">التفضيلات</string>
+    <string name="external_bboks">الكتب الخارجية</string>
+    <string name="could_not_add_book_to_library">تعذر إضافة الكتاب للمكتبة</string>
+    <string name="the_book_already_exists">الكتاب موجود بالفعل</string>
+    <string name="book_added_successfully">تمت اضافة الكتاب بنجاح</string>
+    <string name="book_is_not_compatible">الكتاب غير متوافق مع المكتبة</string>
 </resources>

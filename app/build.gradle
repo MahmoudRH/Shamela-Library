@@ -61,7 +61,7 @@ dependencies {
     implementation platform("org.jetbrains.kotlin:kotlin-bom:$versions.kotlin_bom")
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions.lifecycle_runtime_ktx"
     implementation "androidx.activity:activity-compose:$versions.compose_activity"
-    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.8.7"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.9.0"
 
     //-> Gson library
     implementation "com.google.code.gson:gson:$versions.gson"
