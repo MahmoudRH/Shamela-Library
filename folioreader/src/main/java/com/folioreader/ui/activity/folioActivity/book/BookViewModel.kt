@@ -26,6 +26,9 @@ class BookViewModel : ViewModel() {
     private val _state = MutableStateFlow<BookState>(BookState())
     val state = _state.asStateFlow()
     private val TAG = "BookViewModel"
+
+    private val cachedPages = mutableMapOf<Int, Pair<String, String>>()
+    
     fun onEvent(event: BookEvent) {
         when (event) {
             is BookEvent.OnChangeSelectedPage -> {
@@ -64,7 +67,7 @@ class BookViewModel : ViewModel() {
         }
     }
 
-    private suspend fun getBookPages(
+    private fun getBookPages(
         context: Context,
         pageIndex: Int,
         totalPages: Int,
@@ -74,26 +77,33 @@ class BookViewModel : ViewModel() {
         fontSize: String,
         streamUrl:String
     ) = flow<Map<Int, Pair<String, String>>> {
-        val range = (maxOf(0, pageIndex - 2))..(minOf(pageIndex + 2, totalPages))
-//        val streamUrl = AppUtil.getStreamerUrl(publication.metadata.title)
+        val range = (maxOf(0, pageIndex - 5))..(minOf(pageIndex + 5, totalPages))
+        range
+            .associateWith { page -> cachedPages[page] }
+            .filter { (page, pair) ->
+                if (pair != null)
+                    emit(mapOf(page to pair))
+                pair == null
+            }
+            .forEach { (page, _) ->
 
-        range.forEach { page ->
-            publication.readingOrder[page].let { link ->
-                link.href?.substring(1)?.let { pageFilePath ->
-                    val pageUrl = streamUrl + pageFilePath
-                    Log.d(TAG, "getBookPages() pageUrl returned: $pageUrl")
-                    val htmlContent = getHtmlData(pageUrl)
-                    val pageData = HtmlUtil.getHtmlContent(
-                        context = context,
-                        content = htmlContent,
-                        fontFamilyCssClass = fontFamily,
-                        isNightMode = isNightMode,
-                        fontSizeCssClass = fontSize
-                    )
-                    emit(mapOf(page to Pair(pageUrl, pageData)))
+                publication.readingOrder[page].let { link ->
+                    link.href?.substring(1)?.let { pageFilePath ->
+                        val pageUrl = streamUrl + pageFilePath
+                        Log.d(TAG, "getBookPages() pageUrl returned: $pageUrl")
+                        val htmlContent = getHtmlData(pageUrl)
+                        val pageData = HtmlUtil.getHtmlContent(
+                            context = context,
+                            content = htmlContent,
+                            fontFamilyCssClass = fontFamily,
+                            isNightMode = isNightMode,
+                            fontSizeCssClass = fontSize
+                        )
+                        emit(mapOf(page to Pair(pageUrl, pageData)))
+                        cachedPages[page] = Pair(pageUrl, pageData)
+                    }
                 }
             }
-        }
     }
 
     private suspend fun getHtmlData(urlString: String): String {
@@ -113,7 +123,6 @@ class BookViewModel : ViewModel() {
                 var line: String?
                 while (reader.readLine().also { line = it } != null) {
                     line?.let {
-//                        if (!it.contains("<hr/>") && !it.contains("¦"))
                         stringBuilder.append(it).append('\n')
                     }
                 }
@@ -124,5 +133,4 @@ class BookViewModel : ViewModel() {
             }
         }
     }
-
 }
