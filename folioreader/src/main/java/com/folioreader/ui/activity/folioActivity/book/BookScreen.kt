@@ -14,7 +14,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -59,7 +58,6 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -80,6 +78,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.folioreader.ui.view.CustomWebView
@@ -90,12 +89,7 @@ import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.readium.r2.shared.Publication
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 
-@SuppressLint("SetJavaScriptEnabled")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BookScreen(
     viewModel: BookViewModel = viewModel(),
@@ -104,192 +98,69 @@ fun BookScreen(
     selectedChapter: String,
     settingsChanged: Int,
     publication: Publication,
-    startPageHref:String,
+    startPageHref: String,
     navigateToTableOfContent: (Int) -> Unit,
     navigateToSettings: (Int) -> Unit,
     navigateToSearchScreen: () -> Unit,
     navigateBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val state = viewModel.state.collectAsState().value
+    val state = viewModel.state.collectAsStateWithLifecycle().value
     val backgroundColor = if (AppTheme.isDarkTheme(context)) 0xff131313 else 0xffffffff
+    val pagerState = rememberPagerState(pageCount = { publication.readingOrder.size })
     val scope = rememberCoroutineScope()
-    val webViews = remember(context) { mutableStateMapOf<Int, WebView>() }
+    val cachedWebViews = remember { mutableStateMapOf<Int, WebView>() }
 
-
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        initialPageOffsetFraction = 0f,
-        pageCount = { publication.readingOrder.size }
-    )
-    LaunchedEffect(Unit) {
-        val bookId = publication.metadata.title.hashCode()
-        val lastReadHref = AppUtil.getLastReadFromSharedPreferences(
-            context = context,
-            bookId = bookId.toString()
-        )
-        Log.e("BookScreen", "Unit, lastReadHref: $lastReadHref ")
-        if (startPageHref.isNotBlank()){
-            val pageToScrollTo = publication.readingOrder.indexOfFirst { it.href == startPageHref }
-            pagerState.scrollToPage(pageToScrollTo)
-        }else if (lastReadHref.isNotBlank()) {
-            val pageToScrollTo = publication.readingOrder.indexOfFirst { it.href == lastReadHref }
-            pagerState.scrollToPage(pageToScrollTo)
+    // Save last read on dispose
+    DisposableEffect(Unit) {
+        onDispose {
+            val bookId = publication.metadata.title.hashCode()
+            runCatching {
+                publication.readingOrder[pagerState.currentPage].href?.let { lastReadHref ->
+                    AppUtil.saveLastReadToSharedPreferences(
+                        context = context,
+                        bookId = bookId.toString(),
+                        lastHref = lastReadHref
+                    )
+                }
+            }.onFailure {
+                Log.e("BookScreen", "Failed to save last read", it)
+            }
         }
     }
 
-    Column(modifier = Modifier.background(Color(backgroundColor))) {
-        AnimatedVisibility(
-            visible = state.isAppBarsVisible,
-            enter = expandVertically(),
-            exit = shrinkVertically()
-        ) {
-            TopAppBar(
-                modifier = Modifier,
-                title = {
-                    var titleTextStyle by remember{ mutableStateOf(AppFonts.textLargeBold)}
-                    var readyToDraw by remember { mutableStateOf(false) }
-                    Text(
-                        text = publication.metadata.title,
-                        style = titleTextStyle,
-                        maxLines = 2,
-                        modifier = Modifier.drawWithContent {
-                            if (readyToDraw) drawContent()
-                        },
-                        onTextLayout = {textLayoutResult->
-                            if (textLayoutResult.didOverflowHeight) {
-                                titleTextStyle = titleTextStyle.copy(fontSize = titleTextStyle.fontSize * 0.9)
-                            }else{
-                                readyToDraw = true
-                            }
-                        }
-                    )
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        15.dp
-                    ),
-                ),
-                actions = {
+    // Initial page logic
+    LaunchedEffect(Unit) {
+        val bookId = publication.metadata.title.hashCode()
+        val lastReadHref = AppUtil.getLastReadFromSharedPreferences(context, bookId.toString())
+        val target = when {
+            startPageHref.isNotBlank() -> startPageHref
+            lastReadHref.isNotBlank() -> lastReadHref
+            else -> null
+        }
+        target?.let {
+            val index = publication.readingOrder.indexOfFirst { item -> item.href == it }
+            if (index != -1) pagerState.scrollToPage(index)
+        }
+    }
 
-                    IconButton(onClick = {
-                        navigateToSearchScreen()
-                    }) {
-                        Icon(
-                            Icons.Outlined.Search,
-                            contentDescription = null
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.size(4.dp))
-
-                    IconButton(onClick = {
-                        viewModel.onEvent(BookEvent.ToggleMenuVisibility)
-                    }) {
-                        Icon(
-                            Icons.Outlined.MoreVert,
-                            contentDescription = null
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = state.isMenuVisible,
-                        onDismissRequest = {
-                            viewModel.onEvent(BookEvent.DismissMenu)
-                        }
-                    ) {
-                        DropdownMenuItem(
-                            onClick = {
-                                viewModel.onEvent(BookEvent.DismissMenu)
-                                navigateToSettings(pagerState.currentPage)
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Outlined.Settings, null)
-                            },
-                            text = {
-                                Text(
-                                    text = "الإعدادات",
-                                    style = AppFonts.textNormal
-                                )
-                            })
-                        DropdownMenuItem(
-                            onClick = {
-                                viewModel.onEvent(BookEvent.DismissMenu)
-                                navigateToTableOfContent(pagerState.currentPage)
-                            },
-                            text = {
-                                Text(
-                                    text = "الفهرس",
-                                    style = AppFonts.textNormal
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Outlined.FormatListBulleted,
-                                    null
-                                )
-                            })
-                    }
-
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-//                            viewModel.onEvent(BookEvent.StopStreamerServer)
-                        navigateBack()
-                    }) {
-                        Icon(
-                            Icons.Default.ArrowForwardIos,
-                            contentDescription = null
-                        )
-                    }
+    // Scroll to search result, chapter, or update on settings change
+    LaunchedEffect(searchResult, selectedChapter, settingsChanged) {
+        when {
+            searchResult.first.isNotBlank() -> {
+                val index = publication.readingOrder.indexOfFirst { it.href == searchResult.first }
+                if (index != -1) pagerState.scrollToPage(index)
+            }
+            selectedChapter.isNotBlank() -> {
+                val index = publication.readingOrder.indexOfFirst {
+                    it.href == selectedChapter.split("#").firstOrNull()
                 }
-            )
-        }
-
-        LaunchedEffect(pagerState.currentPage) {
-            webViews.keys.forEach { key ->
-                val maxCacheDistance = 5
-                if (abs(key - pagerState.currentPage) >= maxCacheDistance) {
-                    webViews.remove(key)
-                    println("webView $key deinited")
-                }
+                if (index != -1) pagerState.scrollToPage(index)
             }
-        }
-        LaunchedEffect(Unit) {
-            snapshotFlow { pagerState.currentPage }.collect { page ->
-                viewModel.onEvent(
-                    BookEvent.OnChangeSelectedPage(
-                        pageIndex = page,
-                        context = context,
-                        fontFamilyCssClass = AppFonts.selectedFontFamilyCssClass(),
-                        isNightMode = AppTheme.isDarkTheme(context),
-                        fontSizeCssClass = AppFonts.selectedFontSizeCssClass(),
-                        publication = publication,
-                        streamUrl = streamUrl
-                    )
-                )
-            }
-        }
-        LaunchedEffect(searchResult) {
-            val href = searchResult.first
-            if (href.isNotBlank()) {
-                val pageToScrollTo = publication.readingOrder.indexOfFirst { it.href == href }
-                pagerState.scrollToPage(pageToScrollTo)
-            }
-        }
-        LaunchedEffect(selectedChapter) {
-            if (selectedChapter.isNotBlank()) {
-                val pageToScrollTo = publication.readingOrder.indexOfFirst {
-                    it.href == selectedChapter.split('#').first()
-                }
-                pagerState.scrollToPage(pageToScrollTo)
-            }
-        }
-        LaunchedEffect(settingsChanged) {
-            Log.e("BooksScreen", "SettingsChanged! : $settingsChanged")
-            if (settingsChanged != 0) {
+            settingsChanged != 0 -> {
                 val temp = pagerState.currentPage
                 Log.e("BooksScreen", "pagerState.currentPage! : $temp")
-                webViews.clear()
+                cachedWebViews.clear()
                 viewModel.onEvent(BookEvent.ClearCachedPages)
                 viewModel.onEvent(
                     BookEvent.OnChangeSelectedPage(
@@ -306,154 +177,85 @@ fun BookScreen(
 
             }
         }
+    }
+
+    // Observe current page
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            viewModel.onEvent(
+                BookEvent.OnChangeSelectedPage(
+                    page,
+                    AppFonts.selectedFontSizeCssClass(),
+                    AppFonts.selectedFontFamilyCssClass(),
+                    AppTheme.isDarkTheme(context),
+                    context,
+                    publication,
+                    streamUrl
+                )
+            )
+        }
+    }
+
+    Column(modifier = Modifier.background(Color(backgroundColor))) {
+        BookTopBar(
+            title = publication.metadata.title,
+            isVisible = state.isAppBarsVisible,
+            isMenuVisible = state.isMenuVisible,
+            onBack = navigateBack,
+            onSearch = navigateToSearchScreen,
+            onSettings = { navigateToSettings(pagerState.currentPage) },
+            onToc = { navigateToTableOfContent(pagerState.currentPage) },
+            onToggleMenu = { viewModel.onEvent(BookEvent.ToggleMenuVisibility) },
+            onDismissMenu = { viewModel.onEvent(BookEvent.DismissMenu) }
+        )
+
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .weight(1f)
-                .pointerInput(true) {
-                    detectTapGestures(
-                        onTap = {
-                            //when the webview doesn't fill the whole screen and the user clicks outside of the webview
-                            viewModel.onEvent(BookEvent.ToggleAppBarsVisibility)
-                        }
-                    )
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        viewModel.onEvent(BookEvent.ToggleAppBarsVisibility)
+                    })
                 },
-            key = { index ->
-                publication.readingOrder[index].href ?: index.toString()
-            },
-        ) { currentPageIndex ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                AndroidView(factory = { context ->
-                    webViews[currentPageIndex] ?: run {
-                        CustomWebView(
-                            context,
-                            isNightMode = AppTheme.isDarkTheme(context),
-                            currentPageIndex = currentPageIndex,
-                            currentPageHref = publication.readingOrder[currentPageIndex].href
-                        ).apply {
-                            setBackgroundColor(backgroundColor.toInt())
-                            settings.javaScriptEnabled = true
-                            settings.defaultTextEncodingName = "UTF-8"
-                            settings.allowFileAccess = true
-                            webViewClient = mMebViewClient
-                            addJavascriptInterface(object {
-                                @JavascriptInterface
-                                fun isTapped() {
-                                    Log.e(
-                                        "CustomWebView",
-                                        "onClickHtml: isTapped"
-                                    )
-                                    viewModel.onEvent(BookEvent.ToggleAppBarsVisibility)
-                                }
-                                @JavascriptInterface
-                                fun textSelected(text:String){
-                                    Log.e("CustomWebView", "textSelected: $text", )
-                                }
-                            }, "CustomWebView")
-                            addJavascriptInterface(this, "FolioWebView")
-                        }
-                    }
-                }, update = { webview ->
-                    (webview as CustomWebView).fullScreenMode.value = !state.isAppBarsVisible
-                    webViews[currentPageIndex] ?: run {
-                        val (url, htmlData) = state.pagesMap[currentPageIndex]
-                            ?: ("" to "")
-                        if (url.isNotBlank()) {
-                            webview.loadDataWithBaseURL(
-                                url,
-                                htmlData,
-                                state.mimeType,
-                                "UTF-8",
-                                null
-                            )
-                            webViews[currentPageIndex] = webview
-                        }
-                    }
-                    scope.launch {
-                        delay(200)
-                        val (_, javascriptCall) = searchResult
-                        if (javascriptCall.isNotBlank()) {
-                            webview.loadUrl(javascriptCall)
-                        }
-                    }
-                })
-            }
-
+            key = { index -> publication.readingOrder[index].href ?: index.toString() }
+        ) { pageIndex ->
+            BookPage(
+                index = pageIndex,
+                webViews = cachedWebViews,
+                state = state,
+                publication = publication,
+                backgroundColor = backgroundColor,
+                javascriptCall = searchResult.second,
+                onTapped = { viewModel.onEvent(BookEvent.ToggleAppBarsVisibility) },
+                saveWebView = { index, webview -> cachedWebViews.put(index, webview) }
+            )
         }
 
         BottomBar(
             visibility = state.isAppBarsVisible,
             currentPage = state.currentPageText,
-            onCurrentPageChange = {
-                viewModel.onEvent(
-                    BookEvent.OnCurrentPageTextChanged(
-                        it
-                    )
-                )
-            },
+            onCurrentPageChange = { viewModel.onEvent(BookEvent.OnCurrentPageTextChanged(it)) },
             onDone = {
-                scope.launch {
-                    state.currentPageText.toIntOrNull()?.let {
-                        val page = it.coerceIn(
-                            0,
-                            publication.readingOrder.size - 1
-                        )
-                        pagerState.scrollToPage(page)
-                    }
+                state.currentPageText.toIntOrNull()?.let {
+                    val page = it.coerceIn(0, publication.readingOrder.lastIndex)
+                    scope.launch { pagerState.scrollToPage(page) }
                 }
             },
-            isPrevButtonEnabled = pagerState.currentPage != 0,
-            isNextButtonEnabled = pagerState.currentPage != publication.readingOrder.size - 1,
+            isPrevButtonEnabled = pagerState.currentPage > 0,
+            isNextButtonEnabled = pagerState.currentPage < publication.readingOrder.lastIndex,
             onPrevButtonClick = {
-                pagerState.apply {
-                    val previousPage = max(0, currentPage - 1)
-                    scope.launch { animateScrollToPage(previousPage) }
-                }
+                scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
             },
             onNextButtonClick = {
-                pagerState.apply {
-                    val nextPage =
-                        min(
-                            currentPage + 1,
-                            publication.readingOrder.size - 1
-                        )
-                    scope.launch { animateScrollToPage(nextPage) }
-                }
+                scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
             }
         )
-
     }
+
     LoadingScreen(state.isLoading)
-
-    DisposableEffect(Unit) {
-        onDispose {
-            /*
-            to prevent modifying the last read href when the user is viewing a quote,
-            check if startPageHref is blank or not
-             */
-            try {
-                val bookId = publication.metadata.title.hashCode()
-                publication.readingOrder[pagerState.currentPage].href?.let { lastReadHref ->
-                    AppUtil.saveLastReadToSharedPreferences(
-                        context = context,
-                        bookId = bookId.toString(),
-                        lastHref = lastReadHref
-                    )
-                }
-            } catch (e: IndexOutOfBoundsException) {
-                Log.e(
-                    "BooksScreen",
-                    "IndexOutOfBoundsException while saving last read: \n${e.stackTrace}",
-                )
-            }
-        }
-    }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -550,6 +352,147 @@ private fun BottomBar(
                 )
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BookTopBar(
+    title: String,
+    isVisible: Boolean,
+    isMenuVisible: Boolean,
+    onBack: () -> Unit,
+    onSearch: () -> Unit,
+    onSettings: () -> Unit,
+    onToc: () -> Unit,
+    onToggleMenu: () -> Unit,
+    onDismissMenu: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = expandVertically(),
+        exit = shrinkVertically()
+    ) {
+        TopAppBar(
+            title = {
+                var style by remember { mutableStateOf(AppFonts.textLargeBold) }
+                var ready by remember { mutableStateOf(false) }
+                Text(
+                    text = title,
+                    style = style,
+                    maxLines = 2,
+                    modifier = Modifier.drawWithContent { if (ready) drawContent() },
+                    onTextLayout = {
+                        if (it.didOverflowHeight) style = style.copy(fontSize = style.fontSize * 0.9f)
+                        else ready = true
+                    }
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Default.ArrowForwardIos, contentDescription = null)
+                }
+            },
+            actions = {
+                IconButton(onClick = onSearch) {
+                    Icon(Icons.Outlined.Search, null)
+                }
+                Spacer(modifier = Modifier.size(4.dp))
+                IconButton(onClick = onToggleMenu) {
+                    Icon(Icons.Outlined.MoreVert, null)
+                }
+                DropdownMenu(expanded = isMenuVisible, onDismissRequest = onDismissMenu) {
+                    DropdownMenuItem(
+                        onClick = {
+                            onDismissMenu()
+                            onSettings()
+                        },
+                        leadingIcon = { Icon(Icons.Outlined.Settings, null) },
+                        text = { Text("الإعدادات", style = AppFonts.textNormal) }
+                    )
+                    DropdownMenuItem(
+                        onClick = {
+                            onDismissMenu()
+                            onToc()
+                        },
+                        leadingIcon = { Icon(Icons.Outlined.FormatListBulleted, null) },
+                        text = { Text("الفهرس", style = AppFonts.textNormal) }
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(15.dp)
+            )
+        )
+    }
+}
+
+@SuppressLint("SetJavaScriptEnabled")
+@Composable
+private fun BookPage(
+    index: Int,
+    webViews: Map<Int, WebView>,
+    state: BookState,
+    publication: Publication,
+    backgroundColor: Long,
+    javascriptCall: String,
+    onTapped: () -> Unit,
+    saveWebView: (Int, WebView) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding()
+            .verticalScroll(rememberScrollState())
+    ) {
+        AndroidView(factory = { context ->
+            webViews[index] ?: run {
+                CustomWebView(
+                    context,
+                    isNightMode = AppTheme.isDarkTheme(context),
+                    currentPageIndex = index,
+                    currentPageHref = publication.readingOrder[index].href
+                ).apply {
+                    setBackgroundColor(backgroundColor.toInt())
+                    settings.javaScriptEnabled = true
+                    settings.defaultTextEncodingName = "UTF-8"
+                    settings.allowFileAccess = true
+                    webViewClient = mMebViewClient
+                    addJavascriptInterface(object {
+                        @JavascriptInterface
+                        fun isTapped() = onTapped()
+                        @JavascriptInterface
+                        fun textSelected(text:String){
+                            Log.e("CustomWebView", "textSelected: $text", )
+                        }
+                    }, "CustomWebView")
+                    addJavascriptInterface(this, "FolioWebView")
+                }
+            }
+        }, update = { webview ->
+            (webview as CustomWebView).fullScreenMode.value = !state.isAppBarsVisible
+            webViews[index] ?: run {
+                val (url, htmlData) = state.pagesMap[index]
+                    ?: ("" to "")
+                if (url.isNotBlank()) {
+                    webview.loadDataWithBaseURL(
+                        url,
+                        htmlData,
+                        state.mimeType,
+                        "UTF-8",
+                        null
+                    )
+                    saveWebView(index,webview)
+                }
+            }
+            scope.launch {
+                delay(200)
+                if (javascriptCall.isNotBlank()) {
+                    webview.loadUrl(javascriptCall)
+                }
+            }
+        })
     }
 }
 
