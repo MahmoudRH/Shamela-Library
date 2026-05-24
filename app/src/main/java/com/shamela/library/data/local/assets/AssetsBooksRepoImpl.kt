@@ -3,8 +3,9 @@ package com.shamela.library.data.local.assets
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import com.google.firebase.storage.FirebaseStorage
+import androidx.core.net.toUri
 import com.google.gson.Gson
+import com.shamela.library.BuildConfig
 import com.shamela.library.data.local.assets.dto.AssetsBook
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
@@ -16,8 +17,8 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStreamReader
@@ -30,7 +31,7 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
     private val TAG = "AssetsBooksRepoImpl"
     private val gson = Gson()
     private val categoryBookCounts: MutableMap<String, Int> = mutableMapOf()
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
+
     suspend fun _getCategories(): List<Category> {
         return withContext(Dispatchers.IO) {
             try {
@@ -70,23 +71,6 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
         }
     }
 
-//    private suspend fun _getsAllBooks(): List<Book> {
-//        return withContext(Dispatchers.IO) {
-//            try {
-//                val categoryNames = context.assets.list("categories") ?: emptyArray()
-//                val allBooks = mutableListOf<Book>()
-//                for (categoryName in categoryNames) {
-//                    val books = _getBooksByCategory(categoryName)
-//                    allBooks.addAll(books)
-//                }
-//                allBooks
-//            } catch (e: IOException) {
-//                Log.e(TAG, "Error: getAllBooks. ${e.message}")
-//                emptyList()
-//            }
-//        }
-//    }
-
     override fun getCategories(): Flow<Category> = flow {
         emitAll(_getCategories().asFlow())
     }
@@ -96,7 +80,7 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
     }
 
     override fun searchBooksByName(categoryName: String, query: String): Flow<Book> {
-        return if (categoryName == "all")  searchAllBooks(query)
+        return if (categoryName == "all") searchAllBooks(query)
         else getBooksByCategory(categoryName).filter { it.title.contains(query) }
 
     }
@@ -113,7 +97,7 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
         }
 
         // Wait for all jobs to complete
-        jobs.forEach { it.join() }
+        jobs.joinAll()
 
         // Close the channel to signal the end of emission
         close()
@@ -133,17 +117,25 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
         }
     }
 
-    override suspend fun getDownloadLink(categoryName: String, bookName: String): Uri? {
-        Log.d(TAG, "getDownloadLink: (categoryName, bookName ) = ($categoryName, $bookName)", )
-        try {
-            val bookRef = storage.reference.child("shamela_epub/$categoryName/$bookName.epub")
-            return bookRef.downloadUrl.await()
-        } catch (e: Exception) {
-            Log.e(TAG, "ERROR: getDownloadLink: (categoryName, bookName ) = ($categoryName, $bookName)", )
-            e.printStackTrace()
-        }
-        return null
-    }
+    override suspend fun getDownloadLink(
+        categoryName: String,
+        bookName: String
+    ): Uri? {
 
+        return try {
+
+            val encodedPath = Uri.encode("$categoryName/$bookName.epub", "/")
+
+            "${BuildConfig.BASE_URL}/$encodedPath".toUri()
+
+        } catch (e: Exception) {
+            Log.e(
+                TAG,
+                "ERROR: getDownloadLink: (categoryName, bookName) = ($categoryName, $bookName)"
+            )
+            e.printStackTrace()
+            null
+        }
+    }
 
 }
