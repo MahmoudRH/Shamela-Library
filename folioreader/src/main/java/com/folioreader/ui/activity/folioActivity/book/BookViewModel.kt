@@ -17,55 +17,77 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.readium.r2.shared.Publication
 import java.io.BufferedReader
-import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
 class BookViewModel : ViewModel() {
-    private val _state = MutableStateFlow<BookState>(BookState())
+    private val _state = MutableStateFlow(BookState())
     val state = _state.asStateFlow()
-    private val TAG = "BookViewModel"
-
     private val cachedPages = mutableMapOf<Int, Pair<String, String>>()
-    
+//    val cachedWebViews = mutableStateMapOf<Int, WebView>()
+
+
     fun onEvent(event: BookEvent) {
         when (event) {
             is BookEvent.OnChangeSelectedPage -> {
-                Log.e(TAG, "onEvent: ${event.javaClass.simpleName}, page: ${event.pageIndex}")
+                clearOldWebViews(event.pageIndex)
                 onEvent(BookEvent.OnCurrentPageTextChanged(event.pageIndex.toString()))
-                viewModelScope.launch {
-                    getBookPages(
-                        context = event.context,
-                        fontFamily = event.fontFamilyCssClass,
-                        isNightMode = event.isNightMode,
-                        fontSize = event.fontSizeCssClass,
-                        pageIndex = event.pageIndex,
-                        publication = event.publication,
-                        totalPages = event.publication.readingOrder.lastIndex,
-                        streamUrl = event.streamUrl
-                    ).collect { map ->
-                        if (_state.value.pagesMap[map.keys.first()] == null)
-                            _state.update {
-                                it.copy(
-                                    pagesMap = it.pagesMap + mapOf(map.keys.first() to map.values.first()),
-                                    isLoading = false
-                                )
-                            }
-                    }
-                }
+                fetchPage(event)
             }
 
-            is BookEvent.OnCurrentPageTextChanged -> _state.update { it.copy(currentPageText = event.newPage) }
-            BookEvent.ToggleAppBarsVisibility -> _state.update { it.copy(isAppBarsVisible = !it.isAppBarsVisible) }
-            BookEvent.ToggleMenuVisibility -> _state.update { it.copy(isMenuVisible = !it.isMenuVisible) }
-            BookEvent.DismissMenu -> _state.update { it.copy(isMenuVisible = false) }
-            BookEvent.ClearCachedPages -> _state.update {
-                Log.e(TAG, "onEvent: CachedPagesCleared", )
-                it.copy(pagesMap = mapOf())
+            is BookEvent.OnCurrentPageTextChanged -> _state.update {
+                it.copy(currentPageText = event.newPage)
+            }
+
+            BookEvent.ToggleAppBarsVisibility -> _state.update {
+                it.copy(isAppBarsVisible = !it.isAppBarsVisible)
+            }
+
+            BookEvent.ToggleMenuVisibility -> _state.update {
+                it.copy(isMenuVisible = !it.isMenuVisible)
+            }
+
+            BookEvent.DismissMenu -> _state.update {
+                it.copy(isMenuVisible = false)
+            }
+
+            BookEvent.ClearCachedPages -> {
+                cachedPages.clear()
+//                cachedWebViews.clear()
+                _state.update { it.copy(pagesMap = emptyMap()) }
             }
         }
     }
+    private fun clearOldWebViews(currentIndex: Int) {
+        val maxCacheDistance = 5
+//        cachedWebViews.keys.toList().forEach { key ->
+//            if (abs(key - currentIndex) > maxCacheDistance) cachedWebViews.remove(key)
+//        }
+    }
+
+    private fun fetchPage(event: BookEvent.OnChangeSelectedPage) {
+        viewModelScope.launch {
+            getBookPages(
+                context = event.context,
+                pageIndex = event.pageIndex,
+                totalPages = event.publication.readingOrder.lastIndex,
+                fontFamily = event.fontFamilyCssClass,
+                publication = event.publication,
+                isNightMode = event.isNightMode,
+                fontSize = event.fontSizeCssClass,
+                streamUrl = event.streamUrl
+            ).collect { pageMap ->
+                _state.update {
+                    it.copy(
+                        pagesMap = it.pagesMap + pageMap,
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
 
     private fun getBookPages(
         context: Context,
@@ -75,62 +97,35 @@ class BookViewModel : ViewModel() {
         publication: Publication,
         isNightMode: Boolean,
         fontSize: String,
-        streamUrl:String
-    ) = flow<Map<Int, Pair<String, String>>> {
+        streamUrl: String
+    ) = flow {
         val range = (maxOf(0, pageIndex - 5))..(minOf(pageIndex + 5, totalPages))
-        range
-            .associateWith { page -> cachedPages[page] }
-            .filter { (page, pair) ->
-                if (pair != null)
-                    emit(mapOf(page to pair))
-                pair == null
+        for (page in range) {
+            val cachedPage = cachedPages[page]
+            if (cachedPage != null){
+                emit(mapOf(page to cachedPage))
+                continue
             }
-            .forEach { (page, _) ->
-
-                publication.readingOrder[page].let { link ->
-                    link.href?.substring(1)?.let { pageFilePath ->
-                        val pageUrl = streamUrl + pageFilePath
-                        Log.d(TAG, "getBookPages() pageUrl returned: $pageUrl")
-                        val htmlContent = getHtmlData(pageUrl)
-                        val pageData = HtmlUtil.getHtmlContent(
-                            context = context,
-                            content = htmlContent,
-                            fontFamilyCssClass = fontFamily,
-                            isNightMode = isNightMode,
-                            fontSizeCssClass = fontSize
-                        )
-                        emit(mapOf(page to Pair(pageUrl, pageData)))
-                        cachedPages[page] = Pair(pageUrl, pageData)
-                    }
-                }
-            }
+            val href = publication.readingOrder[page].href?.removePrefix("/") ?: continue
+            val pageUrl = "$streamUrl$href"
+            val html = getHtmlData(pageUrl)
+            val styledHtml = HtmlUtil.getHtmlContent(context, html, fontFamily, isNightMode, fontSize)
+            val data = Pair(pageUrl, styledHtml)
+            cachedPages[page] = data
+            emit(mapOf(page to data))
+        }
     }
 
-    private suspend fun getHtmlData(urlString: String): String {
-        return withContext(Dispatchers.IO) {
-            try {
-                val url = URL(urlString)
-                val urlConnection = url.openConnection() as HttpURLConnection
-                val inputStream = urlConnection.inputStream
-                val reader = BufferedReader(
-                    InputStreamReader(
-                        inputStream,
-                        AppUtil.charsetNameForURLConnection(urlConnection)
-                    )
-                )
-
-                val stringBuilder = StringBuilder()
-                var line: String?
-                while (reader.readLine().also { line = it } != null) {
-                    line?.let {
-                        stringBuilder.append(it).append('\n')
-                    }
+    private suspend fun getHtmlData(urlString: String): String = withContext(Dispatchers.IO) {
+        runCatching {
+            val connection = URL(urlString).openConnection() as HttpURLConnection
+            BufferedReader(InputStreamReader(connection.inputStream, AppUtil.charsetNameForURLConnection(connection))).use { reader ->
+                buildString {
+                    reader.lineSequence().forEach { appendLine(it) }
                 }
-                stringBuilder.toString()
-            } catch (e: IOException) {
-                Log.e(FolioActivity.LOG_TAG, "HtmlTask failed", e)
-                ""
             }
-        }
+        }.onFailure {
+            Log.e(FolioActivity.LOG_TAG, "HtmlTask failed", it)
+        }.getOrDefault("")
     }
 }
