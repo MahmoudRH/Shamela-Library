@@ -23,8 +23,8 @@ android {
         applicationId "com.shamela.library"
         minSdk versions.androidMinSdk
         targetSdk versions.androidTargetSdk
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -36,6 +36,10 @@ android {
                 "BASE_URL",
                 "\"${localProperties['BASE_URL']}\""
         )
+    }
+
+    lint {
+        checkReleaseBuilds false
     }
 
     buildTypes {
