@@ -50,19 +50,31 @@ class FolioActivityViewModel : ViewModel() {
         filePath: String,
     ): Publication? {
         Log.v(TAG, "-> initBook")
-        return withContext(Dispatchers.IO) {
-            EpubParser().parse(filePath, "")?.let {
-                val publication = it.publication
-                val portNumber = AppUtil.getAvailablePortNumber(Constants.DEFAULT_PORT_NUMBER)
-                server = Server(portNumber)
-                server.addEpub(it.publication, it.container, "/${publication.metadata.title.hashCode()}", null)
-                server.start()
-                streamUrl = AppUtil.getStreamerUrl(publication.metadata.title.hashCode().toString(),portNumber)
-                FolioReader.initRetrofit(streamUrl)
-                Log.v(TAG, "initBook [streamUrl]: $streamUrl, ${server.isAlive}")
-                publication
+        return try{
+            withContext(Dispatchers.IO) {
+                EpubParser().parse(filePath, "")?.let {
+                    val publication = it.publication
+                    val portNumber = AppUtil.getAvailablePortNumber(Constants.DEFAULT_PORT_NUMBER)
+                    server = Server(portNumber)
+                    server.addEpub(
+                        it.publication,
+                        it.container,
+                        "/${publication.metadata.title.hashCode()}",
+                        null
+                    )
+                    server.start()
+                    streamUrl = AppUtil.getStreamerUrl(
+                        publication.metadata.title.hashCode().toString(),
+                        portNumber
+                    )
+                    FolioReader.initRetrofit(streamUrl)
+                    Log.v(TAG, "initBook [streamUrl]: $streamUrl, ${server.isAlive}")
+                    publication
+                }
             }
-        }
-    }
+        }catch (e: Exception){
+            Log.e(TAG, "initBook: ${e.message}", )
+            null
+        }    }
 
 }

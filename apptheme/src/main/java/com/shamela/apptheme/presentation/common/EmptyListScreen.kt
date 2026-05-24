@@ -12,7 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.AppTheme
 
 
 @Composable
@@ -22,7 +24,6 @@ fun EmptyListScreen(visibility: Boolean, text:String, modifier: Modifier = Modif
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -31,5 +32,13 @@ fun EmptyListScreen(visibility: Boolean, text:String, modifier: Modifier = Modif
         ) {
             Text(text = text, style = AppFonts.textLarge.copy(color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center))
         }
+    }
+}
+
+@Preview
+@Composable
+private fun EmptyListPrev() {
+    AppTheme.ShamelaLibraryTheme {
+        EmptyListScreen(true, "لا يوجد بيانات")
     }
 }

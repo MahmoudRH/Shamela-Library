@@ -125,12 +125,17 @@ class FolioReader private constructor(private var context: Context) {
     /** @return : pair of author-name and pageCount */
     suspend fun parseEpub(file: File): Pair<String, Int>? {
         return withContext(Dispatchers.IO) {
-            EpubParser().parse(file.path)?.let {
-                val publication = it.publication
-                val authorName = publication.metadata.authors.first().name ?: "-"
-                val pageCount = publication.readingOrder.size
-                authorName to pageCount
-            }
+           try {
+               EpubParser().parse(file.path)?.let {
+                   val publication = it.publication
+                   val authorName = publication.metadata.authors.first().name ?: "-"
+                   val pageCount = publication.readingOrder.size
+                   authorName to pageCount
+               }
+           } catch (e: Exception){
+               Log.e("Mahmoud", "parseEpub: ${e.message}")
+               null
+           }
         }
     }
     private var quote = MutableStateFlow(Triple(0, "", ""))

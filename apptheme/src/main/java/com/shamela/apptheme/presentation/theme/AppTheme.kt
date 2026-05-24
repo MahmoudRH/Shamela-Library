@@ -1,21 +1,15 @@
 package com.shamela.apptheme.presentation.theme
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 import com.shamela.apptheme.presentation.theme.colors.AppColors
+import com.shamela.apptheme.presentation.theme.colors.Golden
 
 
 object AppTheme {
@@ -24,7 +18,7 @@ object AppTheme {
     private const val DARK = "مظلم"
 
 
-    private val selectedColorScheme = mutableStateOf(lightColorScheme())
+    private val selectedColorScheme = mutableStateOf(Golden.lightColorScheme)
     private val preferredTheme = mutableStateOf(DEFAULT)
 
     fun changeColorScheme(newColorScheme: ColorScheme, newPreferredTheme: String) {
@@ -72,21 +66,6 @@ object AppTheme {
     fun ShamelaLibraryTheme(
         content: @Composable () -> Unit,
     ) {
-        val statusBar = when (theme) {
-            DEFAULT -> isSystemInDarkTheme()
-            DARK -> true
-            else -> false
-        }
-        val view = LocalView.current
-        if (!view.isInEditMode) {
-            SideEffect {
-                val window = (view.context as Activity).window
-                window.statusBarColor = colorScheme.primary.toArgb()
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars =
-                    statusBar
-            }
-        }
-
         MaterialTheme(
             colorScheme = colorScheme,
             typography = AppFonts.Typography,
