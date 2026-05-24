@@ -50,6 +50,7 @@ import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.LibraryBookItem
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.navigation.Library
+import com.shamela.library.presentation.screens.LocalPaddingValues
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -70,8 +71,9 @@ fun LibraryScreen(
         }.launchIn(this)
     })
     val libraryState = viewModel.libraryState.collectAsState().value
+    val localPadding = LocalPaddingValues.current
     LazyColumn(
-        Modifier.fillMaxSize(),
+        Modifier.fillMaxSize().padding(localPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {

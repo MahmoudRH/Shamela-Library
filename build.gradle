@@ -21,3 +21,19 @@ plugins {
     id "org.jetbrains.kotlin.plugin.compose"  version "2.1.20" apply false
 
 }
+
+subprojects {
+    configurations.configureEach {
+        resolutionStrategy {
+            eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == 'com.github.NanoHttpd.nanohttpd') {
+                    if (details.requested.name == 'nanohttpd') {
+                        details.useTarget 'com.github.NanoHttpd.nanohttpd:nanohttpd:fd80618e93'
+                    } else if (details.requested.name == 'nanohttpd-nanolets') {
+                        details.useTarget 'com.github.NanoHttpd.nanohttpd:nanohttpd-nanolets:fd80618e93'
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">المكتبة الشاملة</string>
     <string name="select_book">اختر كتابا</string>
     <string name="add_to_library">إضافة إلى المكتبة</string>
     <string name="add_external_book">إضافة كتاب خارجي</string>

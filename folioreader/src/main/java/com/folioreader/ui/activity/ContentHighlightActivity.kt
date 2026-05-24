@@ -2,9 +2,13 @@ package com.folioreader.ui.activity
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +41,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.folioreader.Constants
 import com.folioreader.Constants.CHAPTER_SELECTED
@@ -44,7 +50,7 @@ import com.folioreader.Constants.SETTINGS_CHANGED
 import com.folioreader.ui.composables.LinkItem
 import com.shamela.apptheme.presentation.common.DefaultTopBar
 import com.shamela.apptheme.presentation.common.LoadingScreen
-import com.shamela.apptheme.presentation.settings.PreferenceSettingsScreen
+import com.shamela.apptheme.presentation.settings.PreferenceSettingsUI
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
@@ -54,8 +60,15 @@ import org.readium.r2.shared.Link
 import org.readium.r2.streamer.parser.EpubParser
 
 class ContentHighlightActivity : ComponentActivity() {
+    val viewmodel : ContentHighlightViewModel by viewModels(factoryProducer = { ContentHighlightViewModel.Factory })
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.isAppearanceLightStatusBars = false
         val bookPath = intent.getStringExtra(Constants.EPUB_FILE_PATH)
         val bookTitle = intent.getStringExtra(Constants.BOOK_TITLE)
         val selectedViewType = when (intent.getStringExtra(SELECTED_VIEW_TYPE)) {
@@ -67,19 +80,24 @@ class ContentHighlightActivity : ComponentActivity() {
         val isLoading = mutableStateOf(true)
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
-                bookPath?.let { filepath ->
-                    EpubParser().parse(filepath, "")?.let { pubBox ->
-                        val list =
-                            pubBox.publication.tableOfContents.ifEmpty { pubBox.publication.readingOrder }
-                        linkItems.addAll(list)
-                        isLoading.value = false
+                try {
+                    bookPath?.let { filepath ->
+                        EpubParser().parse(filepath, "")?.let { pubBox ->
+                            val list =
+                                pubBox.publication.tableOfContents.ifEmpty { pubBox.publication.readingOrder }
+                            linkItems.addAll(list)
+                            isLoading.value = false
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e("ContentHighlightActivity", "parseEpub: ${e.message}")
                 }
             }
         }
 
         setContent {
             AppTheme.ShamelaLibraryTheme {
+                val uiState = viewmodel.preferenceSettings.collectAsStateWithLifecycle()
                 val currentViewType = rememberSaveable { mutableStateOf(selectedViewType) }
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Scaffold(
@@ -112,9 +130,10 @@ class ContentHighlightActivity : ComponentActivity() {
                             }
 
                             ViewType.Settings -> {
-                                PreferenceSettingsScreen(
+                                PreferenceSettingsUI(
                                     modifier = Modifier.padding(it),
-                                    onSettingsChanged = { hash-> onSettingsChanged(hash) })
+                                    onEvent = {viewmodel.onPrefsEvent(it)},
+                                    uiState = uiState.value)
                             }
                         }
                     }

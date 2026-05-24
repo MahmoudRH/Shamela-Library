@@ -3,12 +3,15 @@ package com.shamela.apptheme.presentation.common
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -19,7 +22,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -27,10 +34,14 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.shamela.apptheme.R
+import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.apptheme.presentation.util.ShamelaPrev
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +56,7 @@ fun SearchTopBar(
     focusRequester: FocusRequester,
 ) {
     TopAppBar(
+        windowInsets = WindowInsets(0),
         title = {
             SearchTextField(
                 value,
@@ -59,7 +71,7 @@ fun SearchTopBar(
         ),
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
-                Icon(Icons.Default.ArrowForwardIos, contentDescription = null)
+                Icon(Icons.AutoMirrored.Filled.ArrowBackIos, contentDescription = null)
             }
         },
         actions = {
@@ -72,7 +84,7 @@ fun SearchTopBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Cancel,
-                        contentDescription = "مسح"
+                        contentDescription = stringResource(R.string.clear)
                     )
                 }
             }
@@ -80,7 +92,6 @@ fun SearchTopBar(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SearchTextField(
     value: String,
@@ -94,31 +105,53 @@ private fun SearchTextField(
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequester)
-            .onFocusChanged {
-                if (it.isFocused)
-                    keyboardController?.show()
-            },
+            .onFocusChanged { if (it.isFocused) keyboardController?.show() },
         value = value,
         onValueChange = onValueChanged,
         singleLine = true,
-        decorationBox = { innerTextField ->
-            AnimatedVisibility(
-                value.isEmpty(),
-                enter = fadeIn(), exit = fadeOut()
-            ) {
-                Text(text = hint, color = Color.Gray, fontSize = 18.sp)
-            }
-            innerTextField()
-        },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = {
-            keyboardController?.hide()
-            onSearch()
-        }),
         textStyle = TextStyle(
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 18.sp
         ),
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                keyboardController?.hide()
+                onSearch()
+            }
+        ),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                AnimatedVisibility(visible = value.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
+                    Text(
+                        text = hint,
+                        color = Color.Gray,
+                        fontSize = 18.sp
+                    )
+                }
+                innerTextField()
+            }
+        }
     )
+}
+
+@ShamelaPrev
+@Composable
+private fun SearchTopBarPrev() {
+    var searchText by remember { mutableStateOf("") }
+    AppTheme.ShamelaLibraryTheme {
+        SearchTopBar(
+            value = searchText,
+            onValueChanged = { searchText = it },
+            hint = "بحث",
+            focusRequester = FocusRequester(),
+            onNavigateBack = {},
+            onClickSearch = {},
+            onClickClear = { searchText = "" }
+        )
+    }
 }
