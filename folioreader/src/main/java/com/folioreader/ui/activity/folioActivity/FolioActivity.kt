@@ -15,7 +15,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -166,7 +165,6 @@ class FolioActivity : ComponentActivity() {
     }
 
 
-    @OptIn(ExperimentalFoundationApi::class)
     private val searchLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -228,13 +226,8 @@ class FolioActivity : ComponentActivity() {
                 // To determine if app in background or foreground
                 val taskImportance = viewModel.state.value.taskImportance
                 var appInBackground = false
-                if (Build.VERSION.SDK_INT < 26) {
-                    if (ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND == taskImportance)
-                        appInBackground = true
-                } else {
-                    if (ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED == taskImportance)
-                        appInBackground = true
-                }
+                if (ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED == taskImportance)
+                    appInBackground = true
                 if (appInBackground)
                     moveTaskToBack(true)
             }

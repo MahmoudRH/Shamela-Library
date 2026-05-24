@@ -12,10 +12,9 @@ import androidx.work.WorkerParameters
 import com.shamela.apptheme.data.db.DatabaseHelper
 import com.shamela.apptheme.data.util.ArabicNormalizer
 import com.shamela.apptheme.domain.model.BookPage
-import com.shamela.apptheme.presentation.util.ChannelType
-import com.shamela.apptheme.presentation.util.startNotification
+import com.shamela.apptheme.presentation.util.notifications.ChannelType
+import com.shamela.apptheme.presentation.util.notifications.NotificationHelper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
@@ -29,7 +28,7 @@ class BookMigrationWorker(
     @SuppressLint("Range")
     override suspend fun doWork(): Result {
         Log.e("BookMigrationWorker", "doWork: isCalled", )
-        val notification = startNotification(
+        val notification =  NotificationHelper.startNotification(
             context = appContext,
             type = ChannelType.DatabaseMigration,
             title = "تحديث قاعدة البيانات",
