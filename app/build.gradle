@@ -8,6 +8,13 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.compose'
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+
 android {
     namespace 'com.shamela.library'
     compileSdk versions.androidCompileSdk
@@ -23,6 +30,12 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"${localProperties['BASE_URL']}\""
+        )
     }
 
     buildTypes {
@@ -44,6 +57,7 @@ android {
     }
     buildFeatures {
         compose true
+        buildConfig true
     }
     packagingOptions {
         resources {
@@ -104,8 +118,6 @@ dependencies {
     //-> Firebase
     implementation platform("com.google.firebase:firebase-bom:$firebase_bom")
     implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-storage-ktx'
-    implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     //-> Testing
