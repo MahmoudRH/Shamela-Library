@@ -13,8 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,10 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.shamela.apptheme.presentation.common.LoadingScreen
-import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
+import com.shamela.library.presentation.common.DownloadIconButton
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.navigation.Download
 import com.shamela.library.presentation.screens.LocalPaddingValues
@@ -104,14 +101,17 @@ fun DownloadScreen(
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                                 .animateItem(),
                             icon = {
-                                IconButton(onClick = {
-                                    viewModel.onEvent(DownloadEvent.OnClickDownloadBook(it))
-                                }) {
-                                    Icon(
-                                        imageVector = ShamelaIcons.FileDownload,
-                                        contentDescription = "download"
-                                    )
-                                }
+                                DownloadIconButton(
+                                    bookId = it.id,
+                                    downloadStatuses = downloadState.downloadStatuses,
+                                    downloadedBookIds = downloadState.downloadedBookIds,
+                                    onDownloadClick = {
+                                        viewModel.onEvent(DownloadEvent.OnClickDownloadBook(it))
+                                    },
+                                    onCancelClick = {
+                                        viewModel.onEvent(DownloadEvent.OnClickCancelDownload(it.id))
+                                    },
+                                )
                             },
                             item = it
                         )
@@ -135,6 +135,5 @@ fun DownloadScreen(
             }
         }
     }
-    LoadingScreen(visibility = downloadState.isLoading)
 }
 
