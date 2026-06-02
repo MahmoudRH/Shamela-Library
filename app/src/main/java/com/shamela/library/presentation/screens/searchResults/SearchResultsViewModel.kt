@@ -15,7 +15,6 @@ import com.shamela.library.domain.usecases.quotes.QuotesUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
@@ -41,15 +40,15 @@ class SearchResultsViewModel @Inject constructor(
     fun onEvent(event: SearchResultsEvent) {
         when (event) {
             is SearchResultsEvent.Search -> {
+                searchJob?.cancel()
                 searchJob = viewModelScope.launch {
                     event.query.trim().let { query ->
-                        searchJob?.cancel()
-
                         _searchResultsState.update {
                             it.copy(
                                 isLoading = true,
                                 booksResultsList = emptyList(),
                                 sectionsResultsList = emptyList(),
+                                isListEmpty = false
                             )
                         }
                         val categoryName =
@@ -62,45 +61,35 @@ class SearchResultsViewModel @Inject constructor(
                             "sections" -> remoteBooksUseCases
                             else -> localBooksUseCases
                         }
-                        launch {
-                            if (type == "sections") {
+                        if (type == "sections") {
+                            val newList = repo.getAllCategories().filter { category ->
+                                category.name.contains(query)
+                            }.toList()
+                            _searchResultsState.update {
+                                it.copy(
+                                    sectionsResultsList = newList,
+                                    lastQuery = if (newList.isNotEmpty()) query else "",
+                                    isLoading = false,
+                                    isListEmpty = newList.isEmpty()
+                                )
+                            }
+                        } else {
+                            repo.searchForABook(categoryName, query).collect { book ->
                                 _searchResultsState.update {
-                                    val newList = repo.getAllCategories().filter { category ->
-                                        category.name.contains(query)
-                                    }.toList()
+                                    val newList = it.booksResultsList + book
                                     it.copy(
-                                        sectionsResultsList = newList,
-                                        lastQuery = if (newList.isNotEmpty()) query else "",
-                                        isLoading = false
+                                        booksResultsList = newList,
+                                        lastQuery = if (newList.isNotEmpty()) query else ""
                                     )
                                 }
-                            } else {
-                                repo.searchForABook(categoryName, query).collect { book ->
-                                    _searchResultsState.update {
-                                        val newList = it.booksResultsList + book
-                                        it.copy(
-                                            booksResultsList = newList,
-                                            lastQuery = if (newList.isNotEmpty()) query else "",
-                                            isLoading = false
-                                        )
-                                    }
-                                }
+                            }
+                            _searchResultsState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isListEmpty = it.booksResultsList.isEmpty()
+                                )
                             }
                         }
-                        launch {
-                            delay(500)
-                            if (type == "sections") {
-                                _searchResultsState.update {
-                                    it.copy(isListEmpty = it.sectionsResultsList.isEmpty())
-                                }
-                            } else {
-                                _searchResultsState.update {
-                                    it.copy(isListEmpty = it.booksResultsList.isEmpty())
-                                }
-                            }
-                        }
-
-
                     }
                 }
             }
