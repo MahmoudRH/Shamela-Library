@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.model.DownloadStatus
 import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.domain.usecases.quotes.QuotesUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
@@ -17,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
@@ -31,7 +33,7 @@ class SearchResultsViewModel @Inject constructor(
     private val handle: SavedStateHandle,
     private val application: Application,
 ) : ViewModel(), BooksDownloadManager.Subscriber {
-    private val _searchResultsState = MutableStateFlow<SearchResultsState>(SearchResultsState())
+    private val _searchResultsState = MutableStateFlow(SearchResultsState())
     val searchResultsState = _searchResultsState.asStateFlow()
     private var searchJob: Job? = null
     private val booksDownloadManager = BooksDownloadManager(application.applicationContext)
@@ -98,31 +100,21 @@ class SearchResultsViewModel @Inject constructor(
                 viewModelScope.launch {
                     remoteBooksUseCases.getDownloadUri(event.book.categoryName, event.book.title)
                         ?.let { uri ->
-                            val downloadId = booksDownloadManager.downloadBook(
+                            booksDownloadManager.downloadBook(
                                 downloadUri = uri,
                                 book = event.book,
                                 bookCategory = event.book.categoryName
                             )
-                            if (downloadId == BooksDownloadManager.FILE_ALREADY_EXISTS) {
-                                Toast.makeText(
-                                    application,
-                                    "تم تحميل الكتاب من قبل!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                _searchResultsState.update {
-                                    it.copy(isLoading = true)
-                                }
-                            }
                         }
                 }
             }
 
+            is SearchResultsEvent.OnClickCancelDownload -> {
+                BooksDownloadManager.cancelDownload(event.bookId)
+            }
 
             is SearchResultsEvent.OnSearchQueryChanged -> {
-                _searchResultsState.update {
-                    it.copy(query = event.newSearchQuery)
-                }
+                _searchResultsState.update { it.copy(query = event.newSearchQuery) }
             }
 
             SearchResultsEvent.ClearSearchQuery -> {
@@ -132,18 +124,33 @@ class SearchResultsViewModel @Inject constructor(
 
             is SearchResultsEvent.AddQuoteToFavorite -> {
                 viewModelScope.launch {
-                    Log.e("SearchResultsViewModel", "AddQuoteToFavorite ${event.quote}")
+                    Log.d("SearchResultsViewModel", "AddQuoteToFavorite ${event.quote}")
                     quotesUseCases.saveQuote(event.quote)
                     Toast.makeText(application, "تمت الإضافة بنجاح", Toast.LENGTH_SHORT).show()
                 }
             }
         }
-
-
     }
 
     init {
         BooksDownloadManager.subscribe(this)
+        viewModelScope.launch {
+            combine(
+                BooksDownloadManager.downloadStatusFlow,
+                localBooksUseCases.getDownloadedBooks()
+            ) { statusMap, downloadedList ->
+                Pair(statusMap, downloadedList.map { it.id }.toSet())
+            }.collect { (statusMap, downloadedIds) ->
+                statusMap.forEach { (bookId, status) ->
+                    if (status is DownloadStatus.Downloading && downloadedIds.contains(bookId)) {
+                        BooksDownloadManager.clearStatus(bookId)
+                    }
+                }
+                _searchResultsState.update {
+                    it.copy(downloadStatuses = statusMap, downloadedBookIds = downloadedIds)
+                }
+            }
+        }
     }
 
     override fun onCleared() {
@@ -151,9 +158,7 @@ class SearchResultsViewModel @Inject constructor(
         BooksDownloadManager.unsubscribe(this)
     }
 
-    override fun onBookDownloaded(book: Book, isLastBook:Boolean) {
-        _searchResultsState.update {
-            it.copy(isLoading = false)
-        }
+    override fun onBookDownloaded(book: Book, isLastBook: Boolean) {
+        // No-op: UI state is driven by the combine collector above
     }
 }

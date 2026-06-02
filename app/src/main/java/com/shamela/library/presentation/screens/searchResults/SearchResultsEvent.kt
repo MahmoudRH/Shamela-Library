@@ -8,5 +8,6 @@ sealed class SearchResultsEvent {
     class OnSearchQueryChanged(val newSearchQuery: String) : SearchResultsEvent()
     object ClearSearchQuery : SearchResultsEvent()
     class OnClickDownloadBook(val book: Book) : SearchResultsEvent()
+    class OnClickCancelDownload(val bookId: String) : SearchResultsEvent()
     class AddQuoteToFavorite(val quote: Quote) : SearchResultsEvent()
 }

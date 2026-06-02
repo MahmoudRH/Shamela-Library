@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.model.DownloadStatus
 import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.domain.usecases.quotes.QuotesUseCases
 import com.shamela.library.presentation.utils.BooksDownloadManager
@@ -17,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,7 +32,7 @@ class SectionBooksViewModel @Inject constructor(
     private val quotesUseCases: QuotesUseCases,
     private val application: Application
 ) : ViewModel(), BooksDownloadManager.Subscriber {
-    private val _sectionBooksState = MutableStateFlow<SectionBooksState>(SectionBooksState())
+    private val _sectionBooksState = MutableStateFlow(SectionBooksState())
     val sectionBooksState = _sectionBooksState.asStateFlow()
     private val booksDownloadManager = BooksDownloadManager(application.applicationContext)
 
@@ -45,36 +47,30 @@ class SectionBooksViewModel @Inject constructor(
                     val bookUriMap = sectionBooksState.value.books.values.associateWith { book ->
                         async { remoteBooksUseCases.getDownloadUri(categoryName, book.title) }
                     }
-
                     val bookUriList = withContext(coroutineContext) {
                         bookUriMap.mapValues { it.value.await() }
                     }
-                    Log.e("SectionBooksViewModel", "bookUriList: ${bookUriList.values}", )
+                    Log.d("SectionBooksViewModel", "bookUriList: ${bookUriList.values}")
                     booksDownloadManager.downloadSection(bookUriList)
-                    _sectionBooksState.update {
-                        it.copy(isDownloadButtonEnabled = false, isLoading = true)
-                    }
+                    _sectionBooksState.update { it.copy(isDownloadButtonEnabled = false) }
                 }
             }
+
             is SectionBooksEvent.OnClickDownloadBook -> {
                 viewModelScope.launch {
                     remoteBooksUseCases.getDownloadUri(event.book.categoryName, event.book.title)
                         ?.let { uri ->
-
-                           val downloadId = booksDownloadManager.downloadBook(
+                            booksDownloadManager.downloadBook(
                                 downloadUri = uri,
                                 book = event.book,
                                 bookCategory = event.book.categoryName
                             )
-                            if (downloadId == BooksDownloadManager.FILE_ALREADY_EXISTS){
-                                Toast.makeText(application, "تم تحميل الكتاب من قبل!", Toast.LENGTH_SHORT).show()
-                            }else{
-                                _sectionBooksState.update {
-                                    it.copy(isLoading = true)
-                                }
-                            }
                         }
                 }
+            }
+
+            is SectionBooksEvent.OnClickCancelDownload -> {
+                BooksDownloadManager.cancelDownload(event.bookId)
             }
 
             is SectionBooksEvent.LoadBooks -> {
@@ -83,22 +79,15 @@ class SectionBooksViewModel @Inject constructor(
                     val type = handle.get<String>("type").toString()
                     _sectionBooksState.update { it.copy(type = type) }
                     when (type) {
-                        "local" -> {
-                            loadLocalBooksOfSection(categoryName)
-                        }
-
-                        "remote" -> {
-                            launch {
-                                loadRemoteBooksOfSection(categoryName)
-                            }
-                        }
+                        "local" -> loadLocalBooksOfSection(categoryName)
+                        "remote" -> launch { loadRemoteBooksOfSection(categoryName) }
                     }
                 }
             }
 
             is SectionBooksEvent.AddQuoteToFavorite -> {
                 viewModelScope.launch {
-                    Log.e("SectionBooksViewModel", "AddQuoteToFavorite ${event.quote}")
+                    Log.d("SectionBooksViewModel", "AddQuoteToFavorite ${event.quote}")
                     quotesUseCases.saveQuote(event.quote)
                     Toast.makeText(application, "تمت الإضافة بنجاح", Toast.LENGTH_SHORT).show()
                 }
@@ -109,10 +98,7 @@ class SectionBooksViewModel @Inject constructor(
     private suspend fun loadRemoteBooksOfSection(categoryName: String) {
         remoteBooksUseCases.getBooksByCategory(categoryName = categoryName).collect { book ->
             _sectionBooksState.update {
-                it.copy(
-                    books = it.books + mapOf(book.id to book),
-                    isLoading = false
-                )
+                it.copy(books = it.books + mapOf(book.id to book), isLoading = false)
             }
         }
     }
@@ -120,16 +106,30 @@ class SectionBooksViewModel @Inject constructor(
     private suspend fun loadLocalBooksOfSection(categoryName: String) {
         localBooksUseCases.getBooksByCategory(categoryName = categoryName).collect { book ->
             _sectionBooksState.update {
-                it.copy(
-                    books = it.books + mapOf(book.id to book),
-                    isLoading = false
-                )
+                it.copy(books = it.books + mapOf(book.id to book), isLoading = false)
             }
         }
     }
 
     init {
         BooksDownloadManager.subscribe(this)
+        viewModelScope.launch {
+            combine(
+                BooksDownloadManager.downloadStatusFlow,
+                localBooksUseCases.getDownloadedBooks()
+            ) { statusMap, downloadedList ->
+                Pair(statusMap, downloadedList.map { it.id }.toSet())
+            }.collect { (statusMap, downloadedIds) ->
+                statusMap.forEach { (bookId, status) ->
+                    if (status is DownloadStatus.Downloading && downloadedIds.contains(bookId)) {
+                        BooksDownloadManager.clearStatus(bookId)
+                    }
+                }
+                _sectionBooksState.update {
+                    it.copy(downloadStatuses = statusMap, downloadedBookIds = downloadedIds)
+                }
+            }
+        }
     }
 
     override fun onCleared() {
@@ -137,13 +137,9 @@ class SectionBooksViewModel @Inject constructor(
         BooksDownloadManager.unsubscribe(this)
     }
 
-    override fun onBookDownloaded(book: Book, isLastBook:Boolean) {
-        if(!sectionBooksState.value.isDownloadButtonEnabled){
-            if (isLastBook) { _sectionBooksState.update { it.copy(isLoading = false) } }
-        }else{
-            _sectionBooksState.update { it.copy(isLoading = false) }
+    override fun onBookDownloaded(book: Book, isLastBook: Boolean) {
+        if (!sectionBooksState.value.isDownloadButtonEnabled && isLastBook) {
+            _sectionBooksState.update { it.copy(isDownloadButtonEnabled = true) }
         }
-
     }
-
 }

@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -25,9 +23,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.common.SearchTopBar
-import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
+import com.shamela.library.presentation.common.DownloadIconButton
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.screens.LocalPaddingValues
 
@@ -99,14 +97,17 @@ fun SearchResultsScreen(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                     item = currentBook,
                                     icon = {
-                                        IconButton(onClick = {
-                                            viewModel.onEvent(SearchResultsEvent.OnClickDownloadBook(currentBook))
-                                        }) {
-                                            Icon(
-                                                imageVector = ShamelaIcons.FileDownload,
-                                                contentDescription = "download"
-                                            )
-                                        }
+                                        DownloadIconButton(
+                                            bookId = currentBook.id,
+                                            downloadStatuses = state.downloadStatuses,
+                                            downloadedBookIds = state.downloadedBookIds,
+                                            onDownloadClick = {
+                                                viewModel.onEvent(SearchResultsEvent.OnClickDownloadBook(currentBook))
+                                            },
+                                            onCancelClick = {
+                                                viewModel.onEvent(SearchResultsEvent.OnClickCancelDownload(currentBook.id))
+                                            },
+                                        )
                                     },
                                     highlightText = state.lastQuery
                                 )
