@@ -25,16 +25,27 @@ class DownloadCompleteReceiver : BroadcastReceiver() {
     lateinit var booksUseCases: BooksUseCases
 
     private lateinit var workManager: WorkManager
+
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
         if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == action) {
             intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1).let { downloadId ->
                 if (downloadId != -1L) {
+                    workManager = WorkManager.getInstance(context)
+                    val scope = CoroutineScope(Dispatchers.IO)
+
+                    BooksDownloadManager.reconcileOnReceive(
+                        downloadId = downloadId,
+                        context = context,
+                        workManager = workManager,
+                        saveBook = { book -> booksUseCases.saveDownloadedBook(book) },
+                        scope = scope,
+                    )
+
                     BooksDownloadManager.downloadIsDone(downloadId) { book ->
-                        CoroutineScope(Dispatchers.IO).launch {
+                        scope.launch {
                             booksUseCases.saveDownloadedBook(book)
                         }
-                        workManager = WorkManager.getInstance(context)
                         val bookFilePath = BooksDownloadManager.getBookPath(book)
                         val request = OneTimeWorkRequestBuilder<BookPreparationWorker>()
                             .setInputData(
