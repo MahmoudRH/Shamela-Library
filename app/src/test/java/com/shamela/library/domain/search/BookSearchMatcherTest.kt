@@ -122,23 +122,60 @@ class BookSearchMatcherTest {
         assertTrue(BookSearchMatcher.matches(book, "ابن تيمية"))
     }
 
+    // ─── FEATURE (Phase 3): non-contiguous word match ────────────────────────
+
+    @Test // FEATURE - PHASE 3
+    fun `all query words in title but not consecutively returns true`() {
+        // "سير النبلاء" should match "سير أعلام النبلاء" — أعلام is a skipped middle word
+        val book = book("سير أعلام النبلاء")
+        assertTrue(BookSearchMatcher.matches(book, "سير النبلاء"))
+    }
+
+    // ─── FEATURE (Phase 3): typo / fuzzy tolerance ───────────────────────────
+
+    @Test // FEATURE - PHASE 3
+    fun `single character typo in one word matches`() {
+        // "سبر" (ب) differs from "سير" (ي) by one edit — rest of query is exact
+        val book = book("سير أعلام النبلاء")
+        assertTrue(BookSearchMatcher.matches(book, "سبر أعلام النبلاء"))
+    }
+
     // ─── findHighlightRange ───────────────────────────────────────────────────
 
     // ─── relevanceScore ───────────────────────────────────────────────────────
 
     @Test
-    fun `exact title match scores 4`() {
-        assertEquals(4, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "صحيح البخاري"))
+    fun `exact title match scores 6`() {
+        assertEquals(6, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "صحيح البخاري"))
     }
 
     @Test
-    fun `title starts-with scores 3`() {
-        assertEquals(3, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "صحيح"))
+    fun `title starts-with scores 5`() {
+        assertEquals(5, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "صحيح"))
     }
 
     @Test
-    fun `title substring (not prefix) scores 2`() {
-        assertEquals(2, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "البخاري"))
+    fun `title substring (not prefix) scores 4`() {
+        assertEquals(4, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "البخاري"))
+    }
+
+    @Test
+    fun `all words in title (non-contiguous) scores 3`() {
+        assertEquals(3, BookSearchMatcher.relevanceScore(book("سير أعلام النبلاء"), "سير النبلاء"))
+    }
+
+    @Test
+    fun `fuzzy title match scores 2`() {
+        assertEquals(2, BookSearchMatcher.relevanceScore(book("سير أعلام النبلاء"), "سبر أعلام النبلاء"))
+    }
+
+    @Test
+    fun `all-words title ranks above fuzzy title`() {
+        val book = book("سير أعلام النبلاء")
+        assertTrue(
+            BookSearchMatcher.relevanceScore(book, "سير النبلاء") >
+            BookSearchMatcher.relevanceScore(book, "سبر أعلام النبلاء")
+        )
     }
 
     @Test
@@ -172,7 +209,7 @@ class BookSearchMatcherTest {
     fun `normalization applied in scoring`() {
         // query أساس (hamza above) should score the same against title اساس (plain alef)
         val book = book("اساس البلاغة")
-        assertEquals(3, BookSearchMatcher.relevanceScore(book, "أساس"))
+        assertEquals(5, BookSearchMatcher.relevanceScore(book, "أساس"))
     }
 
     // ─── findHighlightRange ───────────────────────────────────────────────────
