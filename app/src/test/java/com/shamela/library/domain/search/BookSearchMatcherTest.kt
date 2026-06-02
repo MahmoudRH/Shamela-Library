@@ -124,6 +124,59 @@ class BookSearchMatcherTest {
 
     // ─── findHighlightRange ───────────────────────────────────────────────────
 
+    // ─── relevanceScore ───────────────────────────────────────────────────────
+
+    @Test
+    fun `exact title match scores 4`() {
+        assertEquals(4, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "صحيح البخاري"))
+    }
+
+    @Test
+    fun `title starts-with scores 3`() {
+        assertEquals(3, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "صحيح"))
+    }
+
+    @Test
+    fun `title substring (not prefix) scores 2`() {
+        assertEquals(2, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "البخاري"))
+    }
+
+    @Test
+    fun `author-only match scores 1`() {
+        val book = book("الرسالة", author = "الشافعي")
+        assertEquals(1, BookSearchMatcher.relevanceScore(book, "الشافعي"))
+    }
+
+    @Test
+    fun `no match scores 0`() {
+        assertEquals(0, BookSearchMatcher.relevanceScore(book("صحيح البخاري"), "الترمذي"))
+    }
+
+    @Test
+    fun `exact title ranks above prefix which ranks above substring`() {
+        val exact    = book("الفقه")
+        val prefix   = book("الفقه الإسلامي")
+        val contains = book("أسس الفقه")
+        val query = "الفقه"
+        assertTrue(
+            BookSearchMatcher.relevanceScore(exact, query) >
+            BookSearchMatcher.relevanceScore(prefix, query)
+        )
+        assertTrue(
+            BookSearchMatcher.relevanceScore(prefix, query) >
+            BookSearchMatcher.relevanceScore(contains, query)
+        )
+    }
+
+    @Test
+    fun `normalization applied in scoring`() {
+        // query أساس (hamza above) should score the same against title اساس (plain alef)
+        val book = book("اساس البلاغة")
+        assertEquals(3, BookSearchMatcher.relevanceScore(book, "أساس"))
+    }
+
+    // ─── findHighlightRange ───────────────────────────────────────────────────
+
     @Test
     fun `findHighlightRange returns null for empty query`() {
         assertNull(BookSearchMatcher.findHighlightRange("صحيح البخاري", ""))
