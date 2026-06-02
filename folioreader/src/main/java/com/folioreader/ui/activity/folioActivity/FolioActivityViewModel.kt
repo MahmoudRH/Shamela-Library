@@ -22,6 +22,12 @@ class FolioActivityViewModel : ViewModel() {
     private val TAG = "FolioActivityViewModel"
     private val _state = MutableStateFlow<FolioActivityState>(FolioActivityState())
     val state: StateFlow<FolioActivityState> = _state.asStateFlow()
+    private val _searchResult = MutableStateFlow("" to "")
+    val searchResult: StateFlow<Pair<String, String>> = _searchResult.asStateFlow()
+    private val _selectedChapter = MutableStateFlow("")
+    val selectedChapter: StateFlow<String> = _selectedChapter.asStateFlow()
+    private val _settingsChanged = MutableStateFlow(0)
+    val settingsChanged: StateFlow<Int> = _settingsChanged.asStateFlow()
     private var server = Server(Constants.DEFAULT_PORT_NUMBER)
     var streamUrl = ""
     fun onEvent(event: FolioActivityEvent) {
@@ -40,6 +46,18 @@ class FolioActivityViewModel : ViewModel() {
                     val publication = initBook(event.filePath)
                     _state.update { it.copy(publication = publication, isLoading = false) }
                 }
+            }
+
+            is FolioActivityEvent.OnSearchResult -> {
+                _searchResult.update { event.href to event.jsCall }
+            }
+
+            is FolioActivityEvent.OnSelectedChapter -> {
+                _selectedChapter.update { event.href }
+            }
+
+            is FolioActivityEvent.OnSettingsChanged -> {
+                _settingsChanged.update { event.hash }
             }
 
             FolioActivityEvent.StopStreamerServer -> server.stop()

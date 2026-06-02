@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -99,13 +100,28 @@ class ContentHighlightActivity : ComponentActivity() {
             AppTheme.ShamelaLibraryTheme {
                 val uiState = viewmodel.preferenceSettings.collectAsStateWithLifecycle()
                 val currentViewType = rememberSaveable { mutableStateOf(selectedViewType) }
+
+                // When back is pressed on the Settings tab, notify FolioActivity to reload
+                if (currentViewType.value == ViewType.Settings) {
+                    BackHandler {
+                        onSettingsChanged(uiState.value.hashCode())
+                    }
+                }
+
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Scaffold(
                         topBar = {
                             Column {
-                                DefaultTopBar(title = bookTitle ?: "الشاملة") {
-                                    finish()
-                                }
+                                DefaultTopBar(
+                                    title = bookTitle ?: "الشاملة",
+                                    onNavigateBack = {
+                                        if (currentViewType.value == ViewType.Settings) {
+                                            onSettingsChanged(uiState.value.hashCode())
+                                        } else {
+                                            finish()
+                                        }
+                                    }
+                                )
 
                                 ViewTypeSection(
                                     modifier = Modifier.align(Alignment.CenterHorizontally),
