@@ -17,6 +17,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +36,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -189,6 +191,17 @@ fun BookScreen(
         }
     }
 
+    // Evict WebViews that are far from the current page to prevent unbounded memory growth.
+    // Keep ±3 so beyondViewportPageCount=2 pages are always within the live window.
+    LaunchedEffect(pagerState.currentPage) {
+        cachedWebViews.keys.toList().forEach { key ->
+            if (kotlin.math.abs(key - pagerState.currentPage) > 3) {
+                cachedWebViews[key]?.destroy()
+                cachedWebViews.remove(key)
+            }
+        }
+    }
+
     Column(modifier = Modifier.background(Color(backgroundColor))) {
         BookTopBar(
             title = publication.metadata.title,
@@ -204,6 +217,7 @@ fun BookScreen(
 
         HorizontalPager(
             state = pagerState,
+            beyondViewportPageCount = 2,
             modifier = Modifier
                 .weight(1f)
                 .pointerInput(Unit) {
@@ -433,78 +447,85 @@ private fun BookPage(
     saveWebView: (Int, WebView) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .systemBarsPadding()
-            .verticalScroll(rememberScrollState())
-    ) {
-        AndroidView(factory = { context ->
-            webViews[index] ?: run {
-                CustomWebView(
-                    context,
-                    isNightMode = AppTheme.isDarkTheme(context),
-                    currentPageIndex = index,
-                    currentPageHref = publication.readingOrder[index].href
-                ).apply {
-                    setBackgroundColor(backgroundColor.toInt())
-                    settings.javaScriptEnabled = true
-                    settings.defaultTextEncodingName = "UTF-8"
-                    settings.allowFileAccess = true
-                    webViewClient = mMebViewClient
-                    addJavascriptInterface(object {
-                        @JavascriptInterface
-                        fun isTapped() = onTapped()
-                        @JavascriptInterface
-                        fun textSelected(text:String){
-                            Log.e("CustomWebView", "textSelected: $text", )
-                        }
-                    }, "CustomWebView")
-                    addJavascriptInterface(this, "FolioWebView")
-                }
-            }
-        }, update = { webview ->
-            (webview as CustomWebView).fullScreenMode.value = !state.isAppBarsVisible
-            webViews[index] ?: run {
-                val (url, htmlData) = state.pagesMap[index]
-                    ?: ("" to "")
-                if (url.isNotBlank()) {
-                    webview.loadDataWithBaseURL(
-                        url,
-                        htmlData,
-                        state.mimeType,
-                        "UTF-8",
-                        null
-                    )
-                    saveWebView(index,webview)
-                }
-            }
-            scope.launch {
-                delay(200)
-                if (javascriptCall.isNotBlank()) {
-                    webview.loadUrl(javascriptCall)
-                }
-            }
-        })
-    }
-}
+    // Start as loaded when we already have a pre-rendered cached WebView for this index.
+    val pageLoaded = remember { mutableStateOf(webViews.containsKey(index)) }
 
-private val mMebViewClient = object : WebViewClient() {
-    override fun shouldInterceptRequest(
-        view: WebView,
-        request: WebResourceRequest,
-    ): WebResourceResponse? {
-        if (!request.isForMainFrame
-            && request.url.path != null
-            && request.url.path!!.endsWith("/favicon.ico")
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .verticalScroll(rememberScrollState())
         ) {
-            try {
-                return WebResourceResponse("image/png", null, null)
-            } catch (e: Exception) {
-                Log.e(FolioActivity.LOG_TAG, "shouldInterceptRequest failed", e)
-            }
-
+            AndroidView(factory = { context ->
+                webViews[index] ?: run {
+                    val loadedState = pageLoaded
+                    CustomWebView(
+                        context,
+                        isNightMode = AppTheme.isDarkTheme(context),
+                        currentPageIndex = index,
+                        currentPageHref = publication.readingOrder[index].href
+                    ).apply {
+                        setBackgroundColor(backgroundColor.toInt())
+                        settings.javaScriptEnabled = true
+                        settings.defaultTextEncodingName = "UTF-8"
+                        settings.allowFileAccess = true
+                        settings.domStorageEnabled = true
+                        webViewClient = object : WebViewClient() {
+                            override fun onPageFinished(view: WebView, url: String) {
+                                loadedState.value = true
+                            }
+                            override fun shouldInterceptRequest(
+                                view: WebView,
+                                request: WebResourceRequest,
+                            ): WebResourceResponse? {
+                                if (!request.isForMainFrame
+                                    && request.url.path != null
+                                    && request.url.path!!.endsWith("/favicon.ico")
+                                ) {
+                                    try {
+                                        return WebResourceResponse("image/png", null, null)
+                                    } catch (e: Exception) {
+                                        Log.e(FolioActivity.LOG_TAG, "shouldInterceptRequest failed", e)
+                                    }
+                                }
+                                return null
+                            }
+                        }
+                        addJavascriptInterface(object {
+                            @JavascriptInterface
+                            fun isTapped() = onTapped()
+                            @JavascriptInterface
+                            fun textSelected(text: String) {
+                                Log.e("CustomWebView", "textSelected: $text")
+                            }
+                        }, "CustomWebView")
+                        addJavascriptInterface(this, "FolioWebView")
+                    }
+                }
+            }, update = { webview ->
+                (webview as CustomWebView).fullScreenMode.value = !state.isAppBarsVisible
+                webViews[index] ?: run {
+                    val (url, htmlData) = state.pagesMap[index] ?: ("" to "")
+                    if (url.isNotBlank()) {
+                        webview.loadDataWithBaseURL(url, htmlData, state.mimeType, "UTF-8", null)
+                        saveWebView(index, webview)
+                    }
+                }
+                scope.launch {
+                    delay(200)
+                    if (javascriptCall.isNotBlank()) {
+                        webview.loadUrl(javascriptCall)
+                    }
+                }
+            })
         }
-        return null
+
+        if (!pageLoaded.value) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }
