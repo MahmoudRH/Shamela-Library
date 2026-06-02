@@ -52,7 +52,9 @@ object DataModule {
 
     @Provides
     fun provideBooksDao(database: BooksDatabase): BooksDao {
-        return database.booksDao
+        val dao = database.booksDao
+        FilesBooksRepoImpl.init(dao)
+        return dao
     }
 
     @Provides

@@ -36,7 +36,7 @@ class SearchViewModel : ViewModel() {
 
             is SearchEvent.SearchBook -> {
                 if (database === null) {
-                    database = DatabaseHelper(event.context)
+                    database = DatabaseHelper.getInstance(event.context)
                 }
                 streamerApi?.let { searchApi ->
                     event.query.trim().let { query ->
@@ -137,7 +137,7 @@ class SearchViewModel : ViewModel() {
                 Log.e(TAG, "SearchCategories: search started")
 
                 if (database === null) {
-                    database = DatabaseHelper(event.context)
+                    database = DatabaseHelper.getInstance(event.context)
                 }
                 event.searchQuery.trim().let { query ->
                     if (query.isNotBlank()) {
@@ -212,7 +212,5 @@ class SearchViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        database?.close()
-
     }
 }
