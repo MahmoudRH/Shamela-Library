@@ -81,7 +81,6 @@ import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
 import com.shamela.apptheme.presentation.theme.ShamelaIcons
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.readium.r2.shared.Publication
 
@@ -446,7 +445,7 @@ private fun BookPage(
     onTapped: () -> Unit,
     saveWebView: (Int, WebView) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
+    val lastAppliedJs = remember { mutableStateOf("") }
     // Start as loaded when we already have a pre-rendered cached WebView for this index.
     val pageLoaded = remember { mutableStateOf(webViews.containsKey(index)) }
 
@@ -512,11 +511,9 @@ private fun BookPage(
                         saveWebView(index, webview)
                     }
                 }
-                scope.launch {
-                    delay(200)
-                    if (javascriptCall.isNotBlank()) {
-                        webview.loadUrl(javascriptCall)
-                    }
+                if (javascriptCall.isNotBlank() && javascriptCall != lastAppliedJs.value && pageLoaded.value) {
+                    lastAppliedJs.value = javascriptCall
+                    webview.loadUrl(javascriptCall)
                 }
             })
         }

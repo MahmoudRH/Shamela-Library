@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.Constants.BOOK_TITLE
 import com.folioreader.Constants.CHAPTER_SELECTED
@@ -33,16 +32,10 @@ import com.folioreader.ui.activity.folioActivity.book.BookScreen
 import com.folioreader.ui.activity.searchActivity.SearchActivity
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppTheme
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 
 
 class FolioActivity : ComponentActivity() {
     private val viewModel: FolioActivityViewModel by viewModels()
-    private var searchResultsFlow = emptyFlow<Pair<String, String>>()
-    private var selectedChapterFlow = emptyFlow<String>()
-    private var settingsChangedFlow = emptyFlow<Int>()
 
     companion object {
         const val LOG_TAG = "FolioActivityCompose"
@@ -77,12 +70,13 @@ class FolioActivity : ComponentActivity() {
             intent.getParcelableExtra(EXTRA_SEARCH_ITEM)
         }
         Log.e(LOG_TAG, "intent data of searchLocator: ${searchLocator.toString()}")
-        lifecycleScope.launch {
-            searchLocator?.let {
-                searchResultsFlow = flow<Pair<String, String>> {
-                    emit(searchLocator.href to highlightSearchLocator(searchLocator))
-                }
-            }
+        searchLocator?.let {
+            viewModel.onEvent(
+                FolioActivityEvent.OnSearchResult(
+                    href = it.href,
+                    jsCall = highlightSearchLocator(it)
+                )
+            )
         }
 
 
@@ -91,10 +85,9 @@ class FolioActivity : ComponentActivity() {
             AppTheme.ShamelaLibraryTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     state.publication?.let { publication ->
-                        val searchResult =
-                            searchResultsFlow.collectAsStateWithLifecycle(initialValue = "" to "").value
-                        val selectedChapter = selectedChapterFlow.collectAsStateWithLifecycle(initialValue = "").value
-                        val settingsChanged = settingsChangedFlow.collectAsStateWithLifecycle(initialValue = 0).value
+                        val searchResult = viewModel.searchResult.collectAsStateWithLifecycle().value
+                        val selectedChapter = viewModel.selectedChapter.collectAsStateWithLifecycle().value
+                        val settingsChanged = viewModel.settingsChanged.collectAsStateWithLifecycle().value
 
 
                         BookScreen(
@@ -176,12 +169,13 @@ class FolioActivity : ComponentActivity() {
                         data.getParcelableExtra(EXTRA_SEARCH_ITEM)
                     }
                     Log.e(LOG_TAG, "data of searchLauncher: ${searchLocator.toString()}")
-                    lifecycleScope.launch {
-                        searchLocator?.let {
-                            searchResultsFlow = flow<Pair<String, String>> {
-                                emit(searchLocator.href to highlightSearchLocator(searchLocator))
-                            }
-                        }
+                    searchLocator?.let {
+                        viewModel.onEvent(
+                            FolioActivityEvent.OnSearchResult(
+                                href = it.href,
+                                jsCall = highlightSearchLocator(it)
+                            )
+                        )
                     }
                 }
 
@@ -198,16 +192,13 @@ class FolioActivity : ComponentActivity() {
                 val data: Intent? = result.data
                 data?.let {
                     data.getStringExtra(CHAPTER_SELECTED)?.let { href ->
-                        Log.e(LOG_TAG, "TableOfContentsScreen: Navigating to href: $href ")
-                        selectedChapterFlow = flow<String> {
-                            emit(href)
-                        }
+                        Log.e(LOG_TAG, "ContentHighlight: Navigating to href: $href")
+                        viewModel.onEvent(FolioActivityEvent.OnSelectedChapter(href))
                     }
-                    data.getIntExtra(SETTINGS_CHANGED, 0).let { hash ->
-                        Log.e(LOG_TAG, "TableOfContentsScreen: SettingsChanged: $hash ")
-                        settingsChangedFlow = flow<Int> {
-                            emit(hash)
-                        }
+                    val hash = data.getIntExtra(SETTINGS_CHANGED, 0)
+                    if (hash != 0) {
+                        Log.e(LOG_TAG, "ContentHighlight: SettingsChanged hash=$hash")
+                        viewModel.onEvent(FolioActivityEvent.OnSettingsChanged(hash))
                     }
                 }
             }
