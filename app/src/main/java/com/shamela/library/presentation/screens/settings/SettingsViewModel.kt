@@ -97,18 +97,18 @@ class SettingsViewModel @Inject constructor(
                 return@withContext null // File already exists, return null
             }
             try {
-                app.applicationContext.contentResolver.openInputStream(uri)
-                    ?.use { inputStream ->
-                        val byteArray = inputStream.readBytes()
-                        val size = byteArray.size
+                app.applicationContext.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    FileOutputStream(destinationFile).use { outputStream ->
+                        val size = inputStream.copyTo(outputStream, bufferSize = 8 * 1024)
                         Log.e("SettingsViewModel", "onEvent: size $size")
-                        val outputStream = FileOutputStream(destinationFile)
-                        outputStream.write(byteArray)
-                        outputStream.close()
                     }
+                }
                 destinationFile
             } catch (e: Exception) {
                 Log.e("SettingsViewModel", "onEvent: Error: ${e.message}")
+                if (destinationFile.exists()) {
+                    destinationFile.delete() // Clean up partially copied file
+                }
                 _toastsChannel.send(R.string.could_not_add_book_to_library)
                 null
             }
