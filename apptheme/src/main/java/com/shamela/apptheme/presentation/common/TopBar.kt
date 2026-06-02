@@ -27,6 +27,7 @@ fun DefaultTopBar(
     actionIcon: ImageVector? = null,
     onActionClick: (() -> Unit) = {},
     onNavigateBack: (() -> Unit)? = null,
+    navigationContent: (@Composable () -> Unit)? = null,
 ) {
     CenterAlignedTopAppBar(
         modifier = Modifier,
@@ -44,8 +45,9 @@ fun DefaultTopBar(
             }
         },
         navigationIcon = {
-            onNavigateBack?.let {
-                IconButton(onClick = onNavigateBack) {
+            when {
+                navigationContent != null -> navigationContent()
+                onNavigateBack != null -> IconButton(onClick = onNavigateBack) {
                     Icon(ShamelaIcons.ArrowBackIos, contentDescription = null)
                 }
             }
