@@ -4,10 +4,8 @@ package com.shamela.library.presentation.screens.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shamela.apptheme.data.db.DatabaseHelper
-import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.usecases.books.BooksUseCases
-import com.shamela.library.presentation.utils.FakeRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -88,7 +86,7 @@ class SearchViewModel @Inject constructor(
 
             is SearchEvent.DoSearch -> {
                 if (database === null) {
-                    database = DatabaseHelper(event.context)
+                    database = DatabaseHelper.getInstance(event.context)
                 }
                 event.query.trim().let { query ->
                     if (query.isNotBlank()) {
