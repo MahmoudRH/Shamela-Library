@@ -10,6 +10,7 @@ import com.shamela.library.data.local.assets.dto.AssetsBook
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
 import com.shamela.library.domain.repo.BooksRepository
+import com.shamela.library.domain.search.BookSearchMatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -81,18 +82,16 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
 
     override fun searchBooksByName(categoryName: String, query: String): Flow<Book> {
         return if (categoryName == "all") searchAllBooks(query)
-        else getBooksByCategory(categoryName).filter { it.title.contains(query) }
-
+        else getBooksByCategory(categoryName).filter { BookSearchMatcher.matches(it, query) }
     }
 
     private fun searchAllBooks(query: String) = channelFlow<Book> {
         val categoryNames = context.assets.list("categories") ?: emptyArray()
 
         val jobs = categoryNames.map { category ->
-            // Launch a coroutine for each category
             launch(Dispatchers.IO) {
-                val results = getBooksByCategory(category).filter { it.title.contains(query) }
-                results.collect { send(it) } // Use send() to emit items in channelFlow
+                val results = getBooksByCategory(category).filter { BookSearchMatcher.matches(it, query) }
+                results.collect { send(it) }
             }
         }
 

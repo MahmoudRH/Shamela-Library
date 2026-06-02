@@ -4,11 +4,14 @@ package com.shamela.library.presentation.screens.download
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -87,8 +90,6 @@ fun DownloadScreen(
             }
 
             BooksViewType.Books -> {
-
-
                 val booksList = downloadState.groupedBooks
                 booksList.forEach { (initial, books) ->
                     stickyHeader {
@@ -116,6 +117,18 @@ fun DownloadScreen(
                         )
                         if (it != books.last()) {
                             HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                        }
+                    }
+                }
+                if (downloadState.isLoadingBooks) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
                         }
                     }
                 }
