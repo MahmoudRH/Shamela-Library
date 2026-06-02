@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.shamela.apptheme.presentation.theme.ShamelaIcons
+import com.shamela.library.presentation.screens.about.AboutAppScreen
 import com.shamela.library.presentation.screens.download.DownloadScreen
 import com.shamela.library.presentation.screens.favorite.FavoriteScreen
 import com.shamela.library.presentation.screens.library.LibraryScreen
@@ -17,7 +18,10 @@ import com.shamela.library.presentation.screens.sectionBooks.SectionBooksScreen
 import com.shamela.library.presentation.screens.settings.SettingsScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 sealed interface HomeHostDestination {
     val route: String
@@ -105,6 +109,20 @@ object SectionBooks : HomeHostDestination {
     }
 }
 
+object AboutApp : HomeHostDestination {
+    override val route = "ABOUT_APP_SCREEN"
+    override val unSelectedIcon = ShamelaIcons.Info
+    override val selectedIcon = ShamelaIcons.Info
+    override val label = "حول التطبيق"
+    override val actionIcon = null
+    override val onActionClick = { false }
+
+    private val _pendingOpen = MutableStateFlow(false)
+    val pendingOpen: StateFlow<Boolean> = _pendingOpen.asStateFlow()
+    fun requestOpen() { _pendingOpen.value = true }
+    fun consumeOpen() { _pendingOpen.value = false }
+}
+
 object SearchResults : HomeHostDestination {
     override val route = "SEARCH_RESULTS/{categoryName}/{type}"
     override val unSelectedIcon = ShamelaIcons.Book
@@ -171,6 +189,9 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
         composable(Favorite.route) { FavoriteScreen() }
         composable(Search.route) { SearchScreen() }
         composable(Settings.route) { SettingsScreen() }
+        composable(AboutApp.route) {
+            AboutAppScreen(navigateBack = { navController.popBackStack() })
+        }
 
         composable(
             SectionBooks.route,

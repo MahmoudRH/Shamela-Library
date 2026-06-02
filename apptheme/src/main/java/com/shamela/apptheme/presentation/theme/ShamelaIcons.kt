@@ -24,7 +24,7 @@ object ShamelaIcons {
 
     val Add by lazy { buildIcon("Add", "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z") }
     val ArrowBackIosNew by lazy { buildIcon("ArrowBackIosNew", "M17.77 3.77L16 2 6 12l10 10 1.77-1.77L9.54 12z") }
-    val ArrowBackIos by lazy { ArrowBackIosNew } // Mapped for RTL ease
+    val ArrowBackIos by lazy { ArrowForwardIos }
     val ArrowForwardIos by lazy { buildIcon("ArrowForwardIos", "M6.23 20.23L8 22l10-10L8 2 6.23 3.77 14.46 12z") }
     val Book by lazy { buildIcon("Book", "M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4zm12 16H6v-4h12v4zm0-5H6V4h12v11z") }
     val Cancel by lazy { buildIcon("Cancel", "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z") }

@@ -61,7 +61,7 @@ fun SectionItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(Modifier.weight(1f)) {
-                Text(text = text, maxLines = 1, style = AppFonts.textLargeBold, color = MaterialTheme.colorScheme.onSurface, overflow = TextOverflow.Ellipsis)
+                Text(text = text, maxLines = 1, style = AppFonts.textNormalBold, color = MaterialTheme.colorScheme.onSurface, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -72,8 +72,8 @@ fun SectionItem(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "${item.bookCount}  عدد الكتب: ",
-                        style = AppFonts.textSmall,
+                        text = " عدد الكتب: ${item.bookCount}",
+                        style = AppFonts.textSmallBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
