@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
             AppTheme.changeColorScheme(
                 AppTheme.themeOf(
                     theme,
-                    colorScheme,
+                    colorSchemeName,
                     AppTheme.isDarkTheme(this@MainActivity),
                     this@MainActivity
                 ),
