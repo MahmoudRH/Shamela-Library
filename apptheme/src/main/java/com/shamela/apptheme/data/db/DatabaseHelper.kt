@@ -93,6 +93,12 @@ class DatabaseHelper private constructor(val context: Context) :
         }
     }
 
+    suspend fun deleteBookPages(bookId: String) {
+        withContext(Dispatchers.IO) {
+            writableDatabase.delete(BookPage.TABLE_NAME, "${BookPage.COL_BOOK_ID} = ?", arrayOf(bookId))
+        }
+    }
+
     @SuppressLint("Range")
     suspend fun searchBook(bookId: String, query: String): List<BookPage> {
         return withContext(Dispatchers.IO) {
