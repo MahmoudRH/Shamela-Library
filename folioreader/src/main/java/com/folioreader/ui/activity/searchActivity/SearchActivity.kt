@@ -24,7 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -397,7 +397,7 @@ class SearchActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
-            Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
         }
     }
 
