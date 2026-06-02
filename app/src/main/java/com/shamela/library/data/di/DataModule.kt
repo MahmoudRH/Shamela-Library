@@ -71,20 +71,22 @@ object DataModule {
     @AssetsRepoImpl
     @Singleton
     @Provides
-    fun provideAssetsBooksUseCases(repo: AssetsBooksRepoImpl, dao: BooksDao): BooksUseCases {
+    fun provideAssetsBooksUseCases(repo: AssetsBooksRepoImpl, dao: BooksDao, app: Application): BooksUseCases {
         return BooksUseCases(
             repository = repo,
-            booksDao = dao
+            booksDao = dao,
+            context = app.applicationContext
         )
     }
 
     @FilesRepoImpl
     @Singleton
     @Provides
-    fun provideFilesBooksUseCases(repo: FilesBooksRepoImpl, dao: BooksDao): BooksUseCases {
+    fun provideFilesBooksUseCases(repo: FilesBooksRepoImpl, dao: BooksDao, app: Application): BooksUseCases {
         return BooksUseCases(
             repository = repo,
-            booksDao = dao
+            booksDao = dao,
+            context = app.applicationContext
         )
     }
 
