@@ -16,10 +16,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.Constants.BOOK_TITLE
@@ -87,14 +87,14 @@ class FolioActivity : ComponentActivity() {
 
 
         setContent {
-            val state = viewModel.state.collectAsState().value
+            val state = viewModel.state.collectAsStateWithLifecycle().value
             AppTheme.ShamelaLibraryTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     state.publication?.let { publication ->
                         val searchResult =
-                            searchResultsFlow.collectAsState(initial = "" to "").value
-                        val selectedChapter = selectedChapterFlow.collectAsState(initial = "").value
-                        val settingsChanged = settingsChangedFlow.collectAsState(initial = 0).value
+                            searchResultsFlow.collectAsStateWithLifecycle(initialValue = "" to "").value
+                        val selectedChapter = selectedChapterFlow.collectAsStateWithLifecycle(initialValue = "").value
+                        val settingsChanged = settingsChangedFlow.collectAsStateWithLifecycle(initialValue = 0).value
 
 
                         BookScreen(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,11 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
@@ -43,14 +45,16 @@ import com.shamela.library.presentation.screens.LocalPaddingValues
 fun FavoriteScreen(
     viewModel: FavoriteViewModel = hiltViewModel(),
 ) {
-    val state = viewModel.favoriteState.collectAsState().value
+    val state = viewModel.favoriteState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
 
     LaunchedEffect(Unit){
         viewModel.onEvent(FavoriteEvent.LoadFavoriteQuotes)
     }
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(localPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(localPadding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
     ) {
         item {
             ViewTypeSection(
@@ -99,14 +103,13 @@ fun FavoriteScreen(
                                         viewModel.onEvent(FavoriteEvent.AddQuoteToFavorite(quote))
                                     })
                             }
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
                             .animateItem(),
                         onFavoriteIconClicked = {
                             viewModel.onEvent(FavoriteEvent.ToggleFavorite(currentBook))
                         },
                         item = currentBook,
                     )
-                    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
                 item {
                     EmptyListScreen(
@@ -145,7 +148,7 @@ private fun ViewTypeSection(modifier: Modifier, selectedFavoriteViewType: Favori
                 style = AppFonts.textNormalBold,
                 textAlign = TextAlign.Center
             )
-            if (it != FavoriteViewType.values().last()) {
+            if (it != FavoriteViewType.entries.last()) {
                 Box(
                     Modifier
                         .width(2.dp)

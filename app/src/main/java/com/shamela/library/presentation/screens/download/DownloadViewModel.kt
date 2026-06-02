@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -51,14 +52,15 @@ class DownloadViewModel @Inject constructor(
             }
 
             DownloadEvent.LoadUserBooks -> {
-                if (_downloadState.value.books.isEmpty())
-                    viewModelScope.launch {
-                        withContext(Dispatchers.IO) {
-                            booksUseCases.getAllBooks().collect { book ->
-                                _downloadState.update { it.copy(books = it.books + book) }
-                            }
+                if (_downloadState.value.books.isEmpty()) {
+                    viewModelScope.launch(Dispatchers.IO) {
+                        val allBooks = booksUseCases.getAllBooks().toList()
+                        val grouped = allBooks.sortedBy { it.title }.groupBy { it.title.firstOrNull() ?: '-' }
+                        _downloadState.update {
+                            it.copy(books = allBooks, groupedBooks = grouped)
                         }
                     }
+                }
             }
 
             is DownloadEvent.OnClickDownloadBook -> {

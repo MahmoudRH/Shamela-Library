@@ -11,22 +11,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.common.SearchTopBar
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.SectionItem
@@ -38,7 +37,7 @@ fun SearchResultsScreen(
     navigateToSectionBooksScreen: (categoryName: String, type: String) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val state = viewModel.searchResultsState.collectAsState().value
+    val state = viewModel.searchResultsState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
     val focusRequester = FocusRequester()
     Column(Modifier.fillMaxSize().padding(localPadding)) {
@@ -73,7 +72,7 @@ fun SearchResultsScreen(
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                             item = it,
                             highlightText = state.lastQuery)
-                        Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                     }
                 }else{
                     items(state.booksResultsList, key = {it.id}) { currentBook->
@@ -104,7 +103,7 @@ fun SearchResultsScreen(
                                             viewModel.onEvent(SearchResultsEvent.OnClickDownloadBook(currentBook))
                                         }) {
                                             Icon(
-                                                imageVector = Icons.Outlined.FileDownload,
+                                                imageVector = ShamelaIcons.FileDownload,
                                                 contentDescription = "download"
                                             )
                                         }
@@ -114,7 +113,7 @@ fun SearchResultsScreen(
                             }
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                     }
                 }
 

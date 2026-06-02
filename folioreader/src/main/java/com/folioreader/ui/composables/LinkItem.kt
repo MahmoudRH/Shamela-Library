@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +28,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import org.readium.r2.shared.Link
 
 @Composable
@@ -99,9 +97,9 @@ fun LinkItem(
         if (item.children.isNotEmpty() && level != 3) {
             IconButton(onClick = { isExpanded = !isExpanded }) {
                 if (isExpanded) {
-                    Icon(imageVector = Icons.Outlined.Remove, contentDescription = "Shrink")
+                    Icon(imageVector = ShamelaIcons.Remove, contentDescription = "Shrink")
                 } else {
-                    Icon(imageVector = Icons.Outlined.Add, contentDescription = "expand")
+                    Icon(imageVector = ShamelaIcons.Add, contentDescription = "expand")
                 }
             }
         } else {

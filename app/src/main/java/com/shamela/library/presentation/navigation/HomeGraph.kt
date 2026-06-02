@@ -1,17 +1,5 @@
 package com.shamela.library.presentation.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.LocalLibrary
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material.icons.outlined.LocalLibrary
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -19,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.presentation.screens.download.DownloadScreen
 import com.shamela.library.presentation.screens.favorite.FavoriteScreen
 import com.shamela.library.presentation.screens.library.LibraryScreen
@@ -41,9 +30,9 @@ sealed interface HomeHostDestination {
 
 object Library : HomeHostDestination {
     override val route = "LIBRARY_SCREEN"
-    override val unSelectedIcon = Icons.Outlined.LocalLibrary
-    override val selectedIcon = Icons.Default.LocalLibrary
-    override val actionIcon = Icons.Outlined.Search
+    override val unSelectedIcon = ShamelaIcons.LocalLibrary
+    override val selectedIcon = ShamelaIcons.LocalLibrary
+    override val actionIcon = ShamelaIcons.Search
     override val label = "المكتبة"
     private val _buttons = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
     val buttons: Flow<Boolean> = _buttons.asSharedFlow()
@@ -54,9 +43,9 @@ object Library : HomeHostDestination {
 
 object Download : HomeHostDestination {
     override val route = "DOWNLOAD_SCREEN"
-    override val unSelectedIcon = Icons.Outlined.FileDownload
-    override val selectedIcon = Icons.Default.FileDownload
-    override val actionIcon = Icons.Outlined.Search
+    override val unSelectedIcon = ShamelaIcons.FileDownload
+    override val selectedIcon = ShamelaIcons.FileDownload
+    override val actionIcon = ShamelaIcons.Search
     override val label = "التحميل"
 
     private val _buttons = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
@@ -69,8 +58,8 @@ object Download : HomeHostDestination {
 
 object Favorite : HomeHostDestination {
     override val route = "FAVORITE_SCREEN"
-    override val unSelectedIcon = Icons.Outlined.FavoriteBorder
-    override val selectedIcon = Icons.Default.Favorite
+    override val unSelectedIcon = ShamelaIcons.FavoriteBorder
+    override val selectedIcon = ShamelaIcons.Favorite
     override val label = "المفضلة"
     override val actionIcon = null
     override val onActionClick = {
@@ -81,8 +70,8 @@ object Favorite : HomeHostDestination {
 
 object Search : HomeHostDestination {
     override val route = "SEARCH_SCREEN"
-    override val unSelectedIcon = Icons.Outlined.Search
-    override val selectedIcon = Icons.Default.Search
+    override val unSelectedIcon = ShamelaIcons.Search
+    override val selectedIcon = ShamelaIcons.Search
     override val label = "البحث"
     override val actionIcon = null
     override val onActionClick = {
@@ -92,8 +81,8 @@ object Search : HomeHostDestination {
 
 object Settings : HomeHostDestination {
     override val route = "SETTINGS_SCREEN"
-    override val unSelectedIcon = Icons.Outlined.Settings
-    override val selectedIcon = Icons.Default.Settings
+    override val unSelectedIcon = ShamelaIcons.Settings
+    override val selectedIcon = ShamelaIcons.Settings
     override val label = "الإعدادات"
     override val actionIcon = null
     override val onActionClick = {
@@ -103,8 +92,8 @@ object Settings : HomeHostDestination {
 
 object SectionBooks : HomeHostDestination {
     override val route = "SECTION_BOOKS/{categoryName}/{type}"
-    override val unSelectedIcon = Icons.Outlined.Book
-    override val selectedIcon = Icons.Outlined.Book
+    override val unSelectedIcon = ShamelaIcons.Book
+    override val selectedIcon = ShamelaIcons.Book
     override val label = ""
     override val actionIcon = null
     override val onActionClick = {
@@ -118,8 +107,8 @@ object SectionBooks : HomeHostDestination {
 
 object SearchResults : HomeHostDestination {
     override val route = "SEARCH_RESULTS/{categoryName}/{type}"
-    override val unSelectedIcon = Icons.Outlined.Book
-    override val selectedIcon = Icons.Outlined.Book
+    override val unSelectedIcon = ShamelaIcons.Book
+    override val selectedIcon = ShamelaIcons.Book
     override val label = ""
     override val actionIcon = null
     override val onActionClick = {

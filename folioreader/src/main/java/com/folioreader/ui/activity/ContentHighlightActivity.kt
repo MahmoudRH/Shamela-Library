@@ -185,7 +185,7 @@ private fun ViewTypeSection(
             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), CircleShape)
             .height(IntrinsicSize.Min)
     ) {
-        ViewType.values().forEach {
+        ViewType.entries.forEach {
             Text(
                 modifier = Modifier
                     .weight(1f)

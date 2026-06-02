@@ -55,6 +55,11 @@ class FolioActivityViewModel : ViewModel() {
                 EpubParser().parse(filePath, "")?.let {
                     val publication = it.publication
                     val portNumber = AppUtil.getAvailablePortNumber(Constants.DEFAULT_PORT_NUMBER)
+                    try {
+                        server.stop()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error stopping old server", e)
+                    }
                     server = Server(portNumber)
                     server.addEpub(
                         it.publication,
@@ -77,4 +82,12 @@ class FolioActivityViewModel : ViewModel() {
             null
         }    }
 
+    override fun onCleared() {
+        super.onCleared()
+        try {
+            server.stop()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping server on cleared", e)
+        }
+    }
 }

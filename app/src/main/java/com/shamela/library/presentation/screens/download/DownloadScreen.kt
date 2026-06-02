@@ -4,24 +4,24 @@ package com.shamela.library.presentation.screens.download
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.LoadingScreen
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
 import com.shamela.library.presentation.common.SectionItem
@@ -40,7 +40,7 @@ fun DownloadScreen(
     navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
 
     ) {
-    val downloadState = viewModel.downloadState.collectAsState().value
+    val downloadState = viewModel.downloadState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
     LaunchedEffect(key1 = Unit, block = {
         Download.buttons.onEach {
@@ -63,7 +63,8 @@ fun DownloadScreen(
     } )
     LazyColumn(
         Modifier.fillMaxSize().padding(localPadding),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
     ) {
         item {
             ViewTypeSection(
@@ -81,15 +82,14 @@ fun DownloadScreen(
                             navigateToSectionBooksScreen(it.name, "remote")
                         }
                         .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
-                    Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }
 
             BooksViewType.Books -> {
 
 
-                val booksList =
-                    downloadState.books.sortedBy { it.title }.groupBy { it.title.first() }
+                val booksList = downloadState.groupedBooks
                 booksList.forEach { (initial, books) ->
                     stickyHeader {
                         CharacterHeader(
@@ -99,13 +99,13 @@ fun DownloadScreen(
                     }
                     items(books, key = { it.id }) {
                         BookItem(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).animateItem(),
+                            modifier = Modifier.animateItem(),
                             icon = {
                                 IconButton(onClick = {
                                     viewModel.onEvent(DownloadEvent.OnClickDownloadBook(it))
                                 }) {
                                     Icon(
-                                        imageVector = Icons.Outlined.FileDownload,
+                                        imageVector = ShamelaIcons.FileDownload,
                                         contentDescription = "download"
                                     )
                                 }
@@ -113,7 +113,7 @@ fun DownloadScreen(
                             item = it
                         )
                         if (it != books.last()) {
-                            Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                         }
                     }
                 }
