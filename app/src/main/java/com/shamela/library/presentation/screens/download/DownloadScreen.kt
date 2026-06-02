@@ -99,7 +99,9 @@ fun DownloadScreen(
                     }
                     items(books, key = { it.id }) {
                         BookItem(
-                            modifier = Modifier.animateItem(),
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .animateItem(),
                             icon = {
                                 IconButton(onClick = {
                                     viewModel.onEvent(DownloadEvent.OnClickDownloadBook(it))

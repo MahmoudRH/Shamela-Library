@@ -167,6 +167,7 @@ fun LibraryScreen(
                                 viewModel.onEvent(LibraryEvent.SelectBook(it))
                             })
                         }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                         .animateItem(),
                         item = it,
                         onFavoriteIconClicked = { viewModel.onEvent(LibraryEvent.ToggleFavorite(it)) },

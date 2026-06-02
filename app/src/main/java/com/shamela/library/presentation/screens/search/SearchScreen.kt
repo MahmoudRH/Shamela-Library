@@ -5,39 +5,25 @@ import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.rounded.Cancel
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -49,6 +35,7 @@ import com.folioreader.ui.activity.searchActivity.SearchActivity
 import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.domain.model.Category
 import com.shamela.library.presentation.screens.LocalPaddingValues
 
@@ -80,13 +67,10 @@ fun SearchScreen(
             },
             onClear = { viewModel.onEvent(SearchEvent.OnChangeSearchQuery("")) }
         )
-        SelectedSections(
+        CategoryFilterRow(
             allCategories = searchState.allCategories,
             selectedCategories = searchState.selectedCategories,
-            expanded = searchState.isListExpanded,
-            onExpandedChange = { viewModel.onEvent(SearchEvent.ToggleCategoriesList) },
-            onDismiss = { viewModel.onEvent(SearchEvent.CloseCategoriesList) },
-            onItemChecked = { category -> viewModel.onEvent(SearchEvent.ItemChecked(category)) }
+            onItemChecked = { viewModel.onEvent(SearchEvent.ItemChecked(it)) }
         )
         AnimatedVisibility(visible = searchState.selectedCategories.isEmpty()) {
             Row(
@@ -96,7 +80,7 @@ fun SearchScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+                Icon(imageVector = ShamelaIcons.Info, contentDescription = null)
                 Text(
                     "يجب اختيار قسم واحد أو عدة اقسام ليتم إجراء البحث فيها",
                     style = AppFonts.textSmallBold
@@ -142,7 +126,7 @@ private fun SearchTextField(
                     onClick = onClear
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Cancel,
+                        imageVector = ShamelaIcons.Cancel,
                         contentDescription = "مسح"
                     )
                 }
@@ -151,84 +135,28 @@ private fun SearchTextField(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SelectedSections(
+private fun CategoryFilterRow(
     allCategories: List<Category>,
     selectedCategories: List<Category>,
-    expanded: Boolean,
-    onExpandedChange: () -> Unit,
-    onDismiss: () -> Unit,
-    onItemChecked: (Category) -> Unit,
+    onItemChecked: (Category) -> Unit
 ) {
-    LazyColumn() {
-        item {
-            Text(
-                "الأقسام",
-                style = AppFonts.textLarge,
-                modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items(allCategories) { category ->
+            val isSelected = selectedCategories.contains(category)
+            FilterChip(
+                selected = isSelected,
+                onClick = { onItemChecked(category) },
+                label = { Text(category.name, style = AppFonts.textSmallBold) },
+                leadingIcon = if (isSelected) {
+                    { Icon(ShamelaIcons.Check, contentDescription = null) }
+                } else null
             )
-            Divider()
-            Spacer(Modifier.height(16.dp))
-        }
-        items(selectedCategories) {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onItemChecked(it) }
-                .padding(vertical = 16.dp, horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(it.name, style = AppFonts.textNormal)
-                Icon(imageVector = Icons.Rounded.Cancel, contentDescription = null)
-            }
-            Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = .5f))
-
-        }
-        item {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                .clickable { onExpandedChange() }
-                .padding(vertical = 16.dp, horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
-                Text("إختر قسماً", style = AppFonts.textNormalBold)
-                Icon(imageVector = Icons.Default.Add, contentDescription = null)
-            }
         }
     }
-    if (expanded)
-        AlertDialog(
-            title = { Text("إختر قسماً أو أكثر", style = AppFonts.textLarge) },
-            onDismissRequest = { onDismiss() },
-            text = {
-                LazyColumn() {
-                    items(allCategories) { item ->
-                        val isSelected = selectedCategories.contains(item)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onItemChecked(item)
-                                    onDismiss()
-                                }
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = isSelected,
-                                onCheckedChange = { onItemChecked(item) })
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = item.name, style = AppFonts.textNormal)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                OutlinedButton(onClick = {
-                    onDismiss()
-                }) {
-                    Text("تم", style = AppFonts.textNormal)
-                }
-            },
-        )
 }

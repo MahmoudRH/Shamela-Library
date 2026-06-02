@@ -103,6 +103,7 @@ fun FavoriteScreen(
                                         viewModel.onEvent(FavoriteEvent.AddQuoteToFavorite(quote))
                                     })
                             }
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
                             .animateItem(),
                         onFavoriteIconClicked = {
                             viewModel.onEvent(FavoriteEvent.ToggleFavorite(currentBook))
