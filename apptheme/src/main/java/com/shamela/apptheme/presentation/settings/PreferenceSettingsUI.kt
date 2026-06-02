@@ -69,7 +69,7 @@ fun PreferenceSettingsUI(
                 PreferenceSettingsEvent.OnChangeAppTheme(
                     colorScheme = AppTheme.themeOf(
                         theme = it,
-                        colorScheme = uiState.userPrefs.colorScheme,
+                        colorScheme = uiState.userPrefs.colorSchemeName,
                         isSystemInDarkTheme = isSystemDark,
                         context = context
                     ),
@@ -80,7 +80,7 @@ fun PreferenceSettingsUI(
         SettingsSection(
             title = stringResource(R.string.change_color),
             options = uiState.availableColorSchemes,
-            selectedOption = uiState.userPrefs.colorScheme,
+            selectedOption = uiState.userPrefs.colorSchemeName,
         ) {
             onEvent(
                 PreferenceSettingsEvent.OnChangeAppTheme(
@@ -90,7 +90,7 @@ fun PreferenceSettingsUI(
                         isSystemInDarkTheme = isSystemDark,
                         context = context
                     ),
-                    userPrefs = uiState.userPrefs.copy(colorScheme = it)
+                    userPrefs = uiState.userPrefs.copy(colorSchemeName = it)
                 )
             )
         }
