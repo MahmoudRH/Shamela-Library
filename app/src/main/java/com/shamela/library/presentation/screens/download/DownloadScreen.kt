@@ -84,7 +84,7 @@ fun DownloadScreen(
                         .clickable {
                             navigateToSectionBooksScreen(it.name, "remote")
                         }
-                        .padding(horizontal = 16.dp, vertical = 8.dp), item = it)
+                        .padding(horizontal = 8.dp, vertical = 4.dp), item = it)
                     HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }

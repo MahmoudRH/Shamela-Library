@@ -69,7 +69,7 @@ fun SearchResultsScreen(
                             .clickable {
                                 navigateToSectionBooksScreen(it.name, "remote")
                             }
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                             item = it,
                             highlightText = state.lastQuery)
                         HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
