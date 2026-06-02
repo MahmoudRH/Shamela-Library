@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -26,6 +24,7 @@ import com.folioreader.ui.view.UnderlinedTextView
 import com.folioreader.util.UiUtil
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -53,7 +52,7 @@ fun HighlightsItem(
         IconButton(
             modifier = Modifier.align(Alignment.CenterEnd),
             onClick = { onDeleteClicked(item.id) }) {
-            Icon(imageVector = Icons.Outlined.Delete, contentDescription = "Delete")
+            Icon(imageVector = ShamelaIcons.Delete, contentDescription = "Delete")
         }
     }
 }

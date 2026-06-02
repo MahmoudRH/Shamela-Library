@@ -10,12 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +21,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,8 +31,10 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.presentation.common.BookItem
 
@@ -48,7 +45,7 @@ fun SectionBooksScreen(
     navigateBack: () -> Unit,
     navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
 ) {
-    val sectionBooksState = viewModel.sectionBooksState.collectAsState().value
+    val sectionBooksState = viewModel.sectionBooksState.collectAsStateWithLifecycle().value
     Column {
         SectionTopBar(
             title = categoryName,
@@ -94,7 +91,7 @@ fun SectionBooksScreen(
                                     )
                                 }) {
                                     Icon(
-                                        imageVector = Icons.Outlined.FileDownload,
+                                        imageVector = ShamelaIcons.FileDownload,
                                         contentDescription = "download"
                                     )
                                 }
@@ -103,7 +100,7 @@ fun SectionBooksScreen(
                         )
                     }
                 }
-                Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
             }
         }
     }
@@ -148,16 +145,16 @@ private fun SectionTopBar(
         ),
         actions = {
             IconButton(onClick = onSearch) {
-                Icon(Icons.Outlined.Search, contentDescription = null)
+                Icon(ShamelaIcons.Search, contentDescription = null)
             }
             Spacer(modifier = Modifier.size(4.dp))
             IconButton(onClick = onDownload) {
-                Icon(Icons.Outlined.FileDownload, contentDescription = null)
+                Icon(ShamelaIcons.FileDownload, contentDescription = null)
             }
         },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
-                Icon(Icons.Default.ArrowForwardIos, contentDescription = null)
+                Icon(ShamelaIcons.ArrowForwardIos, contentDescription = null)
             }
         }
     )

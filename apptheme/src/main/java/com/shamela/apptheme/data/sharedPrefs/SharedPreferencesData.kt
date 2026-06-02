@@ -19,7 +19,7 @@ class SharedPreferencesData(private val context: Context) : UserPrefsDataSource 
             userPrefs = userPrefs.copy(fontSize = it)
         }
         sharedPrefs.getString(PREFERRED_COLOR_SCHEME, null)?.let {
-            userPrefs = userPrefs.copy(colorScheme = it)
+            userPrefs = userPrefs.copy(colorSchemeName = it)
         }
         return userPrefs
     }
@@ -29,7 +29,7 @@ class SharedPreferencesData(private val context: Context) : UserPrefsDataSource 
         sharedPrefs.edit {
             putString(PREFERRED_THEME, prefs.theme)
             putString(PREFERRED_FONT_FAMILY, prefs.fontFamily)
-            putString(PREFERRED_COLOR_SCHEME, prefs.colorScheme)
+            putString(PREFERRED_COLOR_SCHEME, prefs.colorSchemeName)
             putInt(PREFERRED_FONT_SIZE, prefs.fontSize)
         }
     }
