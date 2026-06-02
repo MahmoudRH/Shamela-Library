@@ -43,15 +43,6 @@ body {
     overflow: !important;
 }
 
-/* Custom padding for tablets */
-/*
-@media only screen and (min-device-width: 768px){
-    body {
-        padding: 60px 80px !important;
-    }
-}
-*/
-
 /* Table */
 table {
     border-collapse: collapse;
@@ -87,11 +78,14 @@ ol ol, ol ul, ul ol, ul ul {
 /* Links */
 a {
     -webkit-touch-callout: none;
+    text-decoration: none;
+    color: #1565C0; /* Default light theme link color */
 }
 
 /* Disable link callback */
 * {
     -webkit-user-select: text;
+    -webkit-font-smoothing: subpixel-antialiased;
 }
 
 img {
@@ -100,7 +94,7 @@ img {
 
 p {
     margin: 1.3em 0 1.5em 0;
-    line-height: 1.40em !important;
+    line-height: 1.5em !important;
     text-indent: 1.25em;
 }
 
@@ -118,7 +112,6 @@ button, input, select, textarea {
     display: inline-block !important;
 }
 
-/*h1, h2, h3, h4, h5, h6 { font-weight: 400!important; }*/
 del, s, strike {
     text-decoration: line-through !important;
 }
@@ -128,7 +121,6 @@ hr {
     border: none !important;
     height: 1px !important;
 }
-
 
 /* Sub and Super */
 big {
@@ -148,12 +140,6 @@ sup {
     vertical-align: super !important;
 }
 
-
-/* iBooks like */
-a {
-    text-decoration: none;
-}
-
 pre {
     white-space: pre-wrap;
 }
@@ -162,7 +148,7 @@ pre {
     margin: 0 0 !important;
 }
 
-table, ol, il {
+table, ol, ul { /* Fixed typo: il to ul */
     text-align: -webkit-auto;
 }
 
@@ -171,7 +157,7 @@ h1, h2, h3, h4, h5, h6 {
     text-rendering: optimizelegibility;
 }
 
-/* allow breaking of words on headers and anchors as they tend to be larger font size or contain longer words */
+/* allow breaking of words on headers and anchors */
 a, h1, h2, h3, h4, h5, h6 {
     word-break: break-word !important;
     -webkit-hyphens: none !important;
@@ -189,8 +175,6 @@ img, svg, audio, video {
 
 /* End Ted */
 
-/* Divs are also used to size images so make sure the authors get what they intended */
-/* which is for the images boxed in them to be completely visible on screen */
 div {
     max-width: 100%;
 }
@@ -203,10 +187,10 @@ ruby > rt, ruby > rp {
     -webkit-user-select: none;
 }
 
-* {
-    -webkit-font-smoothing: subpixel-antialiased
+/* Smooth transition for Day/Night mode toggling */
+html, body, p, div, h1, h2, h3, h4, h5, h6, span, a {
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 
 /*
  *
@@ -219,32 +203,15 @@ lk {
     -webkit-user-select: none;
 }
 
-/* Remove tap highlight */
 input, textarea, button, highlight, select, a {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
-/* Highlight styles */
-html .highlight_yellow {
-    background: rgb(255, 235, 107)
-}
-
-html .highlight_green {
-    background: #C0ED72
-}
-
-html .highlight_blue {
-    background: #ADD8FF
-}
-
-html .highlight_pink {
-    background: #FFB0CA
-}
-
-html .highlight_underline {
-    text-decoration: none;
-    border-bottom: 2px solid #F02814;
-}
+html .highlight_yellow { background: rgb(255, 235, 107); color: #000 !important; }
+html .highlight_green { background: #C0ED72; color: #000 !important; }
+html .highlight_blue { background: #ADD8FF; color: #000 !important; }
+html .highlight_pink { background: #FFB0CA; color: #000 !important; }
+html .highlight_underline { text-decoration: none; border-bottom: 2px solid #F02814; }
 
 html .highlight_yellow, html .highlight_green, html .highlight_blue, html .highlight_pink, span.epub-media-overlay-playing {
     border-radius: 3px;
@@ -252,7 +219,6 @@ html .highlight_yellow, html .highlight_green, html .highlight_blue, html .highl
     margin: 0 -2px;
 }
 
-/* default media overlay style */
 .mediaOverlayStyle0 span.epub-media-overlay-playing {
     background: #ccc
 }
@@ -265,7 +231,7 @@ html .highlight_yellow, html .highlight_green, html .highlight_blue, html .highl
 
 /*
  *
- * Night mode
+ * ENHANCED Night mode
  *
  */
 
@@ -275,39 +241,79 @@ html {
 
 body {
     background-color: transparent !important;
+    color: #121212; /* Default Light mode text */
 }
 
 html.nightMode {
-    background-color: #131313 !important;
+    background-color: #121212 !important; /* Slightly softer than pure black */
 }
 
-.nightMode p, .nightMode div {
-    color: #767676 !important;
+/* Broadened target to catch ALL text elements in dark mode */
+html.nightMode body,
+html.nightMode p,
+html.nightMode div,
+html.nightMode span,
+html.nightMode li,
+html.nightMode td,
+html.nightMode blockquote {
+    color: #D4D4D4 !important; /* Soft off-white. Much easier to read than #767676 */
     background-color: transparent !important;
 }
 
-.nightMode h1, .nightMode h2, .nightMode h3, .nightMode h4, .nightMode h5, .nightMode h6 {
-    color: #848484 !important;
+/* Make headers slightly brighter than body text for hierarchy */
+html.nightMode h1,
+html.nightMode h2,
+html.nightMode h3,
+html.nightMode h4,
+html.nightMode h5,
+html.nightMode h6 {
+    color: #EAEAEA !important;
 }
 
+/* Ensure links are visible in dark mode */
+html.nightMode a {
+    color: #64B5F6 !important; /* Light blue */
+}
+
+/* Invert horizontal rules */
+html.nightMode hr {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Dim images slightly so they don't blind the user in a dark room */
+html.nightMode img,
+html.nightMode svg,
+html.nightMode video {
+    filter: brightness(0.85) contrast(1.1);
+}
+
+/*
+ * Dark mode highlights
+ * CRITICAL FIX: Forces text to black inside highlights so it doesn't disappear
+ */
 html.nightMode .highlight_yellow {
-    background: rgba(255, 235, 107, 0.9)
+    background: rgba(255, 235, 107, 0.85) !important;
+    color: #000000 !important;
 }
 
 html.nightMode .highlight_green {
-    background: rgba(192, 237, 114, 0.9)
+    background: rgba(192, 237, 114, 0.85) !important;
+    color: #000000 !important;
 }
 
 html.nightMode .highlight_blue {
-    background: rgba(173, 216, 255, 0.9)
+    background: rgba(173, 216, 255, 0.85) !important;
+    color: #000000 !important;
 }
 
 html.nightMode .highlight_pink {
-    background: rgba(255, 176, 202, 0.9)
+    background: rgba(255, 176, 202, 0.85) !important;
+    color: #000000 !important;
 }
 
 html.nightMode .highlight_underline {
-    border-bottom: 2px solid rgba(240, 40, 20, 0.6)
+    border-bottom: 2px solid rgba(240, 40, 20, 0.8) !important;
+    color: inherit !important;
 }
 
 
@@ -316,163 +322,44 @@ html.nightMode .highlight_underline {
  * Font classes
  *
  */
-@font-face {
-    font-family: 'amiri';
-    src: url('file:///android_asset/fonts/amiri_regular.ttf');
-}
+@font-face { font-family: 'amiri'; src: url('file:///android_asset/fonts/amiri_regular.ttf'); }
+@font-face { font-family: 'flat'; src: url('file:///android_asset/fonts/flat_regular.ttf'); }
+@font-face { font-family: 'gulzar'; src: url('file:///android_asset/fonts/gulzar_regular.ttf'); }
+@font-face { font-family: 'jozoor'; src: url('file:///android_asset/fonts/jozoor_regular.ttf'); }
+@font-face { font-family: 'kitab'; src: url('file:///android_asset/fonts/kitab_regular.ttf'); }
+@font-face { font-family: 'kufi'; src: url('file:///android_asset/fonts/kufi_regular.ttf'); }
+@font-face { font-family: 'messiri'; src: url('file:///android_asset/fonts/messiri_regular.ttf'); }
+@font-face { font-family: 'naskh'; src: url('file:///android_asset/fonts/naskh_regular.ttf'); }
+@font-face { font-family: 'naskh_2'; src: url('file:///android_asset/fonts/naskh_2_regular.ttf'); }
+@font-face { font-family: 'naskh_3'; src: url('file:///android_asset/fonts/naskh_3_regular.ttf'); }
+@font-face { font-family: 'reqa'; src: url('file:///android_asset/fonts/reqa_regular.ttf'); }
+@font-face { font-family: 'tajawal'; src: url('file:///android_asset/fonts/tajawal_regular.ttf'); }
 
-@font-face {
-    font-family: 'flat';
-    src: url('file:///android_asset/fonts/flat_regular.ttf');
-}
+.amiri { font-family: 'amiri', sans-serif; }
+.flat { font-family: 'flat', sans-serif; }
+.gulzar { font-family: 'gulzar', sans-serif; }
+.jozoor { font-family: 'jozoor', sans-serif; }
+.kitab { font-family: 'kitab', sans-serif; }
+.kufi { font-family: 'kufi', sans-serif; }
+.messiri { font-family: 'messiri', sans-serif; }
+.naskh { font-family: 'naskh', sans-serif; }
+.naskh_2 { font-family: 'naskh_2', sans-serif; }
+.naskh_3 { font-family: 'naskh_3', sans-serif; }
+.reqa { font-family: 'reqa', sans-serif; }
+.tajawal { font-family: 'tajawal', sans-serif; }
 
-@font-face {
-    font-family: 'gulzar';
-    src: url('file:///android_asset/fonts/gulzar_regular.ttf');
-}
+html.textSizeOne { font-size: 13px !important; }
+html.textSizeTwo { font-size: 15px !important; }
+html.textSizeThree { font-size: 17px !important; }
+html.textSizeFour { font-size: 19px !important; }
+html.textSizeFive { font-size: 21px !important; }
 
-@font-face {
-    font-family: 'jozoor';
-    src: url('file:///android_asset/fonts/jozoor_regular.ttf');
-}
-
-@font-face {
-    font-family: 'kitab';
-    src: url('file:///android_asset/fonts/kitab_regular.ttf');
-}
-
-@font-face {
-    font-family: 'kufi';
-    src: url('file:///android_asset/fonts/kufi_regular.ttf');
-}
-
-@font-face {
-    font-family: 'messiri';
-    src: url('file:///android_asset/fonts/messiri_regular.ttf');
-}
-
-@font-face {
-    font-family: 'naskh';
-    src: url('file:///android_asset/fonts/naskh_regular.ttf');
-}
-
-@font-face {
-    font-family: 'naskh_2';
-    src: url('file:///android_asset/fonts/naskh_2_regular.ttf');
-}
-
-@font-face {
-    font-family: 'naskh_3';
-    src: url('file:///android_asset/fonts/naskh_3_regular.ttf');
-}
-
-@font-face {
-    font-family: 'reqa';
-    src: url('file:///android_asset/fonts/reqa_regular.ttf');
-}
-
-@font-face {
-    font-family: 'tajawal';
-    src: url('file:///android_asset/fonts/tajawal_regular.ttf');
-}
-
-.amiri {
-    font-family: 'amiri', sans-serif;
-}
-
-.flat {
-    font-family: 'flat', sans-serif;
-}
-
-.gulzar {
-    font-family: 'gulzar', sans-serif;
-}
-
-.jozoor {
-    font-family: 'jozoor', sans-serif;
-}
-
-.kitab {
-    font-family: 'kitab', sans-serif;
-}
-
-.kufi {
-    font-family: 'kufi', sans-serif;
-}
-
-.messiri {
-    font-family: 'messiri', sans-serif;
-}
-
-.naskh {
-    font-family: 'naskh', sans-serif;
-}
-
-.naskh_2 {
-    font-family: 'naskh_2', sans-serif;
-}
-
-.naskh_3 {
-    font-family: 'naskh_3', sans-serif;
-}
-
-.reqa {
-    font-family: 'reqa', sans-serif;
-}
-
-.tajawal {
-    font-family: 'tajawal', sans-serif;
-}
-
-html.textSizeOne {
-    font-size: 13px !important;
-}
-
-html.textSizeTwo {
-    font-size: 15px !important;
-}
-
-html.textSizeThree {
-    font-size: 17px !important;
-}
-
-html.textSizeFour {
-    font-size: 19px !important;
-}
-
-html.textSizeFive {
-    font-size: 21px !important;
-}
-
-h1 {
-    font-size: 2rem;
-    line-height: 1.2;
-}
-
-h2 {
-    font-size: 1.5rem;
-    line-height: 1.2;
-}
-
-h3 {
-    font-size: 1.17rem;
-    line-height: 1.2;
-}
-
-h4 {
-    font-size: 1rem;
-    line-height: 1.2;
-}
-
-h5 {
-    font-size: 0.83rem;
-    line-height: 1.2;
-}
-
-h6 {
-    font-size: 0.67rem;
-    line-height: 1.2;
-}
+h1 { font-size: 2rem; line-height: 1.2; }
+h2 { font-size: 1.5rem; line-height: 1.2; }
+h3 { font-size: 1.17rem; line-height: 1.2; }
+h4 { font-size: 1rem; line-height: 1.2; }
+h5 { font-size: 0.83rem; line-height: 1.2; }
+h6 { font-size: 0.67rem; line-height: 1.2; }
 
 body {
     word-break: break-word !important;
