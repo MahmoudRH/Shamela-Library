@@ -14,6 +14,30 @@ object BookSearchMatcher {
     }
 
     /**
+     * Returns a relevance score for sorting search results.
+     * Higher is more relevant. Callers should sort descending.
+     *
+     *   4 – exact title match
+     *   3 – title starts with query
+     *   2 – query appears anywhere in title
+     *   1 – query appears only in author
+     *   0 – no match (caller should have already filtered with matches())
+     */
+    fun relevanceScore(book: Book, query: String): Int {
+        if (query.isEmpty()) return 0
+        val normQuery = normalizer.normalize(query)
+        val normTitle = normalizer.normalize(book.title)
+        val normAuthor = normalizer.normalize(book.author)
+        return when {
+            normTitle == normQuery -> 4
+            normTitle.startsWith(normQuery) -> 3
+            normTitle.contains(normQuery) -> 2
+            normAuthor.contains(normQuery) -> 1
+            else -> 0
+        }
+    }
+
+    /**
      * Returns the range in [text] (original, un-normalized) that matches [query] after Arabic
      * normalization, so the range can be used directly for a highlight span.
      *
