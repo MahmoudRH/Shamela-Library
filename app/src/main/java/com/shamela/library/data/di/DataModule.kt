@@ -41,6 +41,7 @@ object DataModule {
         return FilesBooksRepoImpl
     }
 
+    @Singleton
     @Provides
     fun provideDatabase(app: Application): BooksDatabase {
         return Room.databaseBuilder(
@@ -50,6 +51,7 @@ object DataModule {
         ).fallbackToDestructiveMigration().build()
     }
 
+    @Singleton
     @Provides
     fun provideBooksDao(database: BooksDatabase): BooksDao {
         return database.booksDao

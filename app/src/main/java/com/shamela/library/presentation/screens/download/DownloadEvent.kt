@@ -8,6 +8,6 @@ sealed class DownloadEvent{
     class OnChangeViewType(val newBooksViewType: BooksViewType): DownloadEvent()
     object LoadUserBooks: DownloadEvent()
     object LoadUserSections: DownloadEvent()
-    class OnClickDownloadBook(val book: Book):DownloadEvent()
-
+    class OnClickDownloadBook(val book: Book): DownloadEvent()
+    class OnClickCancelDownload(val bookId: String): DownloadEvent()
 }
