@@ -117,7 +117,7 @@ class DatabaseHelper private constructor(val context: Context) :
             while (!cursor.isAfterLast) {
                 val page = BookPage(
                     href = cursor.getString(cursor.getColumnIndex(BookPage.COL_HREF)),
-                    content = cursor.getString(cursor.getColumnIndex(BookPage.COL_CONTENT)),
+                    content = "",
                     bookId = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_ID)),
                     category = cursor.getString(cursor.getColumnIndex(BookPage.COL_CATEGORY)),
                     bookTitle = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_TITLE))

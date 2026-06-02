@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +46,23 @@ import androidx.compose.ui.unit.sp
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.search.BookSearchMatcher
+
+private fun buildHighlightedString(text: String, query: String): AnnotatedString =
+    buildAnnotatedString {
+        val range = BookSearchMatcher.findHighlightRange(text, query)
+        if (range == null) {
+            append(text)
+        } else {
+            append(text.substring(0, range.first))
+            withStyle(SpanStyle(
+                fontSize = AppFonts.textNormal.fontSize.value.sp,
+                background = Color(0xfff8ff00),
+                color = Color.Black
+            )) { append(text.substring(range)) }
+            append(text.substring(range.last + 1))
+        }
+    }
 
 //@Composable
 //fun BookItem(
@@ -86,23 +104,8 @@ fun BookItem(
     item: Book,
     highlightText: String = "",
 ) {
-    val text = buildAnnotatedString {
-        item.title.run {
-            val textBefore = substring(0, indexOf(highlightText))
-            val textAfter = substring(indexOf(highlightText) + highlightText.length)
-            append(textBefore)
-            withStyle(
-                style = SpanStyle(
-                    fontSize = (AppFonts.textNormal.fontSize.value).sp,
-                    background = Color(0xfff8ff00),
-                    color = Color.Black
-                )
-            ) {
-                append(highlightText)
-            }
-            append(textAfter)
-        }
-    }
+    val text = buildHighlightedString(item.title, highlightText)
+    val authorText = buildHighlightedString(item.author, highlightText)
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -118,7 +121,7 @@ fun BookItem(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = item.author, style = AppFonts.textNormal)
+                Text(text = authorText, style = AppFonts.textNormal)
                 Text(text = " عدد الصفحات: ${item.pageCount}", style = AppFonts.textNormal)
             }
         }
@@ -133,23 +136,8 @@ fun FavoriteBookItem(
     onFavoriteIconClicked: () -> Unit,
     highlightText: String = "",
 ) {
-    val text = buildAnnotatedString {
-        item.title.run {
-            val textBefore = substring(0, indexOf(highlightText))
-            val textAfter = substring(indexOf(highlightText) + highlightText.length)
-            append(textBefore)
-            withStyle(
-                style = SpanStyle(
-                    fontSize = (AppFonts.textNormal.fontSize.value).sp,
-                    background = Color(0xfff8ff00),
-                    color = Color.Black
-                )
-            ) {
-                append(highlightText)
-            }
-            append(textAfter)
-        }
-    }
+    val text = buildHighlightedString(item.title, highlightText)
+    val authorText = buildHighlightedString(item.author, highlightText)
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -165,7 +153,7 @@ fun FavoriteBookItem(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = item.author, style = AppFonts.textNormal)
+                Text(text = authorText, style = AppFonts.textNormal)
                 Text(text = " عدد الصفحات: ${item.pageCount}", style = AppFonts.textNormal)
             }
         }
@@ -203,23 +191,8 @@ fun LibraryBookItem(
             true
         },
     )
-    val text = buildAnnotatedString {
-        item.title.run {
-            val textBefore = substring(0, indexOf(highlightText))
-            val textAfter = substring(indexOf(highlightText) + highlightText.length)
-            append(textBefore)
-            withStyle(
-                style = SpanStyle(
-                    fontSize = (AppFonts.textNormal.fontSize.value).sp,
-                    background = Color(0xfff8ff00),
-                    color = Color.Black
-                )
-            ) {
-                append(highlightText)
-            }
-            append(textAfter)
-        }
-    }
+    val text = buildHighlightedString(item.title, highlightText)
+    val authorText = buildHighlightedString(item.author, highlightText)
     SwipeToDismissBox(
         state = swipeState,
         backgroundContent = {
@@ -299,7 +272,7 @@ fun LibraryBookItem(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = item.author, style = AppFonts.textNormal)
+                            Text(text = authorText, style = AppFonts.textNormal)
                             Text(
                                 text = " عدد الصفحات: ${item.pageCount}",
                                 style = AppFonts.textNormal

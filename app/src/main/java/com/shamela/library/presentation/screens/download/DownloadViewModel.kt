@@ -8,13 +8,13 @@ import androidx.lifecycle.viewModelScope
 import com.shamela.library.data.local.assets.AssetsRepoImpl
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.usecases.books.BooksUseCases
+import com.shamela.library.domain.util.BooksGroupingUtil
 import com.shamela.library.presentation.screens.library.BooksViewType
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -52,12 +52,28 @@ class DownloadViewModel @Inject constructor(
             }
 
             DownloadEvent.LoadUserBooks -> {
-                if (_downloadState.value.books.isEmpty()) {
+                if (_downloadState.value.books.isEmpty() && !_downloadState.value.isLoadingBooks) {
+                    _downloadState.update { it.copy(isLoadingBooks = true) }
                     viewModelScope.launch(Dispatchers.IO) {
-                        val allBooks = booksUseCases.getAllBooks().toList()
-                        val grouped = allBooks.sortedBy { it.title }.groupBy { it.title.firstOrNull() ?: '-' }
+                        val allBooks = mutableListOf<Book>()
+                        val groupedMutable = mutableMapOf<Char, MutableList<Book>>()
+                        var currentCategory = ""
+
+                        booksUseCases.getAllBooks().collect { book ->
+                            allBooks.add(book)
+                            val key = book.title.firstOrNull() ?: '-'
+                            groupedMutable.getOrPut(key) { mutableListOf() }.add(book)
+
+                            if (book.categoryName != currentCategory) {
+                                currentCategory = book.categoryName
+                                val snapshot = groupedMutable.mapValues { it.value.toList() }
+                                _downloadState.update { it.copy(books = allBooks.toList(), groupedBooks = snapshot) }
+                            }
+                        }
+
+                        val finalGrouped = BooksGroupingUtil.groupByFirstChar(allBooks)
                         _downloadState.update {
-                            it.copy(books = allBooks, groupedBooks = grouped)
+                            it.copy(books = allBooks.toList(), groupedBooks = finalGrouped, isLoadingBooks = false)
                         }
                     }
                 }
