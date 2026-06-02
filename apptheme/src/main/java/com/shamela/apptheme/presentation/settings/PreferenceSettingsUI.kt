@@ -265,9 +265,9 @@ private fun PreferenceScreenPrev() {
             uiState = PreferenceSettingsState(
                 userPrefs = UserPrefs(),
                 availableFontSizes = listOf(-4, -2, 0, 2, 4),
-                availableFontFamilies = listOf("Font 1", "Font 2"),
-                availableColorSchemes = listOf("Color 1", "Color 2"),
-                availableThemes = listOf("Theme 1", "Theme 2")
+                availableFontFamilies = listOf("خط النسخ", "خط الرق"),
+                availableColorSchemes = listOf("ذهبي", "ازرق"),
+                availableThemes = listOf("فاتح", "مظلم", "تلقائي")
             ), onEvent = {}
         )
     }

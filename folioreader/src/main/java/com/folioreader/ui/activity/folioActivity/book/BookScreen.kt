@@ -35,14 +35,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.outlined.FormatListBulleted
-import androidx.compose.material.icons.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -86,6 +78,7 @@ import com.folioreader.util.AppUtil
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.readium.r2.shared.Publication
@@ -293,7 +286,7 @@ private fun BottomBar(
                 onClick = onPrevButtonClick
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.KeyboardArrowRight,
+                    imageVector = ShamelaIcons.KeyboardArrowRight,
                     contentDescription = "Previous page",
                     tint = if (isPrevButtonEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
                 )
@@ -346,7 +339,7 @@ private fun BottomBar(
                 onClick = onNextButtonClick
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.KeyboardArrowLeft,
+                    imageVector = ShamelaIcons.KeyboardArrowLeft,
                     contentDescription = "next page",
                     tint = if (isNextButtonEnabled) MaterialTheme.colorScheme.onBackground else Color.Gray
                 )
@@ -390,16 +383,16 @@ private fun BookTopBar(
             },
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowForwardIos, contentDescription = null)
+                    Icon(ShamelaIcons.ArrowForwardIos, contentDescription = null)
                 }
             },
             actions = {
                 IconButton(onClick = onSearch) {
-                    Icon(Icons.Outlined.Search, null)
+                    Icon(ShamelaIcons.Search, null)
                 }
                 Spacer(modifier = Modifier.size(4.dp))
                 IconButton(onClick = onToggleMenu) {
-                    Icon(Icons.Outlined.MoreVert, null)
+                    Icon(ShamelaIcons.MoreVert, null)
                 }
                 DropdownMenu(expanded = isMenuVisible, onDismissRequest = onDismissMenu) {
                     DropdownMenuItem(
@@ -407,7 +400,7 @@ private fun BookTopBar(
                             onDismissMenu()
                             onSettings()
                         },
-                        leadingIcon = { Icon(Icons.Outlined.Settings, null) },
+                        leadingIcon = { Icon(ShamelaIcons.Settings, null) },
                         text = { Text("الإعدادات", style = AppFonts.textNormal) }
                     )
                     DropdownMenuItem(
@@ -415,7 +408,7 @@ private fun BookTopBar(
                             onDismissMenu()
                             onToc()
                         },
-                        leadingIcon = { Icon(Icons.Outlined.FormatListBulleted, null) },
+                        leadingIcon = { Icon(ShamelaIcons.FormatListBulleted, null) },
                         text = { Text("الفهرس", style = AppFonts.textNormal) }
                     )
                 }

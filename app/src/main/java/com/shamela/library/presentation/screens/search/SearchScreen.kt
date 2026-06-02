@@ -5,23 +5,31 @@ import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -48,9 +56,14 @@ fun SearchScreen(
     val localPadding = LocalPaddingValues.current
     LaunchedEffect(key1 = Unit, block = {
 //        if (searchState.allCategories.isEmpty())
-            viewModel.onEvent(SearchEvent.GetAllCategories)
+        viewModel.onEvent(SearchEvent.GetAllCategories)
     })
-    Column(modifier = Modifier.fillMaxSize().padding(localPadding), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(localPadding),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
         SearchTextField(
             value = searchState.searchQuery,
@@ -61,16 +74,22 @@ fun SearchScreen(
                 intent.apply {
                     putExtra(SearchActivity.Search_Type, SearchActivity.Search_Type_SectionsSearch)
                     putExtra(SearchActivity.Search_Query, searchState.searchQuery)
-                    putExtra(SearchActivity.Search_Categories, searchState.selectedCategories.map { it.name }.toTypedArray())
+                    putExtra(
+                        SearchActivity.Search_Categories,
+                        searchState.selectedCategories.map { it.name }.toTypedArray()
+                    )
                 }
                 context.startActivity(intent)
             },
             onClear = { viewModel.onEvent(SearchEvent.OnChangeSearchQuery("")) }
         )
-        CategoryFilterRow(
+        SelectedSections(
             allCategories = searchState.allCategories,
             selectedCategories = searchState.selectedCategories,
-            onItemChecked = { viewModel.onEvent(SearchEvent.ItemChecked(it)) }
+            expanded = searchState.isListExpanded,
+            onExpandedChange = { viewModel.onEvent(SearchEvent.ToggleCategoriesList) },
+            onDismiss = { viewModel.onEvent(SearchEvent.CloseCategoriesList) },
+            onItemChecked = { category -> viewModel.onEvent(SearchEvent.ItemChecked(category)) }
         )
         AnimatedVisibility(visible = searchState.selectedCategories.isEmpty()) {
             Row(
@@ -90,7 +109,10 @@ fun SearchScreen(
 
     }
     LoadingScreen(visibility = searchState.isLoading && searchState.allCategories.isNotEmpty())
-    EmptyListScreen(visibility = searchState.allCategories.isEmpty(), text = "لا بد من تحميل بعض الكتب قبل التمكن من البحث")
+    EmptyListScreen(
+        visibility = searchState.allCategories.isEmpty(),
+        text = "لا بد من تحميل بعض الكتب قبل التمكن من البحث"
+    )
 }
 
 @Composable
@@ -135,28 +157,86 @@ private fun SearchTextField(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CategoryFilterRow(
+private fun SelectedSections(
     allCategories: List<Category>,
     selectedCategories: List<Category>,
-    onItemChecked: (Category) -> Unit
+    expanded: Boolean,
+    onExpandedChange: () -> Unit,
+    onDismiss: () -> Unit,
+    onItemChecked: (Category) -> Unit,
 ) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        items(allCategories) { category ->
-            val isSelected = selectedCategories.contains(category)
-            FilterChip(
-                selected = isSelected,
-                onClick = { onItemChecked(category) },
-                label = { Text(category.name, style = AppFonts.textSmallBold) },
-                leadingIcon = if (isSelected) {
-                    { Icon(ShamelaIcons.Check, contentDescription = null) }
-                } else null
+    LazyColumn() {
+        item {
+            Text(
+                "الأقسام",
+                style = AppFonts.textLarge,
+                modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
             )
+            HorizontalDivider()
+            Spacer(Modifier.height(16.dp))
+        }
+        items(selectedCategories) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onItemChecked(it) }
+                    .padding(vertical = 16.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                Text(it.name, style = AppFonts.textNormal)
+                Icon(imageVector = ShamelaIcons.Cancel, contentDescription = null)
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = .5f))
+
+        }
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                    .clickable { onExpandedChange() }
+                    .padding(vertical = 16.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                Text("إختر قسماً", style = AppFonts.textNormalBold)
+                Icon(imageVector = ShamelaIcons.Add, contentDescription = null)
+            }
         }
     }
+    if (expanded)
+        AlertDialog(
+            title = { Text("إختر قسماً أو أكثر", style = AppFonts.textLarge) },
+            onDismissRequest = { onDismiss() },
+            text = {
+                LazyColumn() {
+                    items(allCategories) { item ->
+                        val isSelected = selectedCategories.contains(item)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onItemChecked(item)
+                                    onDismiss()
+                                }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = isSelected,
+                                onCheckedChange = { onItemChecked(item) })
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = item.name, style = AppFonts.textNormal)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                OutlinedButton(onClick = {
+                    onDismiss()
+                }) {
+                    Text("تم", style = AppFonts.textNormal)
+                }
+            },
+        )
 }
