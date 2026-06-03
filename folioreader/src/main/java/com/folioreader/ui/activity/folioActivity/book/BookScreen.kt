@@ -381,8 +381,9 @@ private fun BookTopBar(
     ) {
         TopAppBar(
             title = {
-                var style by remember { mutableStateOf(AppFonts.textLargeBold) }
-                var ready by remember { mutableStateOf(false) }
+                val baseStyle = AppFonts.textLargeBold
+                var style by remember(baseStyle) { mutableStateOf(baseStyle) }
+                var ready by remember(baseStyle) { mutableStateOf(false) }
                 Text(
                     text = title,
                     style = style,

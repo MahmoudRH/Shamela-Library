@@ -28,10 +28,10 @@ class ContentHighlightViewModel(private val userPreferencesUseCases: UserPrefere
 
     init {
         initializeSettingsOptions()
-        initializeSelection()
+        refreshPreferences()
     }
 
-    private fun initializeSelection() {
+    fun refreshPreferences() {
         userPreferencesUseCases.readUserPreferences().let { userPrefs ->
             _preferenceSettings.update { it.copy(userPrefs = userPrefs) }
             val selectedThemePosition =
