@@ -17,16 +17,14 @@ object AppFonts {
 
     private const val DEFAULT = "خط النظام"
     private const val AMIRI = "خط أميري"
-    private const val NASKH = "خط النسخ"
-    private const val NASKH_2 = "خط النسخ 2"
-    private const val NASKH_3 = "خط النسخ 3"
     private const val KITAB = "خط كِتاب"
-    private const val JOZOOR = "خط جُذور"
-    private const val FLAT = "خط مسطح"
-    private const val TAJAWAL = "خط تَجَوَّل"
+    private const val TAJAWAL = "خط تَجَوَّل"
     private const val KUFI = "خط كوفي"
-    private const val REQA = "خط رقعة"
-    private const val Messiri = "خط المسيري"
+    private const val MESSIRI = "خط المسيري"
+    private const val CAIRO = "خط كايرو"
+    private const val IBM_PLEX = "خط آي بي إم"
+    private const val NOTO_NASKH = "خط نوتو نسخ"
+    private const val SCHEHERAZADE = "خط شهرزاد"
 
     val Typography = Typography(
         bodyLarge = TextStyle(
@@ -39,16 +37,14 @@ object AppFonts {
     )
 
     private lateinit var AmiriFamily: FontFamily
-    private lateinit var FlatFamily: FontFamily
-    private lateinit var JozoorFamily: FontFamily
     private lateinit var KitabFamily: FontFamily
-    private lateinit var NaskhFamily: FontFamily
-    private lateinit var Naskh2Family: FontFamily
-    private lateinit var Naskh3Family: FontFamily
     private lateinit var TajawalFamily: FontFamily
     private lateinit var MessiriFamily: FontFamily
     private lateinit var KufiFamily: FontFamily
-    private lateinit var ReqaFamily: FontFamily
+    private lateinit var CairoFamily: FontFamily
+    private lateinit var IbmPlexFamily: FontFamily
+    private lateinit var NotoNaskhFamily: FontFamily
+    private lateinit var ScheherazadeFamily: FontFamily
 
     private val availableFonts = mutableMapOf<String, Pair<FontFamily, Typeface?>>()
 
@@ -57,42 +53,36 @@ object AppFonts {
         fun typeface(file: String) = Typeface.createFromAsset(assets, "fonts/$file")
 
         val amiriTypeface = typeface("amiri_regular.ttf")
-        val flatTypeface = typeface("flat_regular.ttf")
-        val jozoorTypeface = typeface("jozoor_regular.ttf")
         val kitabTypeface = typeface("kitab_regular.ttf")
-        val naskhTypeface = typeface("naskh_regular.ttf")
-        val naskh2Typeface = typeface("naskh_2_regular.ttf")
-        val naskh3Typeface = typeface("naskh_3_regular.ttf")
         val tajawalTypeface = typeface("tajawal_regular.ttf")
         val messiriTypeface = typeface("messiri_regular.ttf")
         val kufiTypeface = typeface("kufi_regular.ttf")
-        val reqaTypeface = typeface("reqa_regular.ttf")
+        val cairoTypeface = typeface("cairo_regular.ttf")
+        val ibmPlexTypeface = typeface("ibm_plex_arabic_regular.ttf")
+        val notoNaskhTypeface = typeface("noto_naskh_arabic_regular.ttf")
+        val scheherazadeTypeface = typeface("scheherazade_regular.ttf")
 
         AmiriFamily = FontFamily(amiriTypeface)
-        FlatFamily = FontFamily(flatTypeface)
-        JozoorFamily = FontFamily(jozoorTypeface)
         KitabFamily = FontFamily(kitabTypeface)
-        NaskhFamily = FontFamily(naskhTypeface)
-        Naskh2Family = FontFamily(naskh2Typeface)
-        Naskh3Family = FontFamily(naskh3Typeface)
         TajawalFamily = FontFamily(tajawalTypeface)
         MessiriFamily = FontFamily(messiriTypeface)
         KufiFamily = FontFamily(kufiTypeface)
-        ReqaFamily = FontFamily(reqaTypeface)
+        CairoFamily = FontFamily(cairoTypeface)
+        IbmPlexFamily = FontFamily(ibmPlexTypeface)
+        NotoNaskhFamily = FontFamily(notoNaskhTypeface)
+        ScheherazadeFamily = FontFamily(scheherazadeTypeface)
 
         availableFonts.clear()
         availableFonts[DEFAULT] = Pair(FontFamily.Default, null)
         availableFonts[AMIRI] = Pair(AmiriFamily, amiriTypeface)
-        availableFonts[FLAT] = Pair(FlatFamily, flatTypeface)
-        availableFonts[JOZOOR] = Pair(JozoorFamily, jozoorTypeface)
         availableFonts[KITAB] = Pair(KitabFamily, kitabTypeface)
-        availableFonts[NASKH] = Pair(NaskhFamily, naskhTypeface)
-        availableFonts[NASKH_2] = Pair(Naskh2Family, naskh2Typeface)
-        availableFonts[NASKH_3] = Pair(Naskh3Family, naskh3Typeface)
         availableFonts[TAJAWAL] = Pair(TajawalFamily, tajawalTypeface)
-        availableFonts[Messiri] = Pair(MessiriFamily, messiriTypeface)
+        availableFonts[MESSIRI] = Pair(MessiriFamily, messiriTypeface)
         availableFonts[KUFI] = Pair(KufiFamily, kufiTypeface)
-        availableFonts[REQA] = Pair(ReqaFamily, reqaTypeface)
+        availableFonts[CAIRO] = Pair(CairoFamily, cairoTypeface)
+        availableFonts[IBM_PLEX] = Pair(IbmPlexFamily, ibmPlexTypeface)
+        availableFonts[NOTO_NASKH] = Pair(NotoNaskhFamily, notoNaskhTypeface)
+        availableFonts[SCHEHERAZADE] = Pair(ScheherazadeFamily, scheherazadeTypeface)
 
         selectedFontFamily.value = TajawalFamily
     }
@@ -104,7 +94,7 @@ object AppFonts {
     fun getAvailableFontSizes() = setOf("4", "2", "0", "-2", "-4")
 
     fun fontFamilyOf(font: String): FontFamily {
-        return availableFonts[font]?.first ?: availableFonts[NASKH]?.first ?: FontFamily.Default
+        return availableFonts[font]?.first ?: availableFonts[NOTO_NASKH]?.first ?: FontFamily.Default
     }
 
     private val selectedFontFamily = mutableStateOf<FontFamily>(FontFamily.Default)
@@ -173,16 +163,14 @@ object AppFonts {
     fun selectedFontFamilyCssClass(): String {
         return when (selectedFontFamily.value) {
             AmiriFamily -> "amiri"
-            FlatFamily -> "flat"
-            JozoorFamily -> "jozoor"
             KitabFamily -> "kitab"
             KufiFamily -> "kufi"
             MessiriFamily -> "messiri"
-            NaskhFamily -> "naskh"
-            Naskh2Family -> "naskh_2"
-            Naskh3Family -> "naskh_3"
-            ReqaFamily -> "reqa"
             TajawalFamily -> "tajawal"
+            CairoFamily -> "cairo"
+            IbmPlexFamily -> "ibm_plex"
+            NotoNaskhFamily -> "noto_naskh"
+            ScheherazadeFamily -> "scheherazade"
             else -> ""
         }
     }
