@@ -45,21 +45,28 @@ class BookMigrationWorker(
         return withContext(Dispatchers.IO) {
             Log.e("BookMigrationWorker", "doWork: isRunning", )
             val totalTime = measureTime {
-            val database = DatabaseHelper(appContext).writableDatabase
+            val databaseHelper = DatabaseHelper.getInstance(appContext)
+            val database = databaseHelper.writableDatabase
             val normalizer = ArabicNormalizer()
             val cursor = database.query(BookPage.TABLE_NAME, arrayOf(BookPage.COL_ID, BookPage.COL_CONTENT), null, null, null, null, null)
-            while (cursor.moveToNext()) {
-                val id = cursor.getString(cursor.getColumnIndex(BookPage.COL_ID))
-                val content = cursor.getString(cursor.getColumnIndex(BookPage.COL_CONTENT))
-                val normalizedContent = normalizer.normalize(content)
-
+            try {
+                database.beginTransaction()
                 val contentValues = ContentValues()
-                contentValues.put(BookPage.COL_CONTENT, normalizedContent)
+                while (cursor.moveToNext()) {
+                    val id = cursor.getString(cursor.getColumnIndex(BookPage.COL_ID))
+                    val content = cursor.getString(cursor.getColumnIndex(BookPage.COL_CONTENT))
+                    val normalizedContent = normalizer.normalize(content)
 
-                database.update(BookPage.TABLE_NAME, contentValues, "${BookPage.COL_ID}=?", arrayOf(id))
+                    contentValues.clear()
+                    contentValues.put(BookPage.COL_CONTENT, normalizedContent)
 
+                    database.update(BookPage.TABLE_NAME, contentValues, "${BookPage.COL_ID}=?", arrayOf(id))
+                }
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
+                cursor.close()
             }
-            cursor.close()
             }
             Log.e("BookMigrationWorker", "doWork: totalTime= ${totalTime.inWholeSeconds}s", )
             Result.success()

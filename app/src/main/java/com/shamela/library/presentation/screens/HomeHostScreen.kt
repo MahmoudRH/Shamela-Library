@@ -9,9 +9,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -20,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -29,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -36,6 +42,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.shamela.apptheme.presentation.common.DefaultTopBar
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
+import com.shamela.library.presentation.navigation.AboutApp
 import com.shamela.library.presentation.navigation.Download
 import com.shamela.library.presentation.navigation.Favorite
 import com.shamela.library.presentation.navigation.Library
@@ -68,13 +76,22 @@ fun HomeHostScreen() {
             if (currentRoute == SearchResults.route){
                 categoryName == "all"
             }else{
-                currentRoute != SectionBooks.route
+                currentRoute != SectionBooks.route && currentRoute != AboutApp.route
             }
         }
         else
             false
 
+    val shouldOpenAbout by AboutApp.pendingOpen.collectAsStateWithLifecycle()
+    LaunchedEffect(shouldOpenAbout) {
+        if (shouldOpenAbout) {
+            navController.navigate(AboutApp.route)
+            AboutApp.consumeOpen()
+        }
+    }
+
     var selectedScreen by remember { mutableIntStateOf(0) }
+    var menuExpanded by remember { mutableStateOf(false) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -134,7 +151,28 @@ fun HomeHostScreen() {
                 DefaultTopBar(
                     title = destination[selectedScreen].label,
                     actionIcon = destination[selectedScreen].actionIcon,
-                    onActionClick = { destination[selectedScreen].onActionClick() }
+                    onActionClick = { destination[selectedScreen].onActionClick() },
+                    navigationContent = if (selectedScreen == 0) {
+                        {
+                            Box {
+                                IconButton(onClick = { menuExpanded = true }) {
+                                    Icon(ShamelaIcons.MoreVert, contentDescription = null)
+                                }
+                                DropdownMenu(
+                                    expanded = menuExpanded,
+                                    onDismissRequest = { menuExpanded = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("حول التطبيق", style = AppFonts.textNormal) },
+                                        onClick = {
+                                            menuExpanded = false
+                                            navController.navigate(AboutApp.route)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    } else null
                 )
             }
         }

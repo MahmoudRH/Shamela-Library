@@ -2,7 +2,6 @@ package com.shamela.library
 
 import android.app.Application
 import android.content.Context
-import com.shamela.apptheme.data.db.DatabaseHelper
 import com.shamela.apptheme.data.sharedPrefs.SharedPreferencesData
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
@@ -31,7 +30,23 @@ class ShamelaApp : Application() {
         externalBooksDirectory =
             File(externalMediaDir, "ShamelaDownloads/${EXTERNAL_BOOKS_CATEGORY}")
 
-        val databaseHelper = DatabaseHelper(applicationContext)
+        if (BuildConfig.DEBUG) {
+            android.os.StrictMode.setThreadPolicy(
+                android.os.StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .build()
+            )
+            android.os.StrictMode.setVmPolicy(
+                android.os.StrictMode.VmPolicy.Builder()
+                    .detectLeakedSqlLiteObjects()
+                    .detectLeakedClosableObjects()
+                    .penaltyLog()
+                    .build()
+            )
+        }
+
+        AppFonts.init(this)
         val availableFontFamilies = AppFonts.getAvailableFontFamilies()
         val availableFontSizes = AppFonts.getAvailableFontSizes()
         val availableThemes = AppTheme.getAvailableThemes()

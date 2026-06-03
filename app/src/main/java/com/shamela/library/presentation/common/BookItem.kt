@@ -17,12 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,13 +30,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,7 +44,25 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.search.BookSearchMatcher
+
+private fun buildHighlightedString(text: String, query: String): AnnotatedString =
+    buildAnnotatedString {
+        val range = BookSearchMatcher.findHighlightRange(text, query)
+        if (range == null) {
+            append(text)
+        } else {
+            append(text.substring(0, range.first))
+            withStyle(SpanStyle(
+                fontSize = AppFonts.textNormal.fontSize.value.sp,
+                background = Color(0xfff8ff00),
+                color = Color.Black
+            )) { append(text.substring(range)) }
+            append(text.substring(range.last + 1))
+        }
+    }
 
 //@Composable
 //fun BookItem(
@@ -87,28 +99,13 @@ import com.shamela.library.domain.model.Book
 fun BookItem(
     modifier: Modifier,
     icon: @Composable () -> Unit = {
-        Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)
+        Icon(imageVector = ShamelaIcons.ArrowBackIosNew, contentDescription = null)
     },
     item: Book,
     highlightText: String = "",
 ) {
-    val text = buildAnnotatedString {
-        item.title.run {
-            val textBefore = substring(0, indexOf(highlightText))
-            val textAfter = substring(indexOf(highlightText) + highlightText.length)
-            append(textBefore)
-            withStyle(
-                style = SpanStyle(
-                    fontSize = (AppFonts.textNormal.fontSize.value).sp,
-                    background = Color(0xfff8ff00),
-                    color = Color.Black
-                )
-            ) {
-                append(highlightText)
-            }
-            append(textAfter)
-        }
-    }
+    val text = buildHighlightedString(item.title, highlightText)
+    val authorText = buildHighlightedString(item.author, highlightText)
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -124,7 +121,7 @@ fun BookItem(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = item.author, style = AppFonts.textNormal)
+                Text(text = authorText, style = AppFonts.textNormal)
                 Text(text = " عدد الصفحات: ${item.pageCount}", style = AppFonts.textNormal)
             }
         }
@@ -139,23 +136,8 @@ fun FavoriteBookItem(
     onFavoriteIconClicked: () -> Unit,
     highlightText: String = "",
 ) {
-    val text = buildAnnotatedString {
-        item.title.run {
-            val textBefore = substring(0, indexOf(highlightText))
-            val textAfter = substring(indexOf(highlightText) + highlightText.length)
-            append(textBefore)
-            withStyle(
-                style = SpanStyle(
-                    fontSize = (AppFonts.textNormal.fontSize.value).sp,
-                    background = Color(0xfff8ff00),
-                    color = Color.Black
-                )
-            ) {
-                append(highlightText)
-            }
-            append(textAfter)
-        }
-    }
+    val text = buildHighlightedString(item.title, highlightText)
+    val authorText = buildHighlightedString(item.author, highlightText)
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -171,7 +153,7 @@ fun FavoriteBookItem(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = item.author, style = AppFonts.textNormal)
+                Text(text = authorText, style = AppFonts.textNormal)
                 Text(text = " عدد الصفحات: ${item.pageCount}", style = AppFonts.textNormal)
             }
         }
@@ -184,7 +166,7 @@ fun FavoriteBookItem(
                 label = ""
             )
             Icon(
-                imageVector = if (item.isFavorite) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                imageVector = if (item.isFavorite) ShamelaIcons.Favorite else ShamelaIcons.FavoriteBorder,
                 contentDescription = null,
                 tint = tintColor
             )
@@ -200,7 +182,7 @@ fun LibraryBookItem(
     onFavoriteIconClicked: () -> Unit,
     onSwipeOut: () -> Unit,
     highlightText: String = "",
-    isSelected:Boolean = false
+    isSelected: Boolean = false
 ) {
     val swipeState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
@@ -209,29 +191,14 @@ fun LibraryBookItem(
             true
         },
     )
-    val text = buildAnnotatedString {
-        item.title.run {
-            val textBefore = substring(0, indexOf(highlightText))
-            val textAfter = substring(indexOf(highlightText) + highlightText.length)
-            append(textBefore)
-            withStyle(
-                style = SpanStyle(
-                    fontSize = (AppFonts.textNormal.fontSize.value).sp,
-                    background = Color(0xfff8ff00),
-                    color = Color.Black
-                )
-            ) {
-                append(highlightText)
-            }
-            append(textAfter)
-        }
-    }
+    val text = buildHighlightedString(item.title, highlightText)
+    val authorText = buildHighlightedString(item.author, highlightText)
     SwipeToDismissBox(
         state = swipeState,
         backgroundContent = {
             val color by animateColorAsState(
                 targetValue = when (swipeState.targetValue) {
-                    SwipeToDismissBoxValue.Settled -> Color.LightGray
+                    SwipeToDismissBoxValue.Settled -> Color.Transparent
                     SwipeToDismissBoxValue.StartToEnd -> Color.Red
                     SwipeToDismissBoxValue.EndToStart -> Color.Red
                 }, label = "swipe to dismiss background color"
@@ -240,7 +207,7 @@ fun LibraryBookItem(
                 targetValue = if (swipeState.targetValue == SwipeToDismissBoxValue.Settled) 0.8f else 1.2f,
                 label = "swipe to dismiss icon scale"
             )
-            val icon = Icons.Outlined.Delete
+            val icon = ShamelaIcons.Delete
             val alignment = Alignment.CenterEnd
 
             Box(
@@ -283,11 +250,11 @@ fun LibraryBookItem(
                             modifier = Modifier
                                 .padding(bottom = 12.dp, end = 12.dp, top = 12.dp)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(MaterialTheme.colorScheme.primary)                             ,
+                                .background(MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.CenterStart
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Check,
+                                imageVector = ShamelaIcons.Check,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onBackground
                             )
@@ -305,7 +272,7 @@ fun LibraryBookItem(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = item.author, style = AppFonts.textNormal)
+                            Text(text = authorText, style = AppFonts.textNormal)
                             Text(
                                 text = " عدد الصفحات: ${item.pageCount}",
                                 style = AppFonts.textNormal
@@ -320,7 +287,7 @@ fun LibraryBookItem(
                             label = ""
                         )
                         Icon(
-                            imageVector = if (item.isFavorite) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                            imageVector = if (item.isFavorite) ShamelaIcons.Favorite else ShamelaIcons.FavoriteBorder,
                             contentDescription = null,
                             tint = tintColor
                         )

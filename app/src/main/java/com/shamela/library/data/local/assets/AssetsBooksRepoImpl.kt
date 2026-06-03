@@ -10,18 +10,19 @@ import com.shamela.library.data.local.assets.dto.AssetsBook
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.Category
 import com.shamela.library.domain.repo.BooksRepository
+import com.shamela.library.domain.search.BookSearchMatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStreamReader
+import java.util.Collections
 import java.util.UUID
 import javax.inject.Qualifier
 
@@ -81,26 +82,28 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
 
     override fun searchBooksByName(categoryName: String, query: String): Flow<Book> {
         return if (categoryName == "all") searchAllBooks(query)
-        else getBooksByCategory(categoryName).filter { it.title.contains(query) }
-
+        else flow {
+            val matches = _getBooksByCategory(categoryName)
+                .filter { BookSearchMatcher.matches(it, query) }
+                .sortedByDescending { BookSearchMatcher.relevanceScore(it, query) }
+            emitAll(matches.asFlow())
+        }
     }
 
     private fun searchAllBooks(query: String) = channelFlow<Book> {
         val categoryNames = context.assets.list("categories") ?: emptyArray()
+        val results = Collections.synchronizedList(mutableListOf<Book>())
 
-        val jobs = categoryNames.map { category ->
-            // Launch a coroutine for each category
+        categoryNames.map { category ->
             launch(Dispatchers.IO) {
-                val results = getBooksByCategory(category).filter { it.title.contains(query) }
-                results.collect { send(it) } // Use send() to emit items in channelFlow
+                _getBooksByCategory(category)
+                    .filter { BookSearchMatcher.matches(it, query) }
+                    .forEach { results.add(it) }
             }
-        }
+        }.joinAll()
 
-        // Wait for all jobs to complete
-        jobs.joinAll()
-
-        // Close the channel to signal the end of emission
-        close()
+        results.sortedByDescending { BookSearchMatcher.relevanceScore(it, query) }
+               .forEach { send(it) }
     }
 
 

@@ -20,14 +20,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -49,6 +43,7 @@ import com.folioreader.ui.activity.searchActivity.SearchActivity
 import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.domain.model.Category
 import com.shamela.library.presentation.screens.LocalPaddingValues
 
@@ -61,9 +56,14 @@ fun SearchScreen(
     val localPadding = LocalPaddingValues.current
     LaunchedEffect(key1 = Unit, block = {
 //        if (searchState.allCategories.isEmpty())
-            viewModel.onEvent(SearchEvent.GetAllCategories)
+        viewModel.onEvent(SearchEvent.GetAllCategories)
     })
-    Column(modifier = Modifier.fillMaxSize().padding(localPadding), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(localPadding),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
         SearchTextField(
             value = searchState.searchQuery,
@@ -74,7 +74,10 @@ fun SearchScreen(
                 intent.apply {
                     putExtra(SearchActivity.Search_Type, SearchActivity.Search_Type_SectionsSearch)
                     putExtra(SearchActivity.Search_Query, searchState.searchQuery)
-                    putExtra(SearchActivity.Search_Categories, searchState.selectedCategories.map { it.name }.toTypedArray())
+                    putExtra(
+                        SearchActivity.Search_Categories,
+                        searchState.selectedCategories.map { it.name }.toTypedArray()
+                    )
                 }
                 context.startActivity(intent)
             },
@@ -96,7 +99,7 @@ fun SearchScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+                Icon(imageVector = ShamelaIcons.Info, contentDescription = null)
                 Text(
                     "يجب اختيار قسم واحد أو عدة اقسام ليتم إجراء البحث فيها",
                     style = AppFonts.textSmallBold
@@ -106,7 +109,10 @@ fun SearchScreen(
 
     }
     LoadingScreen(visibility = searchState.isLoading && searchState.allCategories.isNotEmpty())
-    EmptyListScreen(visibility = searchState.allCategories.isEmpty(), text = "لا بد من تحميل بعض الكتب قبل التمكن من البحث")
+    EmptyListScreen(
+        visibility = searchState.allCategories.isEmpty(),
+        text = "لا بد من تحميل بعض الكتب قبل التمكن من البحث"
+    )
 }
 
 @Composable
@@ -142,7 +148,7 @@ private fun SearchTextField(
                     onClick = onClear
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Cancel,
+                        imageVector = ShamelaIcons.Cancel,
                         contentDescription = "مسح"
                     )
                 }
@@ -167,32 +173,34 @@ private fun SelectedSections(
                 style = AppFonts.textLarge,
                 modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
             )
-            Divider()
+            HorizontalDivider()
             Spacer(Modifier.height(16.dp))
         }
         items(selectedCategories) {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onItemChecked(it) }
-                .padding(vertical = 16.dp, horizontal = 16.dp),
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onItemChecked(it) }
+                    .padding(vertical = 16.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
                 Text(it.name, style = AppFonts.textNormal)
-                Icon(imageVector = Icons.Rounded.Cancel, contentDescription = null)
+                Icon(imageVector = ShamelaIcons.Cancel, contentDescription = null)
             }
-            Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = .5f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = .5f))
 
         }
         item {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                .clickable { onExpandedChange() }
-                .padding(vertical = 16.dp, horizontal = 16.dp),
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                    .clickable { onExpandedChange() }
+                    .padding(vertical = 16.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
                 Text("إختر قسماً", style = AppFonts.textNormalBold)
-                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                Icon(imageVector = ShamelaIcons.Add, contentDescription = null)
             }
         }
     }

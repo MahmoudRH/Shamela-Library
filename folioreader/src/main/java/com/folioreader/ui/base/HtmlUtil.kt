@@ -26,15 +26,8 @@ object HtmlUtil {
             context.getString(R.string.css_tag), "file:///android_asset/css/Style.css"
         )
         val jsPaths = listOf(
-            "file:///android_asset/js/jsface.min.js",
-            "file:///android_asset/js/jquery-3.4.1.min.js",
-            "file:///android_asset/js/rangy-core.js",
-            "file:///android_asset/js/rangy-highlighter.js",
-            "file:///android_asset/js/rangy-classapplier.js",
-            "file:///android_asset/js/rangy-serializer.js",
-            "file:///android_asset/js/Bridge.js",
             "file:///android_asset/js/rangefix.js",
-            "file:///android_asset/js/readium-cfi.umd.js"
+            "file:///android_asset/js/Bridge.js"
         )
 
         val scriptTags = jsPaths.joinToString(separator = "\n") { path ->

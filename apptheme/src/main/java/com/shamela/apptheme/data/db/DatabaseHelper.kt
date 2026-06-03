@@ -14,14 +14,21 @@ import io.requery.android.database.sqlite.SQLiteOpenHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class DatabaseHelper(val context: Context) :
-    SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
-
-    private val db: SQLiteDatabase = this.writableDatabase
+class DatabaseHelper private constructor(val context: Context) :
+    SQLiteOpenHelper(context.applicationContext, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         const val DATABASE_NAME = "AppDatabase"
         const val DATABASE_VERSION = 2
+
+        @Volatile
+        private var INSTANCE: DatabaseHelper? = null
+
+        fun getInstance(context: Context): DatabaseHelper {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: DatabaseHelper(context).also { INSTANCE = it }
+            }
+        }
     }
 
     override fun onCreate(database: SQLiteDatabase) {
@@ -55,22 +62,24 @@ class DatabaseHelper(val context: Context) :
                 put(BookPage.COL_CONTENT, page.content)
             }
 
-            return@withContext db.insert(BookPage.TABLE_NAME, null, contentValues) > 0
+            return@withContext writableDatabase.insert(BookPage.TABLE_NAME, null, contentValues) > 0
         }
     }
+
     suspend fun insertBookPages(pages: List<BookPage>): Boolean {
         return withContext(Dispatchers.IO) {
+            val db = writableDatabase
             try {
                 db.beginTransaction()
+                val contentValues = ContentValues()
                 for (page in pages) {
-                    val contentValues = ContentValues().apply {
-                        put(BookPage.COL_ID, page.id)
-                        put(BookPage.COL_BOOK_ID, page.bookId)
-                        put(BookPage.COL_BOOK_TITLE, page.bookTitle)
-                        put(BookPage.COL_HREF, page.href)
-                        put(BookPage.COL_CATEGORY, page.category)
-                        put(BookPage.COL_CONTENT, page.content)
-                    }
+                    contentValues.clear()
+                    contentValues.put(BookPage.COL_ID, page.id)
+                    contentValues.put(BookPage.COL_BOOK_ID, page.bookId)
+                    contentValues.put(BookPage.COL_BOOK_TITLE, page.bookTitle)
+                    contentValues.put(BookPage.COL_HREF, page.href)
+                    contentValues.put(BookPage.COL_CATEGORY, page.category)
+                    contentValues.put(BookPage.COL_CONTENT, page.content)
                     db.insert(BookPage.TABLE_NAME, null, contentValues)
                 }
                 db.setTransactionSuccessful()
@@ -84,14 +93,26 @@ class DatabaseHelper(val context: Context) :
         }
     }
 
+    suspend fun deleteBookPages(bookId: String) {
+        withContext(Dispatchers.IO) {
+            writableDatabase.delete(BookPage.TABLE_NAME, "${BookPage.COL_BOOK_ID} = ?", arrayOf(bookId))
+        }
+    }
+
     @SuppressLint("Range")
     suspend fun searchBook(bookId: String, query: String): List<BookPage> {
         return withContext(Dispatchers.IO) {
             val results = mutableListOf<BookPage>()
             val queryNormalized = ArabicNormalizer().normalize(query)
-            val cursor = db.query(
+            val columns = arrayOf(
+                BookPage.COL_HREF,
+                BookPage.COL_BOOK_ID,
+                BookPage.COL_CATEGORY,
+                BookPage.COL_BOOK_TITLE
+            )
+            val cursor = readableDatabase.query(
                 BookPage.TABLE_NAME,
-                arrayOf("*"),
+                columns,
                 "${BookPage.COL_BOOK_ID} = ? AND ${BookPage.COL_CONTENT} MATCH ?",
                 arrayOf(bookId, "\"${queryNormalized}\""),
                 null,
@@ -102,7 +123,7 @@ class DatabaseHelper(val context: Context) :
             while (!cursor.isAfterLast) {
                 val page = BookPage(
                     href = cursor.getString(cursor.getColumnIndex(BookPage.COL_HREF)),
-                    content = cursor.getString(cursor.getColumnIndex(BookPage.COL_CONTENT)),
+                    content = "",
                     bookId = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_ID)),
                     category = cursor.getString(cursor.getColumnIndex(BookPage.COL_CATEGORY)),
                     bookTitle = cursor.getString(cursor.getColumnIndex(BookPage.COL_BOOK_TITLE))
@@ -113,14 +134,13 @@ class DatabaseHelper(val context: Context) :
             cursor.close()
             return@withContext results
         }
-
     }
 
     @SuppressLint("Range")
     suspend fun searchCategory(category: String, query: String): List<BookPage> {
         return withContext(Dispatchers.IO) {
             val results = mutableListOf<BookPage>()
-            val cursor = db.query(
+            val cursor = readableDatabase.query(
                 BookPage.TABLE_NAME,
                 arrayOf("*"),
                 "${BookPage.COL_CATEGORY} = ? AND ${BookPage.COL_CONTENT} MATCH ?",
@@ -150,7 +170,7 @@ class DatabaseHelper(val context: Context) :
     suspend fun searchLibrary(query: String): List<BookPage> {
         return withContext(Dispatchers.IO) {
             val results = mutableListOf<BookPage>()
-            val cursor = db.query(
+            val cursor = readableDatabase.query(
                 BookPage.TABLE_NAME,
                 arrayOf("*"),
                 "${BookPage.COL_CONTENT} MATCH ?",

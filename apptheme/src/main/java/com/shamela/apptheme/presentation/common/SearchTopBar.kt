@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shamela.apptheme.R
 import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.apptheme.presentation.util.ShamelaPrev
 
 
@@ -71,7 +69,7 @@ fun SearchTopBar(
         ),
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBackIos, contentDescription = null)
+                Icon(ShamelaIcons.ArrowBackIos, contentDescription = null)
             }
         },
         actions = {
@@ -83,7 +81,7 @@ fun SearchTopBar(
                     onClick = onClickClear
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Cancel,
+                        imageVector = ShamelaIcons.Cancel,
                         contentDescription = stringResource(R.string.clear)
                     )
                 }

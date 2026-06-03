@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -28,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.apptheme.presentation.theme.colors.Green
 import com.shamela.apptheme.presentation.util.ShamelaPrev
 import com.shamela.library.R
@@ -78,7 +77,7 @@ private fun SelectBookButton(
             text = selectedFileName ?: stringResource(R.string.select_book),
             style = AppFonts.textNormal
         )
-        Icon(imageVector = Icons.Default.Add, contentDescription = null)
+        Icon(imageVector = ShamelaIcons.Add, contentDescription = null)
     }
 }
 
