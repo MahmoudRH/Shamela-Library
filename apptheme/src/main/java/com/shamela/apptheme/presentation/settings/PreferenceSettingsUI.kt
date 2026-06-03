@@ -26,6 +26,10 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -101,12 +105,11 @@ fun PreferenceSettingsUI(
                 onEvent(PreferenceSettingsEvent.OnChangeSliderPosition(it))
             },
             list = uiState.availableFontSizes,
-            onValueChangeFinished = {
-                val sliderPosition = ceil(uiState.sliderPosition).toInt()
-
+            onValueChangeFinished = { finalPosition ->
+                val index = ceil(finalPosition).toInt()
                 onEvent(
                     PreferenceSettingsEvent.OnChangeAppFontSize(
-                        uiState.userPrefs.copy(fontSize = uiState.availableFontSizes[sliderPosition])
+                        uiState.userPrefs.copy(fontSize = uiState.availableFontSizes[index])
                     )
                 )
             }
@@ -207,8 +210,13 @@ private fun FontSizeSelector(
     sliderPosition: Float,
     list: List<Int>,
     onSliderPositionChanged: (Float) -> Unit,
-    onValueChangeFinished: () -> Unit,
+    onValueChangeFinished: (Float) -> Unit,
 ) {
+    // Tracks the live drag value so onValueChangeFinished always receives the current position,
+    // not the stale one from the previous recomposition.
+    var currentValue by remember { mutableFloatStateOf(sliderPosition) }
+    LaunchedEffect(sliderPosition) { currentValue = sliderPosition }
+
     Text(
         text = title,
         modifier = Modifier
@@ -220,8 +228,12 @@ private fun FontSizeSelector(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         Slider(
-            value = sliderPosition,
-            onValueChange = onSliderPositionChanged,
+            value = currentValue,
+            onValueChange = {
+                currentValue = it
+                onSliderPositionChanged(it)
+            },
+            onValueChangeFinished = { onValueChangeFinished(currentValue) },
             valueRange = 0f..max(list.lastIndex.toFloat(),0f),
             steps = ceil(list.size / 2f).toInt(),
             colors = SliderDefaults.colors(
@@ -244,16 +256,13 @@ private fun FontSizeSelector(
             )
             list.forEachIndexed { index, it ->
                 val color =
-                    if (sliderPosition.toInt() == index) MaterialTheme.colorScheme.primary else Color.Unspecified
+                    if (currentValue.toInt() == index) MaterialTheme.colorScheme.primary else Color.Unspecified
                 Text(
                     text = wordsList[index],
                     style = AppFonts.textNormal.copy(fontSize = (16 + it).sp, color = color)
                 )
             }
         }
-    }
-    LaunchedEffect(sliderPosition) {
-        onValueChangeFinished()
     }
 }
 

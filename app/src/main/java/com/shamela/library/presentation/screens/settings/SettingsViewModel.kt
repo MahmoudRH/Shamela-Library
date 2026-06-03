@@ -55,10 +55,10 @@ class SettingsViewModel @Inject constructor(
 
     init {
         initializeSettingsOptions()
-        initializeSelection()
+        refreshPreferences()
     }
 
-    private fun initializeSelection() {
+    fun refreshPreferences() {
         userPreferencesUseCases.readUserPreferences().let { userPrefs ->
             _preferenceSettings.update { it.copy(userPrefs = userPrefs) }
             val selectedThemePosition =

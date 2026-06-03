@@ -160,6 +160,11 @@ class ContentHighlightActivity : ComponentActivity() {
     }
 
 
+    override fun onResume() {
+        super.onResume()
+        viewmodel.refreshPreferences()
+    }
+
     private fun onTocClicked(title: String?, href: String?) {
         val intent = Intent()
         intent.putExtra(CHAPTER_SELECTED, href)
