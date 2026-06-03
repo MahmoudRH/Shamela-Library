@@ -9,3 +9,4 @@
 local.properties
 /app/google-services.json
 
+/uploadToCloudflares.py

@@ -10,12 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Divider
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +22,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,10 +32,14 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
+import com.shamela.library.domain.model.DownloadStatus
 import com.shamela.library.presentation.common.BookItem
+import com.shamela.library.presentation.common.DownloadIconButton
 
 @Composable
 fun SectionBooksScreen(
@@ -48,13 +48,27 @@ fun SectionBooksScreen(
     navigateBack: () -> Unit,
     navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
 ) {
-    val sectionBooksState = viewModel.sectionBooksState.collectAsState().value
+    val sectionBooksState = viewModel.sectionBooksState.collectAsStateWithLifecycle().value
+
+    val downloadedInSection = remember(sectionBooksState.downloadedBookIds, sectionBooksState.books) {
+        sectionBooksState.downloadedBookIds.intersect(sectionBooksState.books.keys).size
+    }
+    val totalInSection = sectionBooksState.books.size
+    val hasActiveDownloadsInSection = remember(sectionBooksState.downloadStatuses, sectionBooksState.books) {
+        sectionBooksState.books.keys.any { sectionBooksState.downloadStatuses[it] is DownloadStatus.Downloading }
+    }
+
     Column {
         SectionTopBar(
             title = categoryName,
             onNavigateBack = navigateBack,
             onSearch = { navigateToSearchResultsScreen(categoryName, sectionBooksState.type) },
-            onDownload = { viewModel.onEvent(SectionBooksEvent.OnClickDownloadSection) })
+            onDownload = { viewModel.onEvent(SectionBooksEvent.OnClickDownloadSection) },
+            isDownloadButtonEnabled = sectionBooksState.isDownloadButtonEnabled,
+            downloadedBookCount = downloadedInSection,
+            totalBookCount = totalInSection,
+            hasActiveDownloads = hasActiveDownloadsInSection,
+        )
 
         LazyColumn(
             Modifier
@@ -86,24 +100,27 @@ fun SectionBooksScreen(
                         BookItem(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             icon = {
-                                IconButton(onClick = {
-                                    viewModel.onEvent(
-                                        SectionBooksEvent.OnClickDownloadBook(
-                                            currentBook
+                                DownloadIconButton(
+                                    bookId = currentBook.id,
+                                    downloadStatuses = sectionBooksState.downloadStatuses,
+                                    downloadedBookIds = sectionBooksState.downloadedBookIds,
+                                    onDownloadClick = {
+                                        viewModel.onEvent(
+                                            SectionBooksEvent.OnClickDownloadBook(currentBook)
                                         )
-                                    )
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.FileDownload,
-                                        contentDescription = "download"
-                                    )
-                                }
+                                    },
+                                    onCancelClick = {
+                                        viewModel.onEvent(
+                                            SectionBooksEvent.OnClickCancelDownload(currentBook.id)
+                                        )
+                                    },
+                                )
                             },
                             item = currentBook
                         )
                     }
                 }
-                Divider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
             }
         }
     }
@@ -112,7 +129,6 @@ fun SectionBooksScreen(
     LaunchedEffect(Unit) {
         viewModel.onEvent(SectionBooksEvent.LoadBooks)
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,6 +138,10 @@ private fun SectionTopBar(
     onDownload: () -> Unit,
     onSearch: () -> Unit,
     onNavigateBack: () -> Unit,
+    isDownloadButtonEnabled: Boolean,
+    downloadedBookCount: Int,
+    totalBookCount: Int,
+    hasActiveDownloads: Boolean,
 ) {
     TopAppBar(
         modifier = Modifier,
@@ -148,16 +168,34 @@ private fun SectionTopBar(
         ),
         actions = {
             IconButton(onClick = onSearch) {
-                Icon(Icons.Outlined.Search, contentDescription = null)
+                Icon(ShamelaIcons.Search, contentDescription = null)
             }
             Spacer(modifier = Modifier.size(4.dp))
-            IconButton(onClick = onDownload) {
-                Icon(Icons.Outlined.FileDownload, contentDescription = null)
+            IconButton(onClick = onDownload, enabled = isDownloadButtonEnabled) {
+                when {
+                    totalBookCount > 0 && downloadedBookCount == totalBookCount -> {
+                        Icon(
+                            ShamelaIcons.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    hasActiveDownloads -> {
+                        CircularProgressIndicator(
+                            progress = { if (totalBookCount > 0) downloadedBookCount.toFloat() / totalBookCount else 0f },
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.5.dp,
+                        )
+                    }
+                    else -> {
+                        Icon(ShamelaIcons.FileDownload, contentDescription = null)
+                    }
+                }
             }
         },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
-                Icon(Icons.Default.ArrowForwardIos, contentDescription = null)
+                Icon(ShamelaIcons.ArrowForwardIos, contentDescription = null)
             }
         }
     )

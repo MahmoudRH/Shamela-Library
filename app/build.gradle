@@ -23,8 +23,8 @@ android {
         applicationId "com.shamela.library"
         minSdk versions.androidMinSdk
         targetSdk versions.androidTargetSdk
-        versionCode 3
-        versionName "1.2"
+        versionCode 4
+        versionName "1.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -36,6 +36,10 @@ android {
                 "BASE_URL",
                 "\"${localProperties['BASE_URL']}\""
         )
+
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a"
+        }
     }
 
     lint {
@@ -92,7 +96,6 @@ dependencies {
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
-    implementation "androidx.compose.material:material-icons-extended"
 
 
     //-> Compose Navigation
@@ -123,6 +126,7 @@ dependencies {
     implementation platform("com.google.firebase:firebase-bom:$firebase_bom")
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-messaging-ktx'
 
     //-> Testing
     testImplementation 'junit:junit:4.13.2'

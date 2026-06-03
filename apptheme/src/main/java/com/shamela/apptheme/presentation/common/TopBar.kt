@@ -1,9 +1,6 @@
 package com.shamela.apptheme.presentation.common
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.shamela.apptheme.R
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.AppTheme
+import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.apptheme.presentation.util.ShamelaPrev
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,6 +27,7 @@ fun DefaultTopBar(
     actionIcon: ImageVector? = null,
     onActionClick: (() -> Unit) = {},
     onNavigateBack: (() -> Unit)? = null,
+    navigationContent: (@Composable () -> Unit)? = null,
 ) {
     CenterAlignedTopAppBar(
         modifier = Modifier,
@@ -46,9 +45,10 @@ fun DefaultTopBar(
             }
         },
         navigationIcon = {
-            onNavigateBack?.let {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBackIos, contentDescription = null)
+            when {
+                navigationContent != null -> navigationContent()
+                onNavigateBack != null -> IconButton(onClick = onNavigateBack) {
+                    Icon(ShamelaIcons.ArrowBackIos, contentDescription = null)
                 }
             }
         }
@@ -78,7 +78,7 @@ private fun DefaultTopBar3Prev() {
         DefaultTopBar(
             stringResource(R.string.normal),
             onNavigateBack = {},
-            actionIcon = Icons.Default.Search
+            actionIcon = ShamelaIcons.Search
         )
     }
 }

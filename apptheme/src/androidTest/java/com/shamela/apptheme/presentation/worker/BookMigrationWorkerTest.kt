@@ -39,7 +39,7 @@ class BookMigrationWorkerTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        dbHelper = DatabaseHelper(context)
+        dbHelper = DatabaseHelper.getInstance(context)
         setupNotificationChannels(getApplicationContext())
 
         val config = Configuration.Builder()
@@ -62,10 +62,8 @@ class BookMigrationWorkerTest {
 
     @After
     fun tearDown() {
-        dbHelper = DatabaseHelper(context)
-        dbHelper.use {
-            it.writableDatabase.execSQL("DELETE FROM ${BookPage.TABLE_NAME};")
-        }
+        val db = DatabaseHelper.getInstance(context).writableDatabase
+        db.execSQL("DELETE FROM ${BookPage.TABLE_NAME};")
     }
 
     @Test

@@ -68,7 +68,7 @@ class BookPreparationWorker(
     }
 
     private suspend fun insertBookPages(bookFilePath: String, pages: Map<String, String>) {
-        val database = DatabaseHelper(appContext)
+        val database = DatabaseHelper.getInstance(appContext)
         val bookFile = File(bookFilePath)
         val bookTitle = bookFile.name.removeSuffix(".epub")
         val category = bookFile.parentFile?.name ?: "unknown"
@@ -91,8 +91,6 @@ class BookPreparationWorker(
         )
 
         database.insertBookPages(pagesList)
-
-        database.close()
     }
 
     private suspend fun getPages(bookFilePath: String): Map<String, String> {

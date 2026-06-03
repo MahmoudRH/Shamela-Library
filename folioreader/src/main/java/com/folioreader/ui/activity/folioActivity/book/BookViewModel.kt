@@ -20,6 +20,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.math.abs
 
 class BookViewModel : ViewModel() {
     private val _state = MutableStateFlow(BookState())
@@ -99,21 +100,49 @@ class BookViewModel : ViewModel() {
         fontSize: String,
         streamUrl: String
     ) = flow {
+        // Emit the requested page first so the visible page never waits behind prefetch requests.
+        val currentCached = cachedPages[pageIndex]
+        if (currentCached != null) {
+            emit(mapOf(pageIndex to currentCached))
+        } else {
+            fetchSinglePage(pageIndex, publication, streamUrl, context, fontFamily, isNightMode, fontSize)?.let { data ->
+                cachedPages[pageIndex] = data
+                emit(mapOf(pageIndex to data))
+            }
+        }
+
+        // Prefetch surrounding window sorted by proximity — N±1 first, so the
+        // pages the user is most likely to swipe to get data as early as possible.
         val range = (maxOf(0, pageIndex - 5))..(minOf(pageIndex + 5, totalPages))
-        for (page in range) {
+        val sortedPages = range.sortedBy { abs(it - pageIndex) }.filter { it != pageIndex }
+        for (page in sortedPages) {
             val cachedPage = cachedPages[page]
-            if (cachedPage != null){
+            if (cachedPage != null) {
                 emit(mapOf(page to cachedPage))
                 continue
             }
-            val href = publication.readingOrder[page].href?.removePrefix("/") ?: continue
-            val pageUrl = "$streamUrl$href"
-            val html = getHtmlData(pageUrl)
-            val styledHtml = HtmlUtil.getHtmlContent(context, html, fontFamily, isNightMode, fontSize)
-            val data = Pair(pageUrl, styledHtml)
-            cachedPages[page] = data
-            emit(mapOf(page to data))
+            fetchSinglePage(page, publication, streamUrl, context, fontFamily, isNightMode, fontSize)?.let { data ->
+                cachedPages[page] = data
+                emit(mapOf(page to data))
+            }
         }
+    }
+
+    private suspend fun fetchSinglePage(
+        page: Int,
+        publication: Publication,
+        streamUrl: String,
+        context: Context,
+        fontFamily: String,
+        isNightMode: Boolean,
+        fontSize: String,
+    ): Pair<String, String>? {
+        val href = publication.readingOrder[page].href?.removePrefix("/") ?: return null
+        val pageUrl = "$streamUrl$href"
+        val html = getHtmlData(pageUrl)
+        if (html.isEmpty()) return null
+        val styledHtml = HtmlUtil.getHtmlContent(context, html, fontFamily, isNightMode, fontSize)
+        return Pair(pageUrl, styledHtml)
     }
 
     private suspend fun getHtmlData(urlString: String): String = withContext(Dispatchers.IO) {

@@ -1,11 +1,13 @@
 package com.shamela.library.domain.usecases.books
 
+import android.content.Context
 import com.shamela.library.data.local.db.BooksDao
 import com.shamela.library.domain.repo.BooksRepository
 
 data class BooksUseCases(
     val repository: BooksRepository,
     val booksDao: BooksDao,
+    val context: Context,
     val getAllCategories: GetAllCategories = GetAllCategories(repository),
     val getAllBooks: GetAllBooks = GetAllBooks(repository),
     val getBooksByCategory: GetBooksByCategory = GetBooksByCategory(repository),
@@ -15,6 +17,6 @@ data class BooksUseCases(
     val getDownloadedBooks: GetDownloadedBooks = GetDownloadedBooks(booksDao),
     val updateBook: UpdateBook = UpdateBook(booksDao),
     val saveDownloadedBook: SaveDownloadedBook = SaveDownloadedBook(booksDao),
-    val deleteBook: DeleteBook = DeleteBook(booksDao),
+    val deleteBook: DeleteBook = DeleteBook(booksDao, context),
     val getBookById: GetBookById = GetBookById(booksDao)
 )
