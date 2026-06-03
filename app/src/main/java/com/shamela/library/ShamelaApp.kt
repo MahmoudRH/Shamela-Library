@@ -46,6 +46,7 @@ class ShamelaApp : Application() {
             )
         }
 
+        AppFonts.init(this)
         val availableFontFamilies = AppFonts.getAvailableFontFamilies()
         val availableFontSizes = AppFonts.getAvailableFontSizes()
         val availableThemes = AppTheme.getAvailableThemes()
