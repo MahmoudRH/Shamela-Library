@@ -94,8 +94,8 @@ img {
 
 p {
     margin: 1.3em 0 1.5em 0;
-    line-height: 1.5em !important;
-    text-indent: 1.25em;
+    line-height: 1.9em !important;
+    text-indent: 0;
 }
 
 b, strong, th {
@@ -323,30 +323,26 @@ html.nightMode .highlight_underline {
  *
  */
 @font-face { font-family: 'amiri'; src: url('file:///android_asset/fonts/amiri_regular.ttf'); }
-@font-face { font-family: 'flat'; src: url('file:///android_asset/fonts/flat_regular.ttf'); }
 @font-face { font-family: 'gulzar'; src: url('file:///android_asset/fonts/gulzar_regular.ttf'); }
-@font-face { font-family: 'jozoor'; src: url('file:///android_asset/fonts/jozoor_regular.ttf'); }
 @font-face { font-family: 'kitab'; src: url('file:///android_asset/fonts/kitab_regular.ttf'); }
 @font-face { font-family: 'kufi'; src: url('file:///android_asset/fonts/kufi_regular.ttf'); }
 @font-face { font-family: 'messiri'; src: url('file:///android_asset/fonts/messiri_regular.ttf'); }
-@font-face { font-family: 'naskh'; src: url('file:///android_asset/fonts/naskh_regular.ttf'); }
-@font-face { font-family: 'naskh_2'; src: url('file:///android_asset/fonts/naskh_2_regular.ttf'); }
-@font-face { font-family: 'naskh_3'; src: url('file:///android_asset/fonts/naskh_3_regular.ttf'); }
-@font-face { font-family: 'reqa'; src: url('file:///android_asset/fonts/reqa_regular.ttf'); }
 @font-face { font-family: 'tajawal'; src: url('file:///android_asset/fonts/tajawal_regular.ttf'); }
+@font-face { font-family: 'cairo'; src: url('file:///android_asset/fonts/cairo_regular.ttf'); }
+@font-face { font-family: 'ibm_plex'; src: url('file:///android_asset/fonts/ibm_plex_arabic_regular.ttf'); }
+@font-face { font-family: 'noto_naskh'; src: url('file:///android_asset/fonts/noto_naskh_arabic_regular.ttf'); }
+@font-face { font-family: 'scheherazade'; src: url('file:///android_asset/fonts/scheherazade_regular.ttf'); }
 
 .amiri { font-family: 'amiri', sans-serif; }
-.flat { font-family: 'flat', sans-serif; }
 .gulzar { font-family: 'gulzar', sans-serif; }
-.jozoor { font-family: 'jozoor', sans-serif; }
 .kitab { font-family: 'kitab', sans-serif; }
 .kufi { font-family: 'kufi', sans-serif; }
 .messiri { font-family: 'messiri', sans-serif; }
-.naskh { font-family: 'naskh', sans-serif; }
-.naskh_2 { font-family: 'naskh_2', sans-serif; }
-.naskh_3 { font-family: 'naskh_3', sans-serif; }
-.reqa { font-family: 'reqa', sans-serif; }
 .tajawal { font-family: 'tajawal', sans-serif; }
+.cairo { font-family: 'cairo', sans-serif; }
+.ibm_plex { font-family: 'ibm_plex', sans-serif; }
+.noto_naskh { font-family: 'noto_naskh', sans-serif; }
+.scheherazade { font-family: 'scheherazade', sans-serif; }
 
 html.textSizeOne { font-size: 13px !important; }
 html.textSizeTwo { font-size: 15px !important; }
@@ -354,27 +350,29 @@ html.textSizeThree { font-size: 17px !important; }
 html.textSizeFour { font-size: 19px !important; }
 html.textSizeFive { font-size: 21px !important; }
 
-h1 { font-size: 2rem; line-height: 1.2; }
-h2 { font-size: 1.5rem; line-height: 1.2; }
-h3 { font-size: 1.17rem; line-height: 1.2; }
-h4 { font-size: 1rem; line-height: 1.2; }
-h5 { font-size: 0.83rem; line-height: 1.2; }
-h6 { font-size: 0.67rem; line-height: 1.2; }
+h1 { font-size: 2rem; line-height: 1.6; }
+h2 { font-size: 1.5rem; line-height: 1.6; }
+h3 { font-size: 1.17rem; line-height: 1.6; }
+h4 { font-size: 1rem; line-height: 1.6; }
+h5 { font-size: 0.83rem; line-height: 1.6; }
+h6 { font-size: 0.67rem; line-height: 1.6; }
 
 body {
-    word-break: break-word !important;
-    -webkit-hyphens: auto !important;
-    hyphens: auto !important;
+    direction: rtl;
+    text-align: right;
+    overflow-wrap: break-word !important;
+    -webkit-hyphens: none !important;
+    hyphens: none !important;
 }
 
 p, span, div {
-    line-height: 1.5 !important;
+    line-height: 1.9 !important;
 }
 
 @media only screen and (min-device-width: 600px) {
     div {
         font-size: 1rem;
-        line-height: 1.438em !important;
+        line-height: 1.9em !important;
     }
 
     body {
