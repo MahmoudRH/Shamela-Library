@@ -38,6 +38,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,7 +55,10 @@ import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
+import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.util.BookSorter
 import com.shamela.library.presentation.common.BookDetailsBottomSheet
+import com.shamela.library.presentation.common.BookSortMenu
 import com.shamela.library.presentation.common.ConfirmationDialog
 import com.shamela.library.presentation.common.LibraryBookItem
 import com.shamela.library.presentation.common.SectionItem
@@ -79,6 +86,19 @@ fun LibraryScreen(
     val libraryState = viewModel.libraryState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
     var selectedBook by remember { mutableStateOf<Book?>(null) }
+    val sortedBooks = remember(
+        libraryState.books,
+        libraryState.sortOption,
+        libraryState.sortAscending,
+        libraryState.downloadTimes,
+    ) {
+        BookSorter.sortBooks(
+            books = libraryState.books.values.toList(),
+            option = libraryState.sortOption,
+            ascending = libraryState.sortAscending,
+            downloadTimes = libraryState.downloadTimes,
+        )
+    }
     var bookPendingDelete by remember { mutableStateOf<Book?>(null) }
     var showDeleteSelectedDialog by remember { mutableStateOf(false) }
     LazyColumn(
@@ -118,6 +138,26 @@ fun LibraryScreen(
 
             BooksViewType.Books -> {
                 item {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "ترتيب: ${libraryState.sortOption.label}",
+                            style = AppFonts.textNormal
+                        )
+                        BookSortMenu(
+                            sortOption = libraryState.sortOption,
+                            ascending = libraryState.sortAscending,
+                            onOptionSelected = { viewModel.onEvent(LibraryEvent.OnChangeSortOption(it)) },
+                            onToggleDirection = { viewModel.onEvent(LibraryEvent.OnToggleSortDirection) }
+                        )
+                    }
+                }
+                item {
                     AnimatedVisibility(visible = libraryState.selectedBooks.isNotEmpty(), enter = expandVertically(), exit = shrinkVertically()) {
                         Row(
                             Modifier.fillMaxWidth(),
@@ -151,7 +191,7 @@ fun LibraryScreen(
                     }
                 }
 
-                items(libraryState.books.values.toList(), key = { it.id }) {
+                items(sortedBooks, key = { it.id }) {
                     LibraryBookItem(modifier = Modifier
                         .pointerInput(Unit) {
                             detectTapGestures(onTap = { _ ->

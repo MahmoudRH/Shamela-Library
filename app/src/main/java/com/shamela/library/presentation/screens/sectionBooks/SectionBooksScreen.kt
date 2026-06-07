@@ -37,8 +37,13 @@ import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
+import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.DownloadStatus
+import com.shamela.library.domain.util.BookSortOption
+import com.shamela.library.domain.util.BookSorter
+import com.shamela.library.presentation.common.BookDetailsBottomSheet
 import com.shamela.library.presentation.common.BookItem
+import com.shamela.library.presentation.common.BookSortMenu
 import com.shamela.library.presentation.common.DownloadIconButton
 
 @Composable
@@ -50,6 +55,25 @@ fun SectionBooksScreen(
 ) {
     val sectionBooksState = viewModel.sectionBooksState.collectAsStateWithLifecycle().value
     var selectedBook by remember { mutableStateOf<Book?>(null) }
+
+    // Download time only applies to local books (remote ones have no file on disk).
+    val availableSortOptions = remember(sectionBooksState.type) {
+        if (sectionBooksState.type == "local") BookSortOption.values().toList()
+        else BookSortOption.values().filter { it != BookSortOption.DOWNLOAD_TIME }
+    }
+    val sortedBooks = remember(
+        sectionBooksState.books,
+        sectionBooksState.sortOption,
+        sectionBooksState.sortAscending,
+        sectionBooksState.downloadTimes,
+    ) {
+        BookSorter.sortBooks(
+            books = sectionBooksState.books.values.toList(),
+            option = sectionBooksState.sortOption,
+            ascending = sectionBooksState.sortAscending,
+            downloadTimes = sectionBooksState.downloadTimes,
+        )
+    }
 
     val downloadedInSection = remember(sectionBooksState.downloadedBookIds, sectionBooksState.books) {
         sectionBooksState.downloadedBookIds.intersect(sectionBooksState.books.keys).size
@@ -69,6 +93,11 @@ fun SectionBooksScreen(
             downloadedBookCount = downloadedInSection,
             totalBookCount = totalInSection,
             hasActiveDownloads = hasActiveDownloadsInSection,
+            sortOption = sectionBooksState.sortOption,
+            sortAscending = sectionBooksState.sortAscending,
+            availableSortOptions = availableSortOptions,
+            onSortOptionSelected = { viewModel.onEvent(SectionBooksEvent.OnChangeSortOption(it)) },
+            onToggleSortDirection = { viewModel.onEvent(SectionBooksEvent.OnToggleSortDirection) },
         )
 
         LazyColumn(
@@ -78,7 +107,7 @@ fun SectionBooksScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
-            items(sectionBooksState.books.values.toList(), key = { it.id }) { currentBook ->
+            items(sortedBooks, key = { it.id }) { currentBook ->
                 when (sectionBooksState.type) {
                     "local" -> {
                         BookItem(
@@ -149,6 +178,11 @@ private fun SectionTopBar(
     downloadedBookCount: Int,
     totalBookCount: Int,
     hasActiveDownloads: Boolean,
+    sortOption: BookSortOption,
+    sortAscending: Boolean,
+    availableSortOptions: List<BookSortOption>,
+    onSortOptionSelected: (BookSortOption) -> Unit,
+    onToggleSortDirection: () -> Unit,
 ) {
     TopAppBar(
         modifier = Modifier,
@@ -174,6 +208,13 @@ private fun SectionTopBar(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(15.dp),
         ),
         actions = {
+            BookSortMenu(
+                sortOption = sortOption,
+                ascending = sortAscending,
+                availableOptions = availableSortOptions,
+                onOptionSelected = onSortOptionSelected,
+                onToggleDirection = onToggleSortDirection,
+            )
             IconButton(onClick = onSearch) {
                 Icon(ShamelaIcons.Search, contentDescription = null)
             }
