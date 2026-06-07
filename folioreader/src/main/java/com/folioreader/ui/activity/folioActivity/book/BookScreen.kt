@@ -234,6 +234,9 @@ fun BookScreen(
                 backgroundColor = backgroundColor,
                 javascriptCall = searchResult.second,
                 onTapped = { viewModel.onEvent(BookEvent.ToggleAppBarsVisibility) },
+                onRequestMeaning = { text ->
+                    viewModel.onEvent(BookEvent.ShowMeaningSheet(text, context))
+                },
                 saveWebView = { index, webview -> cachedWebViews.put(index, webview) }
             )
         }
@@ -260,6 +263,16 @@ fun BookScreen(
     }
 
     LoadingScreen(state.isLoading)
+
+    if (state.showMeaningSheet) {
+        MeaningBottomSheet(
+            word = state.meaningQuery,
+            loading = state.meaningLoading,
+            dictionaryAvailable = state.dictionaryAvailable,
+            results = state.meaningResults,
+            onDismiss = { viewModel.onEvent(BookEvent.DismissMeaningSheet) }
+        )
+    }
 }
 
 
@@ -444,6 +457,7 @@ private fun BookPage(
     backgroundColor: Long,
     javascriptCall: String,
     onTapped: () -> Unit,
+    onRequestMeaning: (String) -> Unit,
     saveWebView: (Int, WebView) -> Unit,
 ) {
     val lastAppliedJs = remember { mutableStateOf("") }
@@ -501,6 +515,9 @@ private fun BookPage(
                             }
                         }, "CustomWebView")
                         addJavascriptInterface(this, "FolioWebView")
+                        // Qualify with `this.` — the BookPage `onRequestMeaning` param
+                        // (a val) would otherwise shadow this property and fail to assign.
+                        this.onRequestMeaning = onRequestMeaning
                     }
                 }
             }, update = { webview ->
