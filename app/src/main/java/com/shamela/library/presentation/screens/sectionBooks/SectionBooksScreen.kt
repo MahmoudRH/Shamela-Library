@@ -49,6 +49,7 @@ fun SectionBooksScreen(
     navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
 ) {
     val sectionBooksState = viewModel.sectionBooksState.collectAsStateWithLifecycle().value
+    var selectedBook by remember { mutableStateOf<Book?>(null) }
 
     val downloadedInSection = remember(sectionBooksState.downloadedBookIds, sectionBooksState.books) {
         sectionBooksState.downloadedBookIds.intersect(sectionBooksState.books.keys).size
@@ -92,13 +93,15 @@ fun SectionBooksScreen(
                                         })
                                 }
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
-                            item = currentBook
+                            item = currentBook,
+                            onInfoClick = { selectedBook = currentBook }
                         )
                     }
 
                     "remote" -> {
                         BookItem(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            onInfoClick = { selectedBook = currentBook },
                             icon = {
                                 DownloadIconButton(
                                     bookId = currentBook.id,
@@ -125,6 +128,10 @@ fun SectionBooksScreen(
         }
     }
     LoadingScreen(visibility = sectionBooksState.isLoading)
+
+    selectedBook?.let { book ->
+        BookDetailsBottomSheet(book = book, onDismiss = { selectedBook = null })
+    }
 
     LaunchedEffect(Unit) {
         viewModel.onEvent(SectionBooksEvent.LoadBooks)
