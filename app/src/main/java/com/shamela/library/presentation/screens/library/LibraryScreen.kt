@@ -76,6 +76,7 @@ fun LibraryScreen(
     })
     val libraryState = viewModel.libraryState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
+    var selectedBook by remember { mutableStateOf<Book?>(null) }
     LazyColumn(
         Modifier.fillMaxSize().padding(localPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -174,13 +175,17 @@ fun LibraryScreen(
                         onSwipeOut = {
                             viewModel.onEvent(LibraryEvent.DeleteBook(it))
                         },
-                        isSelected = libraryState.selectedBooks.contains(it)
+                        isSelected = libraryState.selectedBooks.contains(it),
+                        onInfoClick = { selectedBook = it }
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }
             }
         }
+    }
+    selectedBook?.let { book ->
+        BookDetailsBottomSheet(book = book, onDismiss = { selectedBook = null })
     }
 }
 
