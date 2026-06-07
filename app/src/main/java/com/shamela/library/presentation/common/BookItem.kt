@@ -204,9 +204,12 @@ fun LibraryBookItem(
 ) {
     val swipeState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart)
+            if (it == SwipeToDismissBoxValue.EndToStart) {
                 onSwipeOut()
-            true
+            }
+            // Don't dismiss the item; let the confirmation dialog decide.
+            // The card snaps back, and the actual removal happens via state update on confirm.
+            false
         },
     )
     val text = buildHighlightedString(item.title, highlightText)

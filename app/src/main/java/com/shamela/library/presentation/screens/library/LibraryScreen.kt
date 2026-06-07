@@ -51,6 +51,8 @@ import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
+import com.shamela.library.presentation.common.BookDetailsBottomSheet
+import com.shamela.library.presentation.common.ConfirmationDialog
 import com.shamela.library.presentation.common.LibraryBookItem
 import com.shamela.library.presentation.common.SectionItem
 import com.shamela.library.presentation.navigation.Library
@@ -77,6 +79,8 @@ fun LibraryScreen(
     val libraryState = viewModel.libraryState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
     var selectedBook by remember { mutableStateOf<Book?>(null) }
+    var bookPendingDelete by remember { mutableStateOf<Book?>(null) }
+    var showDeleteSelectedDialog by remember { mutableStateOf(false) }
     LazyColumn(
         Modifier.fillMaxSize().padding(localPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -121,7 +125,7 @@ fun LibraryScreen(
                         ) {
                             OutlinedButton(
                                 onClick = {
-                                    viewModel.onEvent(LibraryEvent.DeleteSelectedBooks)
+                                    showDeleteSelectedDialog = true
                                 },
                                 colors = ButtonDefaults.outlinedButtonColors(
                                     contentColor = MaterialTheme.colorScheme.error
@@ -173,7 +177,7 @@ fun LibraryScreen(
                         item = it,
                         onFavoriteIconClicked = { viewModel.onEvent(LibraryEvent.ToggleFavorite(it)) },
                         onSwipeOut = {
-                            viewModel.onEvent(LibraryEvent.DeleteBook(it))
+                            bookPendingDelete = it
                         },
                         isSelected = libraryState.selectedBooks.contains(it),
                         onInfoClick = { selectedBook = it }
@@ -184,8 +188,33 @@ fun LibraryScreen(
             }
         }
     }
+
     selectedBook?.let { book ->
         BookDetailsBottomSheet(book = book, onDismiss = { selectedBook = null })
+    }
+
+    bookPendingDelete?.let { book ->
+        ConfirmationDialog(
+            title = "حذف الكتاب",
+            message = "هل أنت متأكد من حذف كتاب \"${book.title}\"؟",
+            onConfirm = {
+                viewModel.onEvent(LibraryEvent.DeleteBook(book))
+                bookPendingDelete = null
+            },
+            onDismiss = { bookPendingDelete = null }
+        )
+    }
+
+    if (showDeleteSelectedDialog) {
+        ConfirmationDialog(
+            title = "حذف الكتب المحددة",
+            message = "هل أنت متأكد من حذف ${libraryState.selectedBooks.size} كتاب محدد؟",
+            onConfirm = {
+                viewModel.onEvent(LibraryEvent.DeleteSelectedBooks)
+                showDeleteSelectedDialog = false
+            },
+            onDismiss = { showDeleteSelectedDialog = false }
+        )
     }
 }
 
