@@ -24,6 +24,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
+import com.shamela.library.domain.model.Book
 import com.shamela.library.presentation.common.FavoriteBookItem
 import com.shamela.library.presentation.common.QuoteItem
 import com.shamela.library.presentation.common.StringHeader
@@ -43,6 +48,7 @@ import com.shamela.library.presentation.screens.LocalPaddingValues
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoriteScreen(
+    navigateToBookDetails: (Book) -> Unit,
     viewModel: FavoriteViewModel = hiltViewModel(),
 ) {
     val state = viewModel.favoriteState.collectAsStateWithLifecycle().value
@@ -109,6 +115,7 @@ fun FavoriteScreen(
                             viewModel.onEvent(FavoriteEvent.ToggleFavorite(currentBook))
                         },
                         item = currentBook,
+                        onInfoClick = { navigateToBookDetails(currentBook) },
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }

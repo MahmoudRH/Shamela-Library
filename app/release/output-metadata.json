@@ -13,7 +13,7 @@
       "attributes": [],
       "versionCode": 4,
       "versionName": "1.3",
-      "outputFile": "app-release.apk"
+      "outputFile": "Shamela-Library-1.3.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/app-release.dm"
+        "baselineProfiles/1/Shamela-Library-1.3.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/app-release.dm"
+        "baselineProfiles/0/Shamela-Library-1.3.dm"
       ]
     }
   ],

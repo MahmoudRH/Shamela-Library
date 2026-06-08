@@ -103,38 +103,7 @@ fun BookItem(
     },
     item: Book,
     highlightText: String = "",
-) {
-    val text = buildHighlightedString(item.title, highlightText)
-    val authorText = buildHighlightedString(item.author, highlightText)
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(Modifier.fillMaxWidth(0.9f)) {
-            Text(
-                text = text,
-                maxLines = 1,
-                style = AppFonts.textNormalBold,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = authorText, style = AppFonts.textNormal)
-                Text(text = " عدد الصفحات: ${item.pageCount}", style = AppFonts.textNormal)
-            }
-        }
-        icon()
-    }
-}
-
-@Composable
-fun FavoriteBookItem(
-    modifier: Modifier,
-    item: Book,
-    onFavoriteIconClicked: () -> Unit,
-    highlightText: String = "",
+    onInfoClick: (() -> Unit)? = null,
 ) {
     val text = buildHighlightedString(item.title, highlightText)
     val authorText = buildHighlightedString(item.author, highlightText)
@@ -157,6 +126,54 @@ fun FavoriteBookItem(
                 Text(text = " عدد الصفحات: ${item.pageCount}", style = AppFonts.textNormal)
             }
         }
+        InfoIconButton(onInfoClick)
+        icon()
+    }
+}
+
+@Composable
+private fun InfoIconButton(onInfoClick: (() -> Unit)?) {
+    if (onInfoClick != null) {
+        IconButton(onClick = onInfoClick) {
+            Icon(
+                imageVector = ShamelaIcons.Info,
+                contentDescription = "عن الكتاب",
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+            )
+        }
+    }
+}
+
+@Composable
+fun FavoriteBookItem(
+    modifier: Modifier,
+    item: Book,
+    onFavoriteIconClicked: () -> Unit,
+    highlightText: String = "",
+    onInfoClick: (() -> Unit)? = null,
+) {
+    val text = buildHighlightedString(item.title, highlightText)
+    val authorText = buildHighlightedString(item.author, highlightText)
+    Row(
+        modifier = modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = text,
+                maxLines = 1,
+                style = AppFonts.textNormalBold,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = authorText, style = AppFonts.textNormal)
+                Text(text = " عدد الصفحات: ${item.pageCount}", style = AppFonts.textNormal)
+            }
+        }
+        InfoIconButton(onInfoClick)
         IconButton(
 //            modifier = Modifier.size(55.dp),
             onClick = onFavoriteIconClicked
@@ -182,13 +199,17 @@ fun LibraryBookItem(
     onFavoriteIconClicked: () -> Unit,
     onSwipeOut: () -> Unit,
     highlightText: String = "",
-    isSelected: Boolean = false
+    isSelected: Boolean = false,
+    onInfoClick: (() -> Unit)? = null,
 ) {
     val swipeState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart)
+            if (it == SwipeToDismissBoxValue.EndToStart) {
                 onSwipeOut()
-            true
+            }
+            // Don't dismiss the item; let the confirmation dialog decide.
+            // The card snaps back, and the actual removal happens via state update on confirm.
+            false
         },
     )
     val text = buildHighlightedString(item.title, highlightText)
@@ -279,6 +300,7 @@ fun LibraryBookItem(
                             )
                         }
                     }
+                    InfoIconButton(onInfoClick)
                     IconButton(
                         onClick = onFavoriteIconClicked
                     ) {
