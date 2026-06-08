@@ -16,6 +16,11 @@ import com.shamela.library.presentation.screens.search.SearchScreen
 import com.shamela.library.presentation.screens.searchResults.SearchResultsScreen
 import com.shamela.library.presentation.screens.sectionBooks.SectionBooksScreen
 import com.shamela.library.presentation.screens.settings.SettingsScreen
+import android.net.Uri
+import com.google.gson.Gson
+import com.shamela.library.domain.model.Book
+import com.shamela.library.presentation.screens.bookDetails.BookDetailsScreen
+import com.shamela.library.presentation.screens.bookDetails.BookDetailsUnavailable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -138,6 +143,18 @@ object SearchResults : HomeHostDestination {
     }
 }
 
+object BookDetails : HomeHostDestination {
+    override val route = "BOOK_DETAILS/{book}"
+    override val unSelectedIcon = ShamelaIcons.Book
+    override val selectedIcon = ShamelaIcons.Book
+    override val label = ""
+    override val actionIcon = null
+    override val onActionClick = { false }
+
+    fun createRoute(book: Book): String =
+        "BOOK_DETAILS/${Uri.encode(Gson().toJson(book))}"
+}
+
 
 fun NavGraphBuilder.homeGraph(navController: NavController) {
     navigation(
@@ -161,7 +178,8 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
                             type
                         )
                     )
-                }
+                },
+                navigateToBookDetails = { book -> navController.navigate(BookDetails.createRoute(book)) }
             )
         }
         composable(
@@ -183,10 +201,15 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
                             type
                         )
                     )
-                }
+                },
+                navigateToBookDetails = { book -> navController.navigate(BookDetails.createRoute(book)) }
             )
         }
-        composable(Favorite.route) { FavoriteScreen() }
+        composable(Favorite.route) {
+            FavoriteScreen(
+                navigateToBookDetails = { book -> navController.navigate(BookDetails.createRoute(book)) }
+            )
+        }
         composable(Search.route) { SearchScreen() }
         composable(Settings.route) { SettingsScreen() }
         composable(AboutApp.route) {
@@ -211,7 +234,8 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
                             )
                         )
                     },
-                    navigateBack = { navController.popBackStack() }
+                    navigateBack = { navController.popBackStack() },
+                    navigateToBookDetails = { book -> navController.navigate(BookDetails.createRoute(book)) }
                 )
             }
         }
@@ -224,18 +248,37 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
             )
         ) {
 
-            SearchResultsScreen(navigateToSectionBooksScreen = { categoryName: String, type: String ->
-                navController.navigate(
-                    SectionBooks.createRoute(
-                        categoryName,
-                        type
-                    )
-                ){
-                    popUpTo(Download.route)
-                }
-            }) { navController.popBackStack() }
+            SearchResultsScreen(
+                navigateToSectionBooksScreen = { categoryName: String, type: String ->
+                    navController.navigate(
+                        SectionBooks.createRoute(categoryName, type)
+                    ) {
+                        popUpTo(Download.route)
+                    }
+                },
+                navigateBack = { navController.popBackStack() },
+                navigateToBookDetails = { book -> navController.navigate(BookDetails.createRoute(book)) },
+            )
         }
 
-
+        composable(
+            BookDetails.route,
+            arguments = listOf(navArgument("book") { type = NavType.StringType })
+        ) { entry ->
+            val raw = entry.arguments?.getString("book")
+            val book = raw?.let { arg ->
+                runCatching { Gson().fromJson(arg, Book::class.java) }
+                    .recoverCatching { Gson().fromJson(Uri.decode(arg), Book::class.java) }
+                    .getOrNull()
+            }
+            if (book != null) {
+                BookDetailsScreen(
+                    book = book,
+                    navigateBack = { navController.popBackStack() },
+                )
+            } else {
+                BookDetailsUnavailable(navigateBack = { navController.popBackStack() })
+            }
+        }
     }
 }
