@@ -15,6 +15,15 @@ if (localPropertiesFile.exists()) {
     localProperties.load(new FileInputStream(localPropertiesFile))
 }
 
+// Release signing — credentials live in a gitignored keystore.properties (base64 to
+// preserve the exact password bytes, including a trailing space). Absent on fresh
+// clones / CI without secrets, in which case release stays unsigned (as before).
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace 'com.shamela.library'
     compileSdk versions.androidCompileSdk
@@ -46,10 +55,29 @@ android {
         checkReleaseBuilds false
     }
 
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                keyAlias keystoreProperties['keyAlias']
+                storePassword new String(keystoreProperties['storePasswordB64'].decodeBase64())
+                keyPassword new String(keystoreProperties['keyPasswordB64'].decodeBase64())
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            android.applicationVariants.all { variant ->
+                variant.outputs.all {
+                    outputFileName = "Shamela-Library-${variant.versionName}.apk"
+                }
+            }
         }
         debug {
             minifyEnabled false
