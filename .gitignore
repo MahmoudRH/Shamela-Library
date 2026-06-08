@@ -8,5 +8,13 @@
 .cxx
 local.properties
 /app/google-services.json
+*.py
+/tools
 
-/uploadToCloudflares.py
+/keystore.properties
+keys.env
+*.env
+
+# macOS & Python junk
+.DS_Store
+__pycache__/

@@ -7,6 +7,8 @@ internal data class AssetsBookDetail(
     val description: String? = null,
     val descriptionSource: String? = null,
     val descriptionUrl: String? = null,
+    val descriptionModel: String? = null,
+    val topics: List<String>? = null,
 )
 
 internal data class AssetsBookInfo(

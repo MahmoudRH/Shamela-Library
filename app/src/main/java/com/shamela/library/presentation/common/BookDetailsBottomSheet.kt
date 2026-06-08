@@ -34,6 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.ShamelaIcons
+import com.shamela.library.BuildConfig
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.BookInfoItem
 
@@ -95,12 +96,23 @@ fun BookDetailsBottomSheet(
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(text = description, style = AppFonts.textNormal)
-                        details.descriptionSource?.takeIf { it.isNotBlank() }?.let { src ->
-                            Spacer(Modifier.height(4.dp))
+                        // Web-sourced descriptions carry a source; a sourceless one is AI-generated.
+                        val src = details.descriptionSource?.takeIf { it.isNotBlank() }
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = if (src != null) "المصدر: $src" else "تم توليده بالذكاء الصناعي",
+                            style = AppFonts.textSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        // DEBUG-only QA label: which AI model produced this نبذة. Never shown in release.
+                        if (BuildConfig.DEBUG && src == null) {
+                            val model = details.descriptionModel?.takeIf { it.isNotBlank() }
+                                ?: "غير معروف"
+                            Spacer(Modifier.height(2.dp))
                             Text(
-                                text = "المصدر: $src",
+                                text = "🛠 النموذج: $model",
                                 style = AppFonts.textSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = MaterialTheme.colorScheme.error,
                             )
                         }
                         Spacer(Modifier.height(16.dp))
@@ -112,7 +124,29 @@ fun BookDetailsBottomSheet(
                         Spacer(Modifier.height(10.dp))
                     }
 
-                    if (description.isNullOrBlank() && about.isEmpty()) {
+                    val topics = details?.topics.orEmpty()
+                    if (topics.isNotEmpty()) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = "الموضوعات",
+                            style = AppFonts.textNormalBold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        topics.forEach { topic ->
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                                Text(
+                                    text = "•  ",
+                                    style = AppFonts.textNormal,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                                Text(text = topic, style = AppFonts.textNormal)
+                            }
+                            Spacer(Modifier.height(4.dp))
+                        }
+                    }
+
+                    if (description.isNullOrBlank() && about.isEmpty() && topics.isEmpty()) {
                         Text(
                             text = "لا تتوفر معلومات إضافية عن هذا الكتاب.",
                             style = AppFonts.textNormal,
