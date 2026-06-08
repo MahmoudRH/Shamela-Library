@@ -21,4 +21,8 @@ sealed class BookEvent {
     object ToggleMenuVisibility : BookEvent()
     object DismissMenu : BookEvent()
     object ClearCachedPages : BookEvent()
+
+    /** User tapped "المعنى" on a text selection — look the word up in the offline dictionary. */
+    class ShowMeaningSheet(val selectedText: String, val context: Context) : BookEvent()
+    object DismissMeaningSheet : BookEvent()
 }

@@ -53,4 +53,8 @@ object ShamelaIcons {
     val DarkMode by lazy { buildIcon("DarkMode", "M9.37 5.51A7 7 0 0018.49 14.63 9 9 0 1112 3c-.89 0-1.74.13-2.63.51z") }
     val AutoMode by lazy { buildIcon("AutoMode", "M19.03 7.39L20.45 6c-1.48-1.34-3.43-2.2-5.57-2.45V1h-2v2.55C8.64 4.05 5 7.7 5 12c0 4.42 3.58 8 8 8 3.73 0 6.84-2.55 7.73-6h-2.08A6.003 6.003 0 0113 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.58 0 3.01.61 4.08 1.61l-1.58 1.58H21V3.5l-1.97 1.97z") }
     val CheckCircle by lazy { buildIcon("CheckCircle", "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z") }
+    val Sort by lazy { buildIcon("Sort", "M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z") }
+    val ArrowUpward by lazy { buildIcon("ArrowUpward", "M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z") }
+    val ArrowDownward by lazy { buildIcon("ArrowDownward", "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z") }
+    val Event by lazy { buildIcon("Event", "M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z") }
 }

@@ -10,14 +10,18 @@ import com.shamela.library.data.local.files.FilesRepoImpl
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.domain.usecases.quotes.QuotesUseCases
+import com.shamela.library.domain.util.BookSortOption
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -58,6 +62,10 @@ class LibraryViewModel @Inject constructor(
                                 books = state.books + databaseBooks,
                                 isLoading = false
                             )
+                        }
+                        // Keep download times in sync with newly arrived books while that sort is active.
+                        if (_libraryState.value.sortOption == BookSortOption.DOWNLOAD_TIME) {
+                            ensureDownloadTimes()
                         }
                     }.launchIn(this)
                     launch {
@@ -138,6 +146,45 @@ class LibraryViewModel @Inject constructor(
                 }
                 _libraryState.update { it.copy(selectedBooks = emptyList()) }
             }
+
+            is LibraryEvent.OnChangeSortOption -> {
+                _libraryState.update {
+                    it.copy(
+                        sortOption = event.option,
+                        sortAscending = event.option.defaultAscending
+                    )
+                }
+                if (event.option == BookSortOption.DOWNLOAD_TIME) ensureDownloadTimes()
+            }
+
+            LibraryEvent.OnToggleSortDirection -> {
+                _libraryState.update { it.copy(sortAscending = !it.sortAscending) }
+            }
+        }
+    }
+
+    private var downloadTimesJob: Job? = null
+
+    /**
+     * Lazily fills [LibraryState.downloadTimes] with the file last-modified time of every book that
+     * doesn't have one yet. mtime never changes, so this only ever stats files once per book. Runs
+     * on IO (StrictMode forbids file access on the main thread) and loops to absorb books that arrive
+     * while it's working.
+     */
+    private fun ensureDownloadTimes() {
+        if (downloadTimesJob?.isActive == true) return
+        downloadTimesJob = viewModelScope.launch(Dispatchers.IO) {
+            while (true) {
+                val current = _libraryState.value
+                val missing = current.books.keys - current.downloadTimes.keys
+                if (missing.isEmpty()) break
+                val newTimes = missing.associateWith { id ->
+                    val book = current.books[id] ?: return@associateWith 0L
+                    File(BooksDownloadManager.getBookPath(book))
+                        .takeIf { it.isFile }?.lastModified() ?: 0L
+                }
+                _libraryState.update { it.copy(downloadTimes = it.downloadTimes + newTimes) }
+            }
         }
     }
 
@@ -154,6 +201,7 @@ class LibraryViewModel @Inject constructor(
                 isLoading = false
             )
         }
+        if (_libraryState.value.sortOption == BookSortOption.DOWNLOAD_TIME) ensureDownloadTimes()
         viewModelScope.launch {
 
             launch {
