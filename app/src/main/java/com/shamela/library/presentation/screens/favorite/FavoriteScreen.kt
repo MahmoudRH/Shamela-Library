@@ -40,7 +40,6 @@ import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.domain.model.Book
-import com.shamela.library.presentation.common.BookDetailsBottomSheet
 import com.shamela.library.presentation.common.FavoriteBookItem
 import com.shamela.library.presentation.common.QuoteItem
 import com.shamela.library.presentation.common.StringHeader
@@ -49,11 +48,11 @@ import com.shamela.library.presentation.screens.LocalPaddingValues
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoriteScreen(
+    navigateToBookDetails: (Book) -> Unit,
     viewModel: FavoriteViewModel = hiltViewModel(),
 ) {
     val state = viewModel.favoriteState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
-    var selectedBook by remember { mutableStateOf<Book?>(null) }
 
     LaunchedEffect(Unit){
         viewModel.onEvent(FavoriteEvent.LoadFavoriteQuotes)
@@ -116,7 +115,7 @@ fun FavoriteScreen(
                             viewModel.onEvent(FavoriteEvent.ToggleFavorite(currentBook))
                         },
                         item = currentBook,
-                        onInfoClick = { selectedBook = currentBook },
+                        onInfoClick = { navigateToBookDetails(currentBook) },
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
@@ -129,10 +128,6 @@ fun FavoriteScreen(
             }
         }
 
-    }
-
-    selectedBook?.let { book ->
-        BookDetailsBottomSheet(book = book, onDismiss = { selectedBook = null })
     }
 }
 

@@ -41,7 +41,6 @@ import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.DownloadStatus
 import com.shamela.library.domain.util.BookSortOption
 import com.shamela.library.domain.util.BookSorter
-import com.shamela.library.presentation.common.BookDetailsBottomSheet
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.BookSortMenu
 import com.shamela.library.presentation.common.DownloadIconButton
@@ -52,9 +51,9 @@ fun SectionBooksScreen(
     categoryName: String,
     navigateBack: () -> Unit,
     navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
+    navigateToBookDetails: (Book) -> Unit,
 ) {
     val sectionBooksState = viewModel.sectionBooksState.collectAsStateWithLifecycle().value
-    var selectedBook by remember { mutableStateOf<Book?>(null) }
 
     // Download time only applies to local books (remote ones have no file on disk).
     val availableSortOptions = remember(sectionBooksState.type) {
@@ -123,14 +122,14 @@ fun SectionBooksScreen(
                                 }
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             item = currentBook,
-                            onInfoClick = { selectedBook = currentBook }
+                            onInfoClick = { navigateToBookDetails(currentBook) }
                         )
                     }
 
                     "remote" -> {
                         BookItem(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            onInfoClick = { selectedBook = currentBook },
+                            onInfoClick = { navigateToBookDetails(currentBook) },
                             icon = {
                                 DownloadIconButton(
                                     bookId = currentBook.id,
@@ -157,10 +156,6 @@ fun SectionBooksScreen(
         }
     }
     LoadingScreen(visibility = sectionBooksState.isLoading)
-
-    selectedBook?.let { book ->
-        BookDetailsBottomSheet(book = book, onDismiss = { selectedBook = null })
-    }
 
     LaunchedEffect(Unit) {
         viewModel.onEvent(SectionBooksEvent.LoadBooks)
