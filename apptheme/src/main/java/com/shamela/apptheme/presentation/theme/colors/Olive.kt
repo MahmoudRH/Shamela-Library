@@ -4,36 +4,50 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-
-//______Light_Olive_______//
-private val olivePrimary = Color(0xFF6B8E23)
-private val oliveSecondary = Color(0xFF556B2F)
-private val oliveTertiary = Color(0xFFA2B964)
-private val oliveSurface = Color(0xFFF5FAFF)
-private val oliveSecondaryContainer = Color(0xFF678D32)
-
-//______Dark_Olive_______//
-private val olivePrimaryDark = Color(0xFF526F1D)
-private val oliveSecondaryDark = Color(0xFF3E5125)
-private val oliveTertiaryDark = Color(0xFF8E9E51)
-private val oliveSurfaceDark = Color(0xFF232426)
-private val oliveSecondaryContainerDark = Color(0xFF4D6E26)
-
-
 object Olive : AppColorScheme(
-    "أخضر زيتي",
-    lightColorScheme(
-        primary = olivePrimary,
-        secondary = oliveSecondary,
-        tertiary = oliveTertiary,
-        surface = oliveSurface,
-        secondaryContainer = oliveSecondaryContainer
+    name = "أخضر زيتي",
+    lightColorScheme = lightColorScheme(
+        primary = Color(0xFF4E662A),
+        onPrimary = Color(0xFFFFFFFF),
+        primaryContainer = Color(0xFFCEECA8),
+        onPrimaryContainer = Color(0xFF122000),
+        secondary = Color(0xFF586249),
+        onSecondary = Color(0xFFFFFFFF),
+        secondaryContainer = Color(0xFFDCE7C8),
+        onSecondaryContainer = Color(0xFF161E0A),
+        tertiary = Color(0xFF396660),
+        onTertiary = Color(0xFFFFFFFF),
+        tertiaryContainer = Color(0xFFBCECE5),
+        onTertiaryContainer = Color(0xFF00201D),
+        background = Color(0xFFFDFDF5),
+        onBackground = Color(0xFF1A1C16),
+        surface = Color(0xFFFDFDF5),
+        onSurface = Color(0xFF1A1C16),
+        surfaceVariant = Color(0xFFE2E4D4),
+        onSurfaceVariant = Color(0xFF45483B),
+        outline = Color(0xFF75786A),
+        outlineVariant = Color(0xFFC5C8B9)
     ),
-    darkColorScheme(
-        primary = olivePrimaryDark,
-        secondary = oliveSecondaryDark,
-        tertiary = oliveTertiaryDark,
-        surface = oliveSurfaceDark,
-        secondaryContainer = oliveSecondaryContainerDark
+    darkColorScheme = darkColorScheme(
+        primary = Color(0xFFB2D08E),
+        onPrimary = Color(0xFF223600),
+        primaryContainer = Color(0xFF374E14),
+        onPrimaryContainer = Color(0xFFCEECA8),
+        secondary = Color(0xFFC0CBAD),
+        onSecondary = Color(0xFF2A331E),
+        secondaryContainer = Color(0xFF414A33),
+        onSecondaryContainer = Color(0xFFDCE7C8),
+        tertiary = Color(0xFFA0D0C9),
+        onTertiary = Color(0xFF013732),
+        tertiaryContainer = Color(0xFF204E48),
+        onTertiaryContainer = Color(0xFFBCECE5),
+        background = Color(0xFF12140E),
+        onBackground = Color(0xFFE3E3DC),
+        surface = Color(0xFF12140E),
+        onSurface = Color(0xFFE3E3DC),
+        surfaceVariant = Color(0xFF45483B),
+        onSurfaceVariant = Color(0xFFC5C8B9),
+        outline = Color(0xFF8F9283),
+        outlineVariant = Color(0xFF45483B)
     )
 )
