@@ -15,6 +15,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
@@ -24,6 +28,8 @@ import com.shamela.apptheme.presentation.common.EmptyListScreen
 import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.common.SearchTopBar
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
+import com.shamela.library.domain.model.Book
+import com.shamela.library.presentation.common.BookDetailsBottomSheet
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.DownloadIconButton
 import com.shamela.library.presentation.common.SectionItem
@@ -38,6 +44,7 @@ fun SearchResultsScreen(
     val state = viewModel.searchResultsState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
     val focusRequester = FocusRequester()
+    var selectedBook by remember { mutableStateOf<Book?>(null) }
     Column(Modifier.fillMaxSize().padding(localPadding)) {
         SearchTopBar(
             onNavigateBack = navigateBack,
@@ -89,13 +96,15 @@ fun SearchResultsScreen(
                                     }
                                     .padding(horizontal = 16.dp, vertical = 8.dp),
                                     item = currentBook,
-                                    highlightText = state.lastQuery
+                                    highlightText = state.lastQuery,
+                                    onInfoClick = { selectedBook = currentBook }
                                 )
                             }
                             "remote"->{
                                 BookItem(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                     item = currentBook,
+                                    onInfoClick = { selectedBook = currentBook },
                                     icon = {
                                         DownloadIconButton(
                                             bookId = currentBook.id,
@@ -123,7 +132,9 @@ fun SearchResultsScreen(
         }
     }
 
-
+    selectedBook?.let { book ->
+        BookDetailsBottomSheet(book = book, onDismiss = { selectedBook = null })
+    }
 
     DisposableEffect(Unit) {
         focusRequester.requestFocus()

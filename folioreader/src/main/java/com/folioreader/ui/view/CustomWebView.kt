@@ -44,6 +44,14 @@ class CustomWebView(
     private val LOG_TAG = "CustomWebView"
     val fullScreenMode = mutableStateOf(false)
 
+    /**
+     * Invoked (on the UI thread) when the user taps "المعنى" on a text selection.
+     * Set by [com.folioreader.ui.activity.folioActivity.book.BookScreen] so the
+     * lookup stays inside the reader's Compose tree (drives the meaning sheet via
+     * BookViewModel), rather than leaving the module like the favorite action.
+     */
+    var onRequestMeaning: ((String) -> Unit)? = null
+
     init {
         density = resources.displayMetrics.density
         uiHandler = Handler()
@@ -84,6 +92,10 @@ class CustomWebView(
             dismissPopupWindow()
             loadUrl("javascript:onTextSelectionItemClicked(${it.id})")
             //TODO:) this code must be changed
+        }
+        binding.meaningSelection.setOnClickListener {
+            dismissPopupWindow()
+            loadUrl("javascript:onTextSelectionItemClicked(${it.id})")
         }
     }
 
@@ -156,6 +168,13 @@ class CustomWebView(
                         pageIndex = currentPageIndex,
                         pageHref = currentPageHref?:""
                     )
+                }
+            }
+
+            R.id.meaningSelection -> {
+                Log.v(LOG_TAG, "-> onTextSelectionItemClicked -> meaningSelection -> $selectedText")
+                selectedText?.let { text ->
+                    uiHandler.post { onRequestMeaning?.invoke(text) }
                 }
             }
 

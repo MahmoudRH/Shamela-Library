@@ -7,7 +7,10 @@ import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.shamela.library.BuildConfig
 import com.shamela.library.data.local.assets.dto.AssetsBook
+import com.shamela.library.data.local.assets.dto.AssetsBookDetail
 import com.shamela.library.domain.model.Book
+import com.shamela.library.domain.model.BookDetails
+import com.shamela.library.domain.model.BookInfoItem
 import com.shamela.library.domain.model.Category
 import com.shamela.library.domain.repo.BooksRepository
 import com.shamela.library.domain.search.BookSearchMatcher
@@ -22,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStreamReader
+import java.text.Normalizer
 import java.util.Collections
 import java.util.UUID
 import javax.inject.Qualifier
@@ -68,6 +72,46 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
             } catch (e: IOException) {
                 Log.e(TAG, "Error: getBooksByCategory($categoryName). ${e.message}")
                 emptyList()
+            }
+        }
+    }
+
+    /**
+     * Loads the "about the book" metadata for a single book from assets/book-details/<category>.json.
+     * Resolved by (categoryName, title) so it works for browsing, search, favorites, and downloaded
+     * books alike. Returns null when the category has no detail file (e.g. محاضرات مفرغة) or the book
+     * isn't found.
+     */
+    suspend fun getBookDetails(categoryName: String, bookTitle: String): BookDetails? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val categoryNameNoSuffix = categoryName.removeSuffix(".json")
+                val fileName = "book-details/$categoryNameNoSuffix.json"
+                val details = context.assets.open(fileName).use { inputStream ->
+                    gson.fromJson(
+                        InputStreamReader(inputStream),
+                        Array<AssetsBookDetail>::class.java
+                    )
+                }
+                // Normalize both sides: a downloaded book's title comes from the device filename,
+                // which may differ in Unicode normalization (NFC/NFD) from the JSON title.
+                val target = Normalizer.normalize(bookTitle, Normalizer.Form.NFC)
+                details.firstOrNull {
+                    Normalizer.normalize(it.title, Normalizer.Form.NFC) == target
+                }?.let { detail ->
+                    BookDetails(
+                        authorDeathYear = detail.authorDeathYear,
+                        about = detail.about.orEmpty().map { BookInfoItem(it.label, it.value) },
+                        description = detail.description,
+                        descriptionSource = detail.descriptionSource,
+                        descriptionUrl = detail.descriptionUrl,
+                        descriptionModel = detail.descriptionModel,
+                        topics = detail.topics.orEmpty(),
+                    )
+                }
+            } catch (e: IOException) {
+                Log.e(TAG, "Error: getBookDetails($categoryName, $bookTitle). ${e.message}")
+                null
             }
         }
     }
