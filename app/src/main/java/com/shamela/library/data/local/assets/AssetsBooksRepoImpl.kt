@@ -105,6 +105,8 @@ class AssetsBooksRepoImpl(private val context: Context) : BooksRepository {
                         description = detail.description,
                         descriptionSource = detail.descriptionSource,
                         descriptionUrl = detail.descriptionUrl,
+                        descriptionModel = detail.descriptionModel,
+                        topics = detail.topics.orEmpty(),
                     )
                 }
             } catch (e: IOException) {
