@@ -13,8 +13,11 @@ import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.model.DownloadStatus
 import com.shamela.library.domain.usecases.books.BooksUseCases
 import com.shamela.library.domain.usecases.quotes.QuotesUseCases
+import com.shamela.library.domain.util.BookSortOption
 import com.shamela.library.presentation.utils.BooksDownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -92,6 +96,45 @@ class SectionBooksViewModel @Inject constructor(
                     Toast.makeText(application, "تمت الإضافة بنجاح", Toast.LENGTH_SHORT).show()
                 }
             }
+
+            is SectionBooksEvent.OnChangeSortOption -> {
+                _sectionBooksState.update {
+                    it.copy(
+                        sortOption = event.option,
+                        sortAscending = event.option.defaultAscending
+                    )
+                }
+                if (event.option == BookSortOption.DOWNLOAD_TIME) ensureDownloadTimes()
+            }
+
+            SectionBooksEvent.OnToggleSortDirection -> {
+                _sectionBooksState.update { it.copy(sortAscending = !it.sortAscending) }
+            }
+        }
+    }
+
+    private var downloadTimesJob: Job? = null
+
+    /**
+     * Lazily fills [SectionBooksState.downloadTimes] with each local book's file last-modified time.
+     * Only meaningful for local sections (remote books have no file); runs on IO since StrictMode
+     * forbids file access on the main thread.
+     */
+    private fun ensureDownloadTimes() {
+        if (sectionBooksState.value.type != "local") return
+        if (downloadTimesJob?.isActive == true) return
+        downloadTimesJob = viewModelScope.launch(Dispatchers.IO) {
+            while (true) {
+                val current = _sectionBooksState.value
+                val missing = current.books.keys - current.downloadTimes.keys
+                if (missing.isEmpty()) break
+                val newTimes = missing.associateWith { id ->
+                    val book = current.books[id] ?: return@associateWith 0L
+                    File(BooksDownloadManager.getBookPath(book))
+                        .takeIf { it.isFile }?.lastModified() ?: 0L
+                }
+                _sectionBooksState.update { it.copy(downloadTimes = it.downloadTimes + newTimes) }
+            }
         }
     }
 
@@ -107,6 +150,9 @@ class SectionBooksViewModel @Inject constructor(
         localBooksUseCases.getBooksByCategory(categoryName = categoryName).collect { book ->
             _sectionBooksState.update {
                 it.copy(books = it.books + mapOf(book.id to book), isLoading = false)
+            }
+            if (_sectionBooksState.value.sortOption == BookSortOption.DOWNLOAD_TIME) {
+                ensureDownloadTimes()
             }
         }
     }

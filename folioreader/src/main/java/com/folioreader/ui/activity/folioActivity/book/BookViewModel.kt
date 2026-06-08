@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.folioreader.ui.activity.folioActivity.FolioActivity
 import com.folioreader.ui.base.HtmlUtil
 import com.folioreader.util.AppUtil
+import com.shamela.apptheme.data.db.DictionaryDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,6 +58,37 @@ class BookViewModel : ViewModel() {
                 cachedPages.clear()
 //                cachedWebViews.clear()
                 _state.update { it.copy(pagesMap = emptyMap()) }
+            }
+
+            is BookEvent.ShowMeaningSheet -> lookUpMeaning(event)
+
+            BookEvent.DismissMeaningSheet -> _state.update {
+                it.copy(showMeaningSheet = false)
+            }
+        }
+    }
+
+    private fun lookUpMeaning(event: BookEvent.ShowMeaningSheet) {
+        val term = event.selectedText.trim()
+        _state.update {
+            it.copy(
+                showMeaningSheet = true,
+                meaningQuery = term,
+                meaningLoading = true,
+                meaningResults = emptyList(),
+                dictionaryAvailable = true,
+            )
+        }
+        val appContext = event.context.applicationContext
+        viewModelScope.launch {
+            val dictionary = DictionaryDatabase.getInstance(appContext)
+            if (!dictionary.isAvailable()) {
+                _state.update { it.copy(meaningLoading = false, dictionaryAvailable = false) }
+            } else {
+                val results = dictionary.search(term)
+                _state.update {
+                    it.copy(meaningLoading = false, dictionaryAvailable = true, meaningResults = results)
+                }
             }
         }
     }
