@@ -57,7 +57,6 @@ import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.domain.model.Book
 import com.shamela.library.domain.util.BookSorter
-import com.shamela.library.presentation.common.BookDetailsBottomSheet
 import com.shamela.library.presentation.common.BookSortMenu
 import com.shamela.library.presentation.common.ConfirmationDialog
 import com.shamela.library.presentation.common.LibraryBookItem
@@ -74,6 +73,7 @@ fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel(),
     navigateToSectionBooksScreen: (categoryName: String, type: String) -> Unit,
     navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
+    navigateToBookDetails: (Book) -> Unit,
 ) {
     LaunchedEffect(key1 = Unit, block = {
         Library.buttons.onEach {
@@ -85,7 +85,6 @@ fun LibraryScreen(
     })
     val libraryState = viewModel.libraryState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
-    var selectedBook by remember { mutableStateOf<Book?>(null) }
     val sortedBooks = remember(
         libraryState.books,
         libraryState.sortOption,
@@ -220,17 +219,13 @@ fun LibraryScreen(
                             bookPendingDelete = it
                         },
                         isSelected = libraryState.selectedBooks.contains(it),
-                        onInfoClick = { selectedBook = it }
+                        onInfoClick = { navigateToBookDetails(it) }
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
                 }
             }
             }
         }
-    }
-
-    selectedBook?.let { book ->
-        BookDetailsBottomSheet(book = book, onDismiss = { selectedBook = null })
     }
 
     bookPendingDelete?.let { book ->
