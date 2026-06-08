@@ -5,7 +5,7 @@ import android.content.Context
 
 object AppColors {
 
-    private const val MATERIAL = "ألوان النظام (اندرويد 12 فأعلى)"
+    private const val MATERIAL = "ألوان النظام"
 
     private val availableColorSchemes =
         AppColorScheme::class.sealedSubclasses.map { it.objectInstance }
@@ -18,7 +18,8 @@ object AppColors {
     }
 
     fun getAvailableColorSchemes(): Set<String> {
-        return availableColorSchemes.map { it?.name ?: MATERIAL }.toSet()
+        val colorsSet = availableColorSchemes.map { it?.name ?: MATERIAL }.toSet()
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) colorsSet else colorsSet.filterNot { it == MATERIAL }.toSet()
     }
 
 
