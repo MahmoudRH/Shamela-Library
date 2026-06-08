@@ -29,7 +29,6 @@ import com.shamela.apptheme.presentation.common.LoadingScreen
 import com.shamela.apptheme.presentation.common.SearchTopBar
 import com.shamela.library.data.local.files.FilesBooksRepoImpl
 import com.shamela.library.domain.model.Book
-import com.shamela.library.presentation.common.BookDetailsBottomSheet
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.DownloadIconButton
 import com.shamela.library.presentation.common.SectionItem
@@ -40,11 +39,11 @@ fun SearchResultsScreen(
     viewModel: SearchResultsViewModel = hiltViewModel(),
     navigateToSectionBooksScreen: (categoryName: String, type: String) -> Unit,
     navigateBack: () -> Unit,
+    navigateToBookDetails: (Book) -> Unit,
 ) {
     val state = viewModel.searchResultsState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
     val focusRequester = FocusRequester()
-    var selectedBook by remember { mutableStateOf<Book?>(null) }
     Column(Modifier.fillMaxSize().padding(localPadding)) {
         SearchTopBar(
             onNavigateBack = navigateBack,
@@ -97,14 +96,14 @@ fun SearchResultsScreen(
                                     .padding(horizontal = 16.dp, vertical = 8.dp),
                                     item = currentBook,
                                     highlightText = state.lastQuery,
-                                    onInfoClick = { selectedBook = currentBook }
+                                    onInfoClick = { navigateToBookDetails(currentBook) }
                                 )
                             }
                             "remote"->{
                                 BookItem(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                     item = currentBook,
-                                    onInfoClick = { selectedBook = currentBook },
+                                    onInfoClick = { navigateToBookDetails(currentBook) },
                                     icon = {
                                         DownloadIconButton(
                                             bookId = currentBook.id,
@@ -130,10 +129,6 @@ fun SearchResultsScreen(
 
             }
         }
-    }
-
-    selectedBook?.let { book ->
-        BookDetailsBottomSheet(book = book, onDismiss = { selectedBook = null })
     }
 
     DisposableEffect(Unit) {

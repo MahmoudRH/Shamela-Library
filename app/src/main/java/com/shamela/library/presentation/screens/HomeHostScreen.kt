@@ -44,6 +44,7 @@ import com.shamela.apptheme.presentation.common.DefaultTopBar
 import com.shamela.apptheme.presentation.theme.AppFonts
 import com.shamela.apptheme.presentation.theme.ShamelaIcons
 import com.shamela.library.presentation.navigation.AboutApp
+import com.shamela.library.presentation.navigation.BookDetails
 import com.shamela.library.presentation.navigation.Download
 import com.shamela.library.presentation.navigation.Favorite
 import com.shamela.library.presentation.navigation.Library
@@ -76,7 +77,8 @@ fun HomeHostScreen() {
             if (currentRoute == SearchResults.route){
                 categoryName == "all"
             }else{
-                currentRoute != SectionBooks.route && currentRoute != AboutApp.route
+                currentRoute != SectionBooks.route && currentRoute != AboutApp.route &&
+                        currentRoute != BookDetails.route
             }
         }
         else

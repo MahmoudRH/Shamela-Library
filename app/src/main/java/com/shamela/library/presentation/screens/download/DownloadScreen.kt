@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shamela.library.domain.model.Book
-import com.shamela.library.presentation.common.BookDetailsBottomSheet
 import com.shamela.library.presentation.common.BookItem
 import com.shamela.library.presentation.common.CharacterHeader
 import com.shamela.library.presentation.common.DownloadIconButton
@@ -44,11 +43,10 @@ fun DownloadScreen(
     viewModel: DownloadViewModel = hiltViewModel(),
     navigateToSectionBooksScreen: (categoryName: String, type: String) -> Unit,
     navigateToSearchResultsScreen: (categoryName: String, type: String) -> Unit,
-
+    navigateToBookDetails: (Book) -> Unit,
     ) {
     val downloadState = viewModel.downloadState.collectAsStateWithLifecycle().value
     val localPadding = LocalPaddingValues.current
-    var selectedBook by remember { mutableStateOf<Book?>(null) }
     LaunchedEffect(key1 = Unit, block = {
         Download.buttons.onEach {
             if (it) {
@@ -121,7 +119,7 @@ fun DownloadScreen(
                                 )
                             },
                             item = it,
-                            onInfoClick = { selectedBook = it }
+                            onInfoClick = { navigateToBookDetails(it) }
                         )
                         if (it != books.last()) {
                             HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(0.5f))
@@ -144,8 +142,5 @@ fun DownloadScreen(
         }
     }
 
-    selectedBook?.let { book ->
-        BookDetailsBottomSheet(book = book, onDismiss = { selectedBook = null })
-    }
 }
 
