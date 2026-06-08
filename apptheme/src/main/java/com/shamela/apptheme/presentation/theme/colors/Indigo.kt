@@ -4,34 +4,50 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-
-private val indigoPrimary = Color(0xFF2C394B)
-private val indigoSecondary = Color(0xFF1D2731)
-private val indigoTertiary = Color(0xFF495E70)
-private val indigoSurface = Color(0xFFF2F4F7)
-private val indigoSecondaryContainer = Color(0xFF506880)
-
-private val indigoPrimaryDark = Color(0xFF2C3847)
-private val indigoSecondaryDark = Color(0xFF1C3A45)
-private val indigoTertiaryDark = Color(0xFF3A4B5B)
-private val indigoSurfaceDark = Color(0xFF0D1117)
-private val indigoSecondaryContainerDark = Color(0xFF293441)
-
-
 object Indigo : AppColorScheme(
     name = "نيلي",
     lightColorScheme = lightColorScheme(
-        primary = indigoPrimary,
-        secondary = indigoSecondary,
-        tertiary = indigoTertiary,
-        surface = indigoSurface,
-        secondaryContainer = indigoSecondaryContainer
+        primary = Color(0xFF434EAE),
+        onPrimary = Color(0xFFFFFFFF),
+        primaryContainer = Color(0xFFDFE0FF),
+        onPrimaryContainer = Color(0xFF000B62),
+        secondary = Color(0xFF5B5D72),
+        onSecondary = Color(0xFFFFFFFF),
+        secondaryContainer = Color(0xFFE0E1F9),
+        onSecondaryContainer = Color(0xFF181A2C),
+        tertiary = Color(0xFF76546D),
+        onTertiary = Color(0xFFFFFFFF),
+        tertiaryContainer = Color(0xFFFFD7F3),
+        onTertiaryContainer = Color(0xFF2D1228),
+        background = Color(0xFFFBFBFF),
+        onBackground = Color(0xFF1A1B21),
+        surface = Color(0xFFFBFBFF),
+        onSurface = Color(0xFF1A1B21),
+        surfaceVariant = Color(0xFFE3E1EC),
+        onSurfaceVariant = Color(0xFF46464F),
+        outline = Color(0xFF767680),
+        outlineVariant = Color(0xFFC7C5D0)
     ),
     darkColorScheme = darkColorScheme(
-        primary = indigoPrimaryDark,
-        secondary = indigoSecondaryDark,
-        tertiary = indigoTertiaryDark,
-        surface = indigoSurfaceDark,
-        secondaryContainer = indigoSecondaryContainerDark
+        primary = Color(0xFFBCC2FF),
+        onPrimary = Color(0xFF0C1B80),
+        primaryContainer = Color(0xFF293496),
+        onPrimaryContainer = Color(0xFFDFE0FF),
+        secondary = Color(0xFFC3C5DD),
+        onSecondary = Color(0xFF2D2F42),
+        secondaryContainer = Color(0xFF434659),
+        onSecondaryContainer = Color(0xFFE0E1F9),
+        tertiary = Color(0xFFE6BAD9),
+        onTertiary = Color(0xFF44263E),
+        tertiaryContainer = Color(0xFF5D3C55),
+        onTertiaryContainer = Color(0xFFFFD7F3),
+        background = Color(0xFF1A1B21),
+        onBackground = Color(0xFFE4E2E6),
+        surface = Color(0xFF1A1B21),
+        onSurface = Color(0xFFE4E2E6),
+        surfaceVariant = Color(0xFF46464F),
+        onSurfaceVariant = Color(0xFFC7C5D0),
+        outline = Color(0xFF90909A),
+        outlineVariant = Color(0xFF46464F)
     )
 )
